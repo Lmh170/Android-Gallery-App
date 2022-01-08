@@ -42,7 +42,9 @@ class BottomNavFrag : Fragment() {
             return@setOnApplyWindowInsetsListener windowInsets
         }
 
-
+        binding.fcvBottomNav.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+            bottomMargin = binding.bnvMain.measuredHeight
+        }
 
         binding.bnvMain.setOnItemReselectedListener {
             val frag = childFragmentManager.findFragmentById(R.id.fcvBottomNav)
@@ -98,25 +100,6 @@ class BottomNavFrag : Fragment() {
 
     }
 
-    private fun setSystemBarsAppearance() {
-
-        val nightModeFlags: Int = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            if (nightModeFlags == Configuration.UI_MODE_NIGHT_NO ||
-                nightModeFlags == Configuration.UI_MODE_NIGHT_UNDEFINED){
-                    activity?.window?.insetsController?.setSystemBarsAppearance(WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS, WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS)
-                activity?.window?.insetsController?.setSystemBarsAppearance(WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS, WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS)
-
-            }
-        } else {
-            if (nightModeFlags == Configuration.UI_MODE_NIGHT_NO ||
-                nightModeFlags == Configuration.UI_MODE_NIGHT_UNDEFINED){
-                    activity?.window?.decorView?.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
-                    activity?.window?.decorView?.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
-            }
-        }
-    }
-
     override fun onStart() {
         super.onStart()
         setUpSystemBars()
@@ -140,11 +123,10 @@ class BottomNavFrag : Fragment() {
                     names: List<String>,
                     sharedElements: MutableMap<String, View>
                 ) {
-                    var frag: GridItemFrag?
+                    val frag: GridItemFrag?
                     try {
                         frag = childFragmentManager.findFragmentById(R.id.fcvBottomNav) as GridItemFrag?
                     } catch (e: ClassCastException) {
-                        throw e
                         return
                     }
                     if (frag != null) {

@@ -165,22 +165,15 @@ class GridItemFrag : Fragment() {
                 binding.rvItems.removeOnLayoutChangeListener(this)
 
                 // val layoutManager = recyclerView.layoutManager
-                val viewAtPosition = if (MainActivity.viewPagerScrollDirectionDownwards) {
-                    binding.rvItems.layoutManager!!.findViewByPosition(MainActivity.currentListPosition + spanCount)
-                } else {
+                val viewAtPosition =
                     binding.rvItems.layoutManager!!.findViewByPosition(MainActivity.currentListPosition)
-                }
+
                 // Scroll to position if the view for the current position is null (not currently part of
                 // layout manager children), or it's not completely visible.
-                if (viewAtPosition == null || binding.rvItems.layoutManager!!
+                if (viewAtPosition == null || !binding.rvItems.layoutManager!!
                         .isViewPartiallyVisible(viewAtPosition, true, true)
                 ) {
-                    if (MainActivity.viewPagerScrollDirectionDownwards) {
-                        binding.rvItems.post { binding.rvItems.layoutManager!!.scrollToPosition(MainActivity.currentListPosition + spanCount) }
-                    } else {
-                        binding.rvItems.post { binding.rvItems.layoutManager!!.scrollToPosition(MainActivity.currentListPosition) }
-                    }
-
+                    binding.rvItems.post { binding.rvItems.layoutManager!!.scrollToPosition(MainActivity.currentListPosition) }
                 }
             }
         })

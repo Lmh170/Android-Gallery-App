@@ -37,7 +37,7 @@ class MainActivity : AppCompatActivity() {
                 viewModel.loadItems()
             }
         }
-        viewModel.permissionNeededForDelete.observe(this, Observer { intentSender ->
+        viewModel.permissionNeededForDelete.observe(this, { intentSender ->
             val intentSenderRequest = IntentSenderRequest.Builder(intentSender).build()
             request.launch(intentSenderRequest)
         })
@@ -72,15 +72,6 @@ class MainActivity : AppCompatActivity() {
                             Manifest.permission.READ_EXTERNAL_STORAGE
                         )
 
-                    /**
-                     * If we should show the rationale for requesting storage permission, then
-                     * we'll show [ActivityMainBinding.permissionRationaleView] which does this.
-                     *
-                     * If `showRationale` is false, this means the user has not only denied
-                     * the permission, but they've clicked "Don't ask again". In this case
-                     * we send the user to the settings page for the app so they can grant
-                     * the permission (Yay!) or uninstall the app.
-                     */
                     if (showRationale) {
                      //   showNoAccess()
                          // Todo()
@@ -126,7 +117,5 @@ class MainActivity : AppCompatActivity() {
         var currentViewPagerPosition = 0
         @JvmStatic
         lateinit var currentAlbumName: String
-        @JvmStatic
-        var viewPagerScrollDirectionDownwards = false
     }
 }
