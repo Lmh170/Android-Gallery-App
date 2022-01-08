@@ -57,15 +57,12 @@ class AlbumDetailFrag : Fragment() {
             return@setOnApplyWindowInsetsListener windowInsets
         }
 
-
-
         val callback = object : ActionMode.Callback {
             override fun onCreateActionMode(mode: ActionMode?, menu: Menu?): Boolean {
                 // menuInflater.inflate(R.menu.contextual_action_bar, menu)
                 //    WindowCompat.setDecorFitsSystemWindows(requireActivity().window, true)
-                WindowInsetsControllerCompat(requireActivity().window, binding.root).let { controller ->
-                    controller.isAppearanceLightStatusBars = false
-                }
+                WindowInsetsControllerCompat(requireActivity().window, binding.root).isAppearanceLightStatusBars =
+                    false
                 return true
             }
 
@@ -92,13 +89,12 @@ class AlbumDetailFrag : Fragment() {
                  }
                  */
                 return false
-                }
+            }
 
                 override fun onDestroyActionMode(mode: ActionMode?) {
                     tracker.clearSelection()
-                    WindowInsetsControllerCompat(requireActivity().window, binding.root).let { controller ->
-                        controller.isAppearanceLightStatusBars = true
-                    }
+                    WindowInsetsControllerCompat(requireActivity().window, binding.root).isAppearanceLightStatusBars =
+                        true
                   //  WindowCompat.setDecorFitsSystemWindows(requireActivity().window, false)
                 }
         }
