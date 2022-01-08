@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/item_photos"
+        android:icon="@drawable/ic_outline_photo_24"
+        android:title="Photos" />
+    <item
+        android:id="@+id/item_albus"
+        android:icon="@drawable/ic_outline_auto_stories_24"
+        android:title="Albums" />
+</menu>

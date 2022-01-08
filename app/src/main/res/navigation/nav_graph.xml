@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/bottomNavFrag">
+
+    <fragment
+        android:id="@+id/bottomNavFrag"
+        android:name="com.example.gallery.ui.BottomNavFrag"
+        android:label="fragment_bottom_nav"
+        tools:layout="@layout/fragment_bottom_nav" >
+        <action
+            android:id="@+id/action_bottomNavFrag_to_viewPagerFrag"
+            app:destination="@id/viewPagerFrag" />
+        <action
+            android:id="@+id/action_bottomNavFrag_to_albumDetailFrag"
+            app:destination="@id/albumDetailFrag" />
+    </fragment>
+    <fragment
+        android:id="@+id/viewPagerFrag"
+        android:name="com.example.gallery.ui.ViewPagerFrag"
+        android:label="fragment_view_pager"
+        tools:layout="@layout/fragment_view_pager" >
+        <argument
+            android:name="isAlbum"
+            app:argType="boolean"
+            android:defaultValue="false" />
+    </fragment>
+    <fragment
+        android:id="@+id/albumDetailFrag"
+        android:name="com.example.gallery.ui.AlbumDetailFrag"
+        android:label="fragment_album_detail"
+        tools:layout="@layout/fragment_album_detail" >
+        <action
+            android:id="@+id/action_albumDetailFrag_to_viewPagerFrag"
+            app:destination="@id/viewPagerFrag" />
+    </fragment>
+</navigation>
