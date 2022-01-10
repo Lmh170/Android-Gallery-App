@@ -32,7 +32,7 @@ sealed class ListItem {
         }
 
         override fun areContentsTheSame(oldItem: ListItem, newItem: ListItem): Boolean {
-            return if (oldItem is ListItem.MediaItem && newItem is ListItem.MediaItem) {
+            return if (oldItem is MediaItem && newItem is MediaItem) {
                 oldItem.uri == newItem.uri
             } else {
                 oldItem == newItem

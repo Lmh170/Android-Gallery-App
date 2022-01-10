@@ -1,6 +1,5 @@
 package com.example.gallery.adapter
 
-import android.content.res.Resources
 import android.graphics.drawable.Drawable
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -11,12 +10,12 @@ import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
 import com.bumptech.glide.signature.MediaStoreSignature
-import com.example.gallery.*
+import com.example.gallery.GlideApp
+import com.example.gallery.ListItem
 import com.example.gallery.databinding.ViewPagerItemHolderBinding
 import com.example.gallery.ui.MainActivity
 import com.example.gallery.ui.ViewPagerFrag
 import java.util.concurrent.atomic.AtomicBoolean
-import kotlin.math.ceil
 
 class ViewPagerAdapter(val frag: ViewPagerFrag): ListAdapter<ListItem.MediaItem, ViewPagerAdapter.ViewHolder>(ListItem.MediaItem.DiffCallback) {
     val transitionStarted: AtomicBoolean = AtomicBoolean()
@@ -27,22 +26,6 @@ class ViewPagerAdapter(val frag: ViewPagerFrag): ListAdapter<ListItem.MediaItem,
                 parent, false)
         )
     }
-
-    private fun pxToDp (dp: Double): Int {
-        val logicalDensity = frag.resources.configuration.densityDpi.toLong()
-      //  float logicalDensity = metrics.density;
-   //     logicalDensity will then contain the factor you need to multiply dp by to get physical pixel dimensions for the device screen
-        val px = ceil(dp * logicalDensity).toInt()
-        return px
-     //   int px = (int) Math.ceil(dp * logicalDensity);
-    }
-
-    private fun getScreenWidth(): Int =
-        Resources.getSystem().displayMetrics.widthPixels
-
-
-    private fun getScreenHeight(): Int =
-        Resources.getSystem().displayMetrics.heightPixels
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.onBind()

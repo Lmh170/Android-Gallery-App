@@ -1,23 +1,20 @@
 package com.example.gallery.ui
 
 import android.animation.Animator
-import android.app.AlertDialog
-import android.content.Context
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.media.MediaMetadataRetriever
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowInsetsController
 import android.widget.Toast
 import androidx.core.app.SharedElementCallback
 import androidx.core.view.*
 import androidx.exifinterface.media.ExifInterface
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
@@ -27,9 +24,7 @@ import com.example.gallery.ListItem
 import com.example.gallery.R
 import com.example.gallery.adapter.ViewPagerAdapter
 import com.example.gallery.databinding.FragmentViewPagerBinding
-import com.example.gallery.databinding.ViewDialogInfoBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.transition.MaterialContainerTransform
 import java.net.URLDecoder
 import java.text.SimpleDateFormat
@@ -377,9 +372,7 @@ class ViewPagerFrag : Fragment() {
             iStream.close()
         }
 
-
-       // val alertDialog: MaterialAlertDialogBuilder = AlertDialog.Builder(context, R.style.)
-        val alertDialog = MaterialAlertDialogBuilder(requireContext(), R.style.Theme_MaterialAlertDialog_Centered)
+        val alertDialog = MaterialAlertDialogBuilder(requireContext())
         alertDialog.setIcon(R.drawable.ic_outline_info_24)
         alertDialog.setTitle("File Details")
 
@@ -440,7 +433,8 @@ class ViewPagerFrag : Fragment() {
         }
     }
 
-    private fun convertTime(time: Long, showTimeZone: Boolean = false): String {
+    @SuppressLint("SimpleDateFormat")
+    private fun convertTime(time: Long, showTimeZone: Boolean = true): String {
         val date = Date(time)
         val format = SimpleDateFormat(
             if (showTimeZone) {
@@ -450,19 +444,18 @@ class ViewPagerFrag : Fragment() {
             }
         )
         format.timeZone = TimeZone.getDefault()
-        return "${SimpleDateFormat.getDateInstance(SimpleDateFormat.LONG).format(date)}  " +
-                "${SimpleDateFormat.getTimeInstance(SimpleDateFormat.LONG).format(date)}"
-
-       // return format.format(date)
+        return format.format(date)
     }
 
-    fun convertTimeForVideo(time: String) : String {
+    @SuppressLint("SimpleDateFormat")
+    private fun convertTimeForVideo(time: String) : String {
         val dateFormat = SimpleDateFormat("yyyyMMdd'T'HHmmss.SSS'Z'")
         dateFormat.timeZone = TimeZone.getTimeZone("UTC")
         val parsedDate = dateFormat.parse(time)
         return convertTime(parsedDate?.time ?: 0)
     }
 
+    @SuppressLint("SimpleDateFormat")
     private fun convertTimeForPhoto(time: String, offset: String? = null) : String {
 
         val timestamp = if (offset != null) {

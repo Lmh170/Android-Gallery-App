@@ -1,7 +1,5 @@
 package com.example.gallery
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.recyclerview.widget.DiffUtil
 
 data class Album (var name: String, var mediaItems: MutableList<ListItem.MediaItem>){

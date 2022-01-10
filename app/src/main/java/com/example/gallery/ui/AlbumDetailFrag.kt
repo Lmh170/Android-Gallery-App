@@ -8,11 +8,7 @@ import androidx.core.app.SharedElementCallback
 import androidx.core.view.*
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.selection.SelectionTracker
-import androidx.recyclerview.selection.StableIdKeyProvider
-import androidx.recyclerview.selection.StorageStrategy
 import androidx.recyclerview.widget.GridLayoutManager
-import com.example.gallery.MyItemDetailsLookup
 import com.example.gallery.adapter.GridItemAdapter
 import com.example.gallery.databinding.FragmentAlbumDetailBinding
 import com.google.android.material.transition.Hold
@@ -40,14 +36,6 @@ class AlbumDetailFrag : Fragment() {
             setHasFixedSize(true)
             this.adapter = adapter
         }
-        val tracker = SelectionTracker.Builder(
-            "GritItemFragSelectionId",
-            binding.rvAlbums,
-            StableIdKeyProvider(binding.rvAlbums),
-            MyItemDetailsLookup(binding.rvAlbums),
-            StorageStrategy.createLongStorage()
-        ).build()
-        adapter.tracker = tracker
         BottomNavFrag.enteringFromAlbum = true
 
         ViewCompat.setOnApplyWindowInsetsListener(requireActivity().window.decorView) { _, windowInsets ->
@@ -57,67 +45,6 @@ class AlbumDetailFrag : Fragment() {
             }
             return@setOnApplyWindowInsetsListener windowInsets
         }
-
-        val callback = object : ActionMode.Callback {
-            override fun onCreateActionMode(mode: ActionMode?, menu: Menu?): Boolean {
-                // menuInflater.inflate(R.menu.contextual_action_bar, menu)
-                //    WindowCompat.setDecorFitsSystemWindows(requireActivity().window, true)
-                WindowInsetsControllerCompat(requireActivity().window, binding.root).isAppearanceLightStatusBars =
-                    false
-                return true
-            }
-
-            override fun onPrepareActionMode(mode: ActionMode?, menu: Menu?): Boolean {
-                return false
-            }
-
-            override fun onActionItemClicked(mode: ActionMode?, item: MenuItem?): Boolean {
-                /*
-                return when (item?.itemId) {
-                     R.id.share -> {
-                         // Handle share icon press
-                         true
-                     }
-                     R.id.delete -> {
-                         // Handle delete icon press
-                         true
-                     }
-                     R.id.more -> {
-                         // Handle more item (inside overflow menu) press
-                         true
-                     }
-                     else -> false
-                 }
-                 */
-                return false
-            }
-
-                override fun onDestroyActionMode(mode: ActionMode?) {
-                    tracker.clearSelection()
-                    WindowInsetsControllerCompat(requireActivity().window, binding.root).isAppearanceLightStatusBars =
-                        true
-                  //  WindowCompat.setDecorFitsSystemWindows(requireActivity().window, false)
-                }
-        }
-        tracker.addObserver(object: SelectionTracker.SelectionObserver<Long>() {
-            var actionMode: ActionMode? = null
-
-            override fun onSelectionChanged() {
-                super.onSelectionChanged()
-                actionMode?.title = tracker.selection.size().toString()
-                if (actionMode == null) {
-                    actionMode = binding.tbAlbum.startActionMode(callback)
-
-                //    val inflater = requireActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
-                 //   val actionBinding = ActionModeToolbarBinding.inflate(inflater)
-                  //  actionMode?.customView = actionBinding.root
-                    //actionMode = activity?.startActionMode(callback)
-                } else if (tracker.selection.size() == 0) {
-                    actionMode?.finish()
-                    actionMode = null
-                }
-            }
-        })
 
         viewModel.albums.observe(viewLifecycleOwner, { albums->
             val items = albums.find { it.name == MainActivity.currentAlbumName }?.mediaItems

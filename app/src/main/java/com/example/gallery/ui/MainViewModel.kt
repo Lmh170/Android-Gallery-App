@@ -14,6 +14,7 @@ import com.example.gallery.Album
 import com.example.gallery.ListItem
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.selects.select
 import kotlinx.coroutines.withContext
 import java.util.*
 
@@ -45,12 +46,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    suspend fun postImages(images: List<ListItem>) {
-        viewModelScope.launch {
-            _recyclerViewItems.postValue(images)
-        }
-    }
-
     fun deleteImage(image: ListItem.MediaItem?) {
         if (image == null) return
         viewModelScope.launch {
@@ -65,7 +60,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    private suspend fun extractItems(items: List<ListItem>): List<ListItem.MediaItem> {
+    private fun extractItems(items: List<ListItem>): List<ListItem.MediaItem> {
         val viewPagerImages = mutableListOf<ListItem.MediaItem>()
         for (item in items ) {
             if (item is ListItem.MediaItem) viewPagerImages += item
@@ -114,7 +109,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.BUCKET_DISPLAY_NAME)
                 val dateModifiedColumn =
                     cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.DATE_MODIFIED)
-                var lastDate: Date? = null
+                //var lastDate: Date? = null
+                val lastDate = Calendar.getInstance()
                 while (cursor.moveToNext()) {
                     val type = cursor.getInt(typeColumn)
                     val id = cursor.getLong(idColumn)
@@ -132,11 +128,15 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                         ContentUris.withAppendedId(
                             MediaStore.Video.Media.EXTERNAL_CONTENT_URI, id)
                     }
-                    val selectedDate = Date(dateAdded)
-                    if (lastDate == null || lastDate.date > selectedDate.date || lastDate.month > selectedDate.month
-                        || lastDate.year > selectedDate.year)  {
+                    val selectedDate = Calendar.getInstance()
+                    selectedDate.timeInMillis = dateAdded
+                    if (lastDate.timeInMillis == 0L ||
+                        lastDate.get(Calendar.DAY_OF_MONTH) > selectedDate.get(Calendar.DAY_OF_MONTH) ||
+                            lastDate.get(Calendar.MONTH) > selectedDate.get(Calendar.MONTH) ||
+                            lastDate.get(Calendar.YEAR) > selectedDate.get(Calendar.YEAR))  {
+
                         images += ListItem.Header(dateAdded)
-                        lastDate = selectedDate
+                        lastDate.timeInMillis = selectedDate.timeInMillis
                         listPosition += 1
                     }
                     viewPagerPosition += 1

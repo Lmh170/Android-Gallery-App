@@ -23,8 +23,6 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.selection.ItemDetailsLookup
-import androidx.recyclerview.selection.SelectionTracker
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
@@ -47,12 +45,8 @@ import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
 
-/**
- * A fragment for displaying a grid of images.
- */
 class GridItemAdapter(val frag: Fragment, val isAlbum: Boolean): ListAdapter<ListItem, ViewHolder>(ListItem.ListItemDiffCallback()) {
     val enterTransitionStarted: AtomicBoolean = AtomicBoolean()
-    lateinit var tracker: SelectionTracker<Long>
 
     companion object {
         const val ITEM_VIEW_TYPE_HEADER = 8123
@@ -98,18 +92,7 @@ class GridItemAdapter(val frag: Fragment, val isAlbum: Boolean): ListAdapter<Lis
     }
 
     inner class MediaItemHolder(val binding: ListGridMediaItemHolderBinding, val type: Int): RecyclerView.ViewHolder(binding.root) {
-
-        fun getItemDetails() : ItemDetailsLookup.ItemDetails<Long> =
-            object : ItemDetailsLookup.ItemDetails<Long>() {
-                override fun getPosition(): Int =
-                    layoutPosition
-
-                override fun getSelectionKey(): Long =
-                    itemId
-            }
-
         fun onBind() {
-            binding.image.isActivated = tracker.isSelected((getItem(position) as ListItem.MediaItem).id)
             if (binding.image.isActivated) {
                 binding.image.shapeAppearanceModel = ShapeAppearanceModel().withCornerSize(70f)
             } else {
@@ -200,14 +183,6 @@ class GridItemAdapter(val frag: Fragment, val isAlbum: Boolean): ListAdapter<Lis
                 Date((getItem(layoutPosition) as ListItem.Header).date)
             )
         }
-        fun getItemDetails() : ItemDetailsLookup.ItemDetails<Long> =
-            object : ItemDetailsLookup.ItemDetails<Long>() {
-                override fun getPosition(): Int =
-                    layoutPosition
-
-                override fun getSelectionKey(): Long =
-                    itemId
-            }
     }
 
     override fun getItemId(position: Int): Long =

@@ -2,12 +2,13 @@ package com.example.gallery.adapter
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.signature.MediaStoreSignature
-import com.example.gallery.*
+import com.example.gallery.Album
+import com.example.gallery.GlideApp
+import com.example.gallery.R
 import com.example.gallery.databinding.AlbumHolderBinding
 import com.example.gallery.ui.BottomNavFrag
 import com.example.gallery.ui.MainActivity

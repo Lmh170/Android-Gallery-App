@@ -1,12 +1,11 @@
 package com.example.gallery.ui
 
 import android.content.res.Configuration
-import android.os.Build
 import android.os.Bundle
 import android.view.*
-import androidx.fragment.app.Fragment
 import androidx.core.app.SharedElementCallback
 import androidx.core.view.*
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
 import androidx.fragment.app.replace
 import com.example.gallery.R
@@ -18,7 +17,6 @@ import com.google.android.material.transition.MaterialSharedAxis
 class BottomNavFrag : Fragment() {
     private lateinit var _binding: FragmentBottomNavBinding
     private val binding get() = _binding
-    private lateinit var actionMode: ActionMode
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -47,11 +45,11 @@ class BottomNavFrag : Fragment() {
         }
 
         binding.bnvMain.setOnItemReselectedListener {
-            val frag = childFragmentManager.findFragmentById(R.id.fcvBottomNav)
-            if (frag is GridItemFrag) {
-                frag.binding.rvItems.smoothScrollToPosition(0)
-            } else if (frag is GridAlbumFrag) {
-                frag.binding.rvAlbum.smoothScrollToPosition(0)
+            val fragment = childFragmentManager.findFragmentById(R.id.fcvBottomNav)
+            if (fragment is GridItemFrag) {
+                fragment.binding.rvItems.smoothScrollToPosition(0)
+            } else if (fragment is GridAlbumFrag) {
+                fragment.binding.rvAlbum.smoothScrollToPosition(0)
             }
         }
         binding.bnvMain.setOnItemSelectedListener {
@@ -65,7 +63,6 @@ class BottomNavFrag : Fragment() {
                     true
                 }
                 R.id.item_albus -> {
-                    if (::actionMode.isInitialized) actionMode.finish()
                     childFragmentManager.commit {
                         replace<GridAlbumFrag>(R.id.fcvBottomNav)
                         setReorderingAllowed(true)
@@ -76,11 +73,6 @@ class BottomNavFrag : Fragment() {
             }
         }
         return binding.root
-    }
-
-    fun startActionMode(callback: ActionMode.Callback): ActionMode {
-        actionMode =  binding.tbMain.startActionMode(callback)
-        return actionMode
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

@@ -54,8 +54,4 @@ class GridAlbumFrag : Fragment() {
             if (position == 0) binding.rvAlbum.scrollToPosition(0)
         }
     }
-
-    companion object {
-        var spanCount = 2
-    }
 }
