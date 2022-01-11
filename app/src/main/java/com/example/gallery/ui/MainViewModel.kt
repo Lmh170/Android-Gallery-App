@@ -14,7 +14,6 @@ import com.example.gallery.Album
 import com.example.gallery.ListItem
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.selects.select
 import kotlinx.coroutines.withContext
 import java.util.*
 
@@ -198,7 +197,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             albums.removeAt(0)
         }
         return albums
-
     }
 
     private suspend fun performDeleteImage(image: ListItem.MediaItem) {

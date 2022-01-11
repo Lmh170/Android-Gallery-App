@@ -19,6 +19,7 @@ import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.provider.MediaStore
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.FragmentNavigatorExtras
@@ -98,11 +99,15 @@ class GridItemAdapter(val frag: Fragment, val isAlbum: Boolean): ListAdapter<Lis
             } else {
                 binding.image.shapeAppearanceModel = ShapeAppearanceModel().withCornerSize(0f)
             }
-
+            if ((getItem(layoutPosition) as ListItem.MediaItem).type ==
+                MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO) {
+                    binding.ivPlayMediaItem.visibility = View.VISIBLE
+            }
             binding.image.transitionName = (getItem(layoutPosition) as ListItem.MediaItem).id.toString()
             Glide.with(frag.requireActivity()).
             load((getItem(layoutPosition) as ListItem.MediaItem).uri)
-                .signature(MediaStoreSignature("", (getItem(layoutPosition)as ListItem.MediaItem).dateModified, 0))
+                .signature(MediaStoreSignature("",
+                    (getItem(layoutPosition)as ListItem.MediaItem).dateModified, 0))
                 .thumbnail(0.2f)
                 .listener(object : RequestListener<Drawable?> {
                     override fun onLoadFailed(

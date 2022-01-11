@@ -26,6 +26,9 @@
             android:name="isAlbum"
             app:argType="boolean"
             android:defaultValue="false" />
+        <action
+            android:id="@+id/action_viewPagerFrag_to_videoPlayer"
+            app:destination="@id/videoPlayer" />
     </fragment>
     <fragment
         android:id="@+id/albumDetailFrag"
@@ -36,4 +39,12 @@
             android:id="@+id/action_albumDetailFrag_to_viewPagerFrag"
             app:destination="@id/viewPagerFrag" />
     </fragment>
+    <activity
+        android:id="@+id/videoPlayer"
+        android:name="com.example.gallery.ui.VideoPlayer"
+        android:label="VideoPlayer" >
+        <argument
+            android:name="videoUri"
+            app:argType="android.net.Uri" />
+    </activity>
 </navigation>

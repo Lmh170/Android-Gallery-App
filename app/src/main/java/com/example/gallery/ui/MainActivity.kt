@@ -39,6 +39,9 @@ class MainActivity : AppCompatActivity() {
             val intentSenderRequest = IntentSenderRequest.Builder(intentSender).build()
             request.launch(intentSenderRequest)
         })
+
+        println("intent: data ${intent.data} type ${intent.type} flags ${intent.flags} action: ${intent.action}" +
+                "categories: ${intent.categories} scheme ${intent.scheme}")
     }
 
     override fun onStart() {
@@ -109,11 +112,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     companion object {
-        @JvmStatic
         var currentListPosition = 0
-        @JvmStatic
         var currentViewPagerPosition = 0
-        @JvmStatic
         lateinit var currentAlbumName: String
     }
 }
