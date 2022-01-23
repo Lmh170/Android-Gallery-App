@@ -82,7 +82,6 @@ class MainActivity : AppCompatActivity() {
                         )
 
                     if (showRationale) {
-                     //   showNoAccess()
                          // Todo()
                         Toast.makeText(this, "App requires access to storage to access your Photos", Toast.LENGTH_SHORT).show()
                     } else {
@@ -115,7 +114,8 @@ class MainActivity : AppCompatActivity() {
                 Manifest.permission.READ_EXTERNAL_STORAGE,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE
             )
-            ActivityCompat.requestPermissions(this, permissions, READ_EXTERNAL_STORAGE_REQUEST)
+         //   ActivityCompat.requestPermissions(this, permissions, READ_EXTERNAL_STORAGE_REQUEST)
+            requestPermissions(permissions, READ_EXTERNAL_STORAGE_REQUEST)
         }
     }
 

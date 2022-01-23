@@ -21,7 +21,6 @@ import java.util.concurrent.atomic.AtomicBoolean
 class BottomNavFrag : Fragment() {
     private lateinit var _binding: FragmentBottomNavBinding
     private val binding get() = _binding
-    private val shouldCollapse = AtomicBoolean()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -39,7 +38,6 @@ class BottomNavFrag : Fragment() {
         binding.fcvBottomNav.updatePadding(0, 0, 0, binding.bnvMain.measuredHeight)
         (activity as AppCompatActivity).setSupportActionBar(binding.tbMain)
         binding.appBarLayout.statusBarForeground = MaterialShapeDrawable.createWithElevationOverlay(requireContext())
-
 
         binding.bnvMain.setOnItemReselectedListener {
             val fragment = childFragmentManager.findFragmentById(R.id.fcvBottomNav)
