@@ -22,12 +22,13 @@
             android:id="@+id/ivThumbnailAlbum"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:background="?attr/customColorValue"
             android:clickable="true"
             android:focusable="true"
             android:foreground="?attr/selectableItemBackground"
             android:scaleType="centerCrop"
             tools:srcCompat="@tools:sample/avatars"
-            android:background="?attr/customColorValue"/>
+            android:contentDescription="image" />
     </androidx.cardview.widget.CardView>
 
 

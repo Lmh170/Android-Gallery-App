@@ -3,20 +3,25 @@ package com.example.gallery.ui
 import android.content.res.Configuration
 import android.os.Bundle
 import android.view.*
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.SharedElementCallback
 import androidx.core.view.*
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
 import androidx.fragment.app.replace
+import androidx.recyclerview.widget.GridLayoutManager
 import com.example.gallery.R
 import com.example.gallery.adapter.GridItemAdapter
 import com.example.gallery.databinding.FragmentBottomNavBinding
+import com.google.android.material.shape.MaterialShapeDrawable
 import com.google.android.material.transition.Hold
 import com.google.android.material.transition.MaterialSharedAxis
+import java.util.concurrent.atomic.AtomicBoolean
 
 class BottomNavFrag : Fragment() {
     private lateinit var _binding: FragmentBottomNavBinding
     private val binding get() = _binding
+    private val shouldCollapse = AtomicBoolean()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -31,30 +36,25 @@ class BottomNavFrag : Fragment() {
             prepareTransitions()
         }
 
-        ViewCompat.setOnApplyWindowInsetsListener(requireActivity().window.decorView) { _, windowInsets ->
-            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
-            binding.tbMain.updateLayoutParams<ViewGroup.MarginLayoutParams>{
-                topMargin = insets.top
-            }
-            binding.bnvMain.updatePadding(0, 0, 0, insets.bottom)
-            return@setOnApplyWindowInsetsListener windowInsets
-        }
+        binding.fcvBottomNav.updatePadding(0, 0, 0, binding.bnvMain.measuredHeight)
+        (activity as AppCompatActivity).setSupportActionBar(binding.tbMain)
+        binding.appBarLayout.statusBarForeground = MaterialShapeDrawable.createWithElevationOverlay(requireContext())
 
-        binding.fcvBottomNav.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-            bottomMargin = binding.bnvMain.measuredHeight
-        }
 
         binding.bnvMain.setOnItemReselectedListener {
             val fragment = childFragmentManager.findFragmentById(R.id.fcvBottomNav)
             if (fragment is GridItemFrag) {
-                fragment.binding.rvItems.smoothScrollToPosition(0)
+                fragment.binding.rvItems.scrollToPosition(0)
+                binding.appBarLayout.setExpanded(true)
             } else if (fragment is GridAlbumFrag) {
-                fragment.binding.rvAlbum.smoothScrollToPosition(0)
+                fragment.binding.rvAlbum.scrollToPosition(0)
+                binding.appBarLayout.setExpanded(true)
             }
         }
         binding.bnvMain.setOnItemSelectedListener {
             when (it.itemId) {
                 R.id.item_photos -> {
+                    binding.appBarLayout.setExpanded(true)
                     childFragmentManager.commit {
                         replace<GridItemFrag>(R.id.fcvBottomNav)
                         setReorderingAllowed(true)
@@ -115,18 +115,17 @@ class BottomNavFrag : Fragment() {
                     names: List<String>,
                     sharedElements: MutableMap<String, View>
                 ) {
-                    val frag: GridItemFrag?
-                    try {
-                        frag = childFragmentManager.findFragmentById(R.id.fcvBottomNav) as GridItemFrag?
-                    } catch (e: ClassCastException) {
-                        return
+
+                    val frag: GridItemFrag = childFragmentManager.findFragmentById(R.id.fcvBottomNav) as GridItemFrag
+                    if ((frag.binding.rvItems.layoutManager as GridLayoutManager).findFirstCompletelyVisibleItemPosition() != 0) {
+                        binding.appBarLayout.setExpanded(false, false)
                     }
-                    if (frag != null) {
-                        ViewGroupCompat.setTransitionGroup(frag.binding.rvItems, false)
-                    }
+
+                    ViewGroupCompat.setTransitionGroup(frag.binding.rvItems, false)
+
                     // Locate the ViewHolder for the clicked position.
-                    val selectedViewHolder = frag?.binding?.rvItems
-                        ?.findViewHolderForAdapterPosition(MainActivity.currentListPosition) ?: return
+                    val selectedViewHolder = frag.binding.rvItems
+                        .findViewHolderForAdapterPosition(MainActivity.currentListPosition) ?: return
 
 //                    (exitTransition as Hold).excludeChildren((selectedViewHolder as GridAdapter.MediaItemHolder).binding.image, true)
 

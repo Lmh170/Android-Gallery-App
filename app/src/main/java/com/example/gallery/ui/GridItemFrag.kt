@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import com.example.gallery.adapter.GridItemAdapter
 import com.example.gallery.databinding.FragmentGridItemBinding
 import com.google.android.material.transition.MaterialFadeThrough
+import java.util.concurrent.atomic.AtomicBoolean
 
 class GridItemFrag : Fragment() {
     private lateinit var _binding: FragmentGridItemBinding
@@ -26,15 +27,15 @@ class GridItemFrag : Fragment() {
         viewModel.recyclerViewItems.observe(viewLifecycleOwner, { items ->
             val position = (binding.rvItems.layoutManager as GridLayoutManager)
                 .findFirstCompletelyVisibleItemPosition()
-            (binding.root.adapter as GridItemAdapter).submitList(items){
+            (binding.rvItems.adapter as GridItemAdapter).submitList(items){
                 if (position == 0) binding.rvItems.scrollToPosition(0)
             }
            }
         )
         val adapter = GridItemAdapter(requireParentFragment(), false)
-        adapter.setHasStableIds(true)
+      //  adapter.setHasStableIds(true)
 
-        binding.root.apply {
+        binding.rvItems.apply {
             this.adapter = adapter
             val manager = GridLayoutManager(context, spanCount)
             manager.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
@@ -81,7 +82,9 @@ class GridItemFrag : Fragment() {
                 if (viewAtPosition == null || !binding.rvItems.layoutManager!!
                         .isViewPartiallyVisible(viewAtPosition, true, true)
                 ) {
-                    binding.rvItems.post { binding.rvItems.layoutManager!!.scrollToPosition(MainActivity.currentListPosition) }
+                    binding.rvItems.post {
+                        binding.rvItems.layoutManager!!.scrollToPosition(MainActivity.currentListPosition)
+                    }
                 }
             }
         })

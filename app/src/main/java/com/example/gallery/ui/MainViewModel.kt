@@ -109,7 +109,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 val dateModifiedColumn =
                     cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.DATE_MODIFIED)
                 //var lastDate: Date? = null
-                val lastDate = Calendar.getInstance()
+                var lastDate : Calendar? = null
                 while (cursor.moveToNext()) {
                     val type = cursor.getInt(typeColumn)
                     val id = cursor.getLong(idColumn)
@@ -129,13 +129,13 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     }
                     val selectedDate = Calendar.getInstance()
                     selectedDate.timeInMillis = dateAdded
-                    if (lastDate.timeInMillis == 0L ||
+                    if (lastDate == null ||
                         lastDate.get(Calendar.DAY_OF_MONTH) > selectedDate.get(Calendar.DAY_OF_MONTH) ||
                             lastDate.get(Calendar.MONTH) > selectedDate.get(Calendar.MONTH) ||
                             lastDate.get(Calendar.YEAR) > selectedDate.get(Calendar.YEAR))  {
 
                         images += ListItem.Header(dateAdded)
-                        lastDate.timeInMillis = selectedDate.timeInMillis
+                        lastDate = selectedDate
                         listPosition += 1
                     }
                     viewPagerPosition += 1

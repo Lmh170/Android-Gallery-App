@@ -4,7 +4,12 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="../../.gradle/caches/transforms-3/04a7555b95a25f15df85d085c394a2b2/transformed/material-1.6.0-alpha01/res/layout/design_bottom_navigation_item.xml" value="0.3697916666666667" />
+        <entry key="app/src/main/res/layout/activity_main.xml" value="0.34479166666666666" />
+        <entry key="app/src/main/res/layout/album_holder.xml" value="0.34479166666666666" />
+        <entry key="app/src/main/res/layout/fragment_album_detail.xml" value="0.34479166666666666" />
         <entry key="app/src/main/res/layout/fragment_bottom_nav.xml" value="0.2777777777777778" />
+        <entry key="app/src/main/res/layout/fragment_grid_album.xml" value="0.34479166666666666" />
+        <entry key="app/src/main/res/layout/fragment_grid_item.xml" value="0.19010416666666666" />
         <entry key="app/src/main/res/layout/list_grid_header.xml" value="0.34479166666666666" />
         <entry key="app/src/main/res/layout/list_grid_media_item_holder.xml" value="0.5" />
         <entry key="app/src/main/res/layout/video_player.xml" value="0.34479166666666666" />

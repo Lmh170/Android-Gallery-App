@@ -104,11 +104,13 @@ class GridItemAdapter(val frag: Fragment, val isAlbum: Boolean): ListAdapter<Lis
                     binding.ivPlayMediaItem.visibility = View.VISIBLE
             }
             binding.image.transitionName = (getItem(layoutPosition) as ListItem.MediaItem).id.toString()
-            Glide.with(frag.requireActivity()).
-            load((getItem(layoutPosition) as ListItem.MediaItem).uri)
-                .signature(MediaStoreSignature("",
-                    (getItem(layoutPosition)as ListItem.MediaItem).dateModified, 0))
-                .thumbnail(0.2f)
+
+            Glide.with(binding.image).
+                load((getItem(layoutPosition) as ListItem.MediaItem).uri)
+                .centerCrop()
+                .signature(MediaStoreSignature(null,
+                    (getItem(layoutPosition) as ListItem.MediaItem).dateModified, 0))
+              //  .thumbnail(0.2f)
                 .listener(object : RequestListener<Drawable?> {
                     override fun onLoadFailed(
                         e: GlideException?, model: Any,
@@ -167,15 +169,12 @@ class GridItemAdapter(val frag: Fragment, val isAlbum: Boolean): ListAdapter<Lis
                 } else if (frag is AlbumDetailFrag) {
                     val args = Bundle()
                     args.putBoolean("isAlbum", true)
-                    try {
-                        frag.findNavController().navigate(
-                            R.id.action_albumDetailFrag_to_viewPagerFrag,
-                            args, // Bundle of args
-                            null, // NavOptions
-                            extras)
-                    } catch (e: java.lang.IllegalArgumentException) {
-                        // tapping twice on an image
-                    }
+                    frag.findNavController().navigate(
+                        R.id.action_albumDetailFrag_to_viewPagerFrag,
+                        args, // Bundle of args
+                        null, // NavOptions
+                        extras)
+
 
                 }
             }

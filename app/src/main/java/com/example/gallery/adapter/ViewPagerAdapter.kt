@@ -29,7 +29,7 @@ import com.google.android.material.shape.ShapeAppearanceModel
 import java.util.concurrent.atomic.AtomicBoolean
 
 class ViewPagerAdapter(val frag: ViewPagerFrag): ListAdapter<ListItem.MediaItem, ViewPagerAdapter.ViewHolder>(ListItem.MediaItem.DiffCallback) {
-    val transitionStarted: AtomicBoolean = AtomicBoolean()
+    val enterTransitionStarted: AtomicBoolean = AtomicBoolean()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return  ViewHolder(
@@ -61,8 +61,10 @@ class ViewPagerAdapter(val frag: ViewPagerFrag): ListAdapter<ListItem.MediaItem,
             }
             binding.pagerImage.transitionName = getItem(layoutPosition).id.toString()
             binding.pagerImage.gFrag = frag
-            GlideApp.with(frag.requireActivity())
+
+            GlideApp.with(binding.pagerImage)
                 .load(getItem(layoutPosition).uri)
+                .thumbnail(0.2f)
                 .signature(MediaStoreSignature(null, getItem(layoutPosition).dateModified, 0))
                 .listener(object : RequestListener<Drawable> {
                 override fun onLoadFailed(
@@ -74,7 +76,7 @@ class ViewPagerAdapter(val frag: ViewPagerFrag): ListAdapter<ListItem.MediaItem,
                     if (MainActivity.currentViewPagerPosition != layoutPosition) {
                         return true
                     }
-                    if (transitionStarted.getAndSet(true)) {
+                    if (enterTransitionStarted.getAndSet(true)) {
                         return true
                     }
                     frag.startPostponedEnterTransition()
@@ -90,7 +92,7 @@ class ViewPagerAdapter(val frag: ViewPagerFrag): ListAdapter<ListItem.MediaItem,
                     if (MainActivity.currentViewPagerPosition != layoutPosition) {
                         return false
                     }
-                    if (transitionStarted.getAndSet(true)) {
+                    if (enterTransitionStarted.getAndSet(true)) {
                         return false
                     }
                     frag.startPostponedEnterTransition()

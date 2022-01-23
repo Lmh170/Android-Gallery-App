@@ -18,25 +18,25 @@ class GridAlbumAdapter(private val frag: BottomNavFrag): ListAdapter<Album, Grid
 
     inner class AlbumHolder(private val binding: AlbumHolderBinding): RecyclerView.ViewHolder(binding.root){
         fun onBind() {
-            GlideApp.with(frag.requireActivity())
+            GlideApp.with(binding.ivThumbnailAlbum)
                 .load(getItem(layoutPosition).mediaItems[0].uri)
-                .signature(MediaStoreSignature("", getItem(layoutPosition).mediaItems[0].dateModified, 0))
+                .centerCrop()
+                .signature(MediaStoreSignature(null, getItem(layoutPosition).mediaItems[0].dateModified, 0))
                 .thumbnail(0.3f)
                 .into(binding.ivThumbnailAlbum)
+
             binding.tvAlbumName.text = getItem(layoutPosition).name
             binding.ivThumbnailAlbum.transitionName = "album_$layoutPosition"
 
             binding.ivThumbnailAlbum.setOnClickListener {
-                try {
-                    frag.exitTransition = MaterialSharedAxis(MaterialSharedAxis.Z, true)
-                    MainActivity.currentListPosition = 0
-                    MainActivity.currentAlbumName = getItem(layoutPosition).name
-                    frag.findNavController().navigate(
-                        R.id.action_bottomNavFrag_to_albumDetailFrag,
-                        null,
-                        null,
-                        null)
-                } catch (e: java.lang.IllegalArgumentException){}
+                frag.exitTransition = MaterialSharedAxis(MaterialSharedAxis.Z, true)
+                MainActivity.currentListPosition = 0
+                MainActivity.currentAlbumName = getItem(layoutPosition).name
+                frag.findNavController().navigate(
+                    R.id.action_bottomNavFrag_to_albumDetailFrag,
+                    null,
+                    null,
+                    null)
             }
         }
     }

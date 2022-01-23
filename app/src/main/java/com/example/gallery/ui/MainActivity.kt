@@ -14,6 +14,12 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
+import androidx.fragment.app.findFragment
+import androidx.navigation.findNavController
+import androidx.navigation.fragment.NavHostFragment
+import com.bumptech.glide.MemoryCategory
+import com.example.gallery.GlideApp
+import com.example.gallery.R
 import com.example.gallery.databinding.ActivityMainBinding
 
 private const val READ_EXTERNAL_STORAGE_REQUEST = 0x1045
@@ -42,6 +48,8 @@ class MainActivity : AppCompatActivity() {
 
         println("intent: data ${intent.data} type ${intent.type} flags ${intent.flags} action: ${intent.action}" +
                 "categories: ${intent.categories} scheme ${intent.scheme}")
+
+        GlideApp.get(this).setMemoryCategory(MemoryCategory.HIGH)
     }
 
     override fun onStart() {

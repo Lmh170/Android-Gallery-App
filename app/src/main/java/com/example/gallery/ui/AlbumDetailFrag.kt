@@ -36,15 +36,8 @@ class AlbumDetailFrag : Fragment() {
             setHasFixedSize(true)
             this.adapter = adapter
         }
-        BottomNavFrag.enteringFromAlbum = true
 
-        ViewCompat.setOnApplyWindowInsetsListener(requireActivity().window.decorView) { _, windowInsets ->
-            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
-            binding.tbAlbum.updateLayoutParams<ViewGroup.MarginLayoutParams>{
-                topMargin = insets.top
-            }
-            return@setOnApplyWindowInsetsListener windowInsets
-        }
+        BottomNavFrag.enteringFromAlbum = true
 
         viewModel.albums.observe(viewLifecycleOwner, { albums->
             val items = albums.find { it.name == MainActivity.currentAlbumName }?.mediaItems

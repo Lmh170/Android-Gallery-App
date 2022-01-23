@@ -10,6 +10,7 @@ import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowInsets
 import android.widget.Toast
 import androidx.core.app.SharedElementCallback
 import androidx.core.view.*
@@ -245,7 +246,7 @@ class ViewPagerFrag : Fragment() {
             binding.cvDelete.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 bottomMargin = insets.bottom + 5
             }
-            return@setOnApplyWindowInsetsListener windowInsets
+            WindowInsetsCompat.CONSUMED
         }
         binding.cvShare.setOnClickListener {
             val currentItem = getCurrentItem() ?: return@setOnClickListener
