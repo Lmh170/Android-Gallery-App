@@ -1,6 +1,7 @@
 package com.example.gallery.ui
 
 import android.content.res.Configuration
+import android.net.Uri
 import android.os.Bundle
 import android.view.*
 import androidx.fragment.app.Fragment
@@ -19,6 +20,7 @@ import com.google.android.material.transition.Hold
 import com.google.android.material.transition.MaterialSharedAxis
 import android.view.ViewGroup
 import com.example.gallery.ListItem
+import com.example.gallery.MyItemKeyProvider
 
 
 class AlbumDetailFrag : Fragment() {
@@ -35,7 +37,6 @@ class AlbumDetailFrag : Fragment() {
         _binding = FragmentAlbumDetailBinding.inflate(inflater, container, false)
 
         val adapter = GridItemAdapter(this@AlbumDetailFrag, true)
-        adapter.setHasStableIds(true)
         binding.rvAlbums.apply{
             setHasFixedSize(true)
             this.adapter = adapter
@@ -43,20 +44,12 @@ class AlbumDetailFrag : Fragment() {
         val tracker = SelectionTracker.Builder(
             "GritItemFragSelectionId",
             binding.rvAlbums,
-            StableIdKeyProvider(binding.rvAlbums),
+            MyItemKeyProvider(adapter),
             MyItemDetailsLookup(binding.rvAlbums),
-            StorageStrategy.createLongStorage()
+            StorageStrategy.createParcelableStorage(Uri::class.java)
         ).build()
         adapter.tracker = tracker
         BottomNavFrag.enteringFromAlbum = true
-
-        ViewCompat.setOnApplyWindowInsetsListener(requireActivity().window.decorView) { _, windowInsets ->
-            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
-            binding.tbAlbum.updateLayoutParams<ViewGroup.MarginLayoutParams>{
-                topMargin = insets.top
-            }
-            return@setOnApplyWindowInsetsListener windowInsets
-        }
 
         val callback = object : ActionMode.Callback {
             override fun onCreateActionMode(mode: ActionMode?, menu: Menu?): Boolean {
@@ -99,7 +92,7 @@ class AlbumDetailFrag : Fragment() {
                   //  WindowCompat.setDecorFitsSystemWindows(requireActivity().window, false)
                 }
         }
-        tracker.addObserver(object: SelectionTracker.SelectionObserver<Long>() {
+        tracker.addObserver(object: SelectionTracker.SelectionObserver<Uri>() {
             var actionMode: ActionMode? = null
 
             override fun onSelectionChanged() {

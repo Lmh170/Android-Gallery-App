@@ -1,5 +1,6 @@
 package com.example.gallery.ui
 
+import android.net.Uri
 import android.os.Bundle
 import android.view.*
 import androidx.fragment.app.Fragment
@@ -11,6 +12,8 @@ import androidx.recyclerview.selection.StableIdKeyProvider
 import androidx.recyclerview.selection.StorageStrategy
 import androidx.recyclerview.widget.GridLayoutManager
 import com.example.gallery.MyItemDetailsLookup
+import com.example.gallery.MyItemKeyProvider
+import com.example.gallery.R
 import com.example.gallery.adapter.GridItemAdapter
 import com.example.gallery.databinding.FragmentGridItemBinding
 import com.google.android.material.transition.MaterialFadeThrough
@@ -19,6 +22,7 @@ class GridItemFrag : Fragment() {
     private lateinit var _binding: FragmentGridItemBinding
     val binding get() = _binding
     private val viewModel: MainViewModel by activityViewModels()
+    var actionMode: ActionMode? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -37,7 +41,6 @@ class GridItemFrag : Fragment() {
            }
         )
         val adapter = GridItemAdapter(requireParentFragment(), false)
-        adapter.setHasStableIds(true)
 
         binding.root.apply {
             this.adapter = adapter
@@ -57,19 +60,18 @@ class GridItemFrag : Fragment() {
         val tracker = SelectionTracker.Builder(
             "GritItemFragSelectionId",
             binding.rvItems,
-            StableIdKeyProvider(binding.rvItems),
+            MyItemKeyProvider(adapter),
             MyItemDetailsLookup(binding.rvItems),
-            StorageStrategy.createLongStorage()
-        ).withSelectionPredicate(object : SelectionTracker.SelectionPredicate<Long>() {
-            override fun canSetStateForKey(key: Long, nextState: Boolean): Boolean =
-                key != Long.MIN_VALUE
+            StorageStrategy.createParcelableStorage(Uri::class.java)
+        ).withSelectionPredicate(object : SelectionTracker.SelectionPredicate<Uri>() {
+            override fun canSetStateForKey(key: Uri, nextState: Boolean): Boolean =
+                key != Uri.EMPTY
 
             override fun canSelectMultiple(): Boolean =
                 true
 
             override fun canSetStateAtPosition(position: Int, nextState: Boolean): Boolean =
                 true
-
         }).build()
         adapter.tracker = tracker
         scrollToPosition()
@@ -78,16 +80,11 @@ class GridItemFrag : Fragment() {
         val callback = object : ActionMode.Callback {
             override fun onCreateActionMode(mode: ActionMode?, menu: Menu?): Boolean {
                 // menuInflater.inflate(R.menu.contextual_action_bar, menu)
-                //    WindowCompat.setDecorFitsSystemWindows(requireActivity().window, true)
-                WindowInsetsControllerCompat(requireActivity().window, binding.root).let { controller ->
-                    controller.isAppearanceLightStatusBars = false
-                }
                 return true
             }
 
-            override fun onPrepareActionMode(mode: ActionMode?, menu: Menu?): Boolean {
-                return false
-            }
+            override fun onPrepareActionMode(mode: ActionMode?, menu: Menu?): Boolean =
+                false
 
             override fun onActionItemClicked(mode: ActionMode?, item: MenuItem?): Boolean {
                 /*
@@ -112,15 +109,10 @@ class GridItemFrag : Fragment() {
 
             override fun onDestroyActionMode(mode: ActionMode?) {
                 tracker.clearSelection()
-                WindowInsetsControllerCompat(requireActivity().window, binding.root).let { controller ->
-                    controller.isAppearanceLightStatusBars = true
-                }
-                //  WindowCompat.setDecorFitsSystemWindows(requireActivity().window, false)
             }
         }
-        tracker.addObserver(object: SelectionTracker.SelectionObserver<Long>() {
-            var actionMode: ActionMode? = null
 
+        tracker.addObserver(object: SelectionTracker.SelectionObserver<Uri>() {
             override fun onSelectionChanged() {
                 super.onSelectionChanged()
 
@@ -134,12 +126,14 @@ class GridItemFrag : Fragment() {
                 } else if (tracker.selection.size() == 0) {
                     actionMode?.finish()
                     actionMode = null
+                    activity?.window?.statusBarColor = resources.getColor(android.R.color.transparent, activity?.theme)
                 }
             }
 
             override fun onSelectionCleared() {
-                actionMode?.finish()
+              //  actionMode?.finish()
                 actionMode = null
+                activity?.window?.statusBarColor = resources.getColor(android.R.color.transparent, activity?.theme)
             }
         })
 

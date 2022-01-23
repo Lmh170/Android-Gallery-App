@@ -12,7 +12,8 @@
         android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:liftOnScroll="true">
+        app:liftOnScroll="true"
+        android:fitsSystemWindows="true">
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/tbMain"
             android:layout_width="match_parent"
