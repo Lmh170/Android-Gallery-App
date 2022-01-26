@@ -54,10 +54,14 @@ import java.util.concurrent.atomic.AtomicBoolean
  */
 class GridItemAdapter(val frag: Fragment, val isAlbum: Boolean): ListAdapter<ListItem, ViewHolder>(ListItem.ListItemDiffCallback()) {
     val enterTransitionStarted: AtomicBoolean = AtomicBoolean()
-    lateinit var tracker: SelectionTracker<Uri>
+    lateinit var tracker: SelectionTracker<Long>
 
     companion object {
         const val ITEM_VIEW_TYPE_HEADER = 8123
+    }
+
+    init {
+        setHasStableIds(true)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -102,17 +106,18 @@ class GridItemAdapter(val frag: Fragment, val isAlbum: Boolean): ListAdapter<Lis
 
     inner class MediaItemHolder(val binding: ListGridMediaItemHolderBinding, val type: Int): RecyclerView.ViewHolder(binding.root) {
 
-        fun getItemDetails() : ItemDetailsLookup.ItemDetails<Uri> =
-            object : ItemDetailsLookup.ItemDetails<Uri>() {
+        fun getItemDetails() : ItemDetailsLookup.ItemDetails<Long> =
+            object : ItemDetailsLookup.ItemDetails<Long>() {
                 override fun getPosition(): Int =
                     layoutPosition
 
-                override fun getSelectionKey(): Uri =
-                    (getItem(layoutPosition) as ListItem.MediaItem).uri
+                override fun getSelectionKey(): Long =
+                    itemId
+
             }
 
         fun onBind(position: Int) {
-            binding.image.isActivated = tracker.isSelected((getItem(position) as ListItem.MediaItem).uri)
+            binding.image.isActivated = tracker.isSelected(itemId)
             if (binding.image.isActivated) {
                 binding.image.shapeAppearanceModel = ShapeAppearanceModel().withCornerSize(70f)
             } else {
@@ -200,16 +205,20 @@ class GridItemAdapter(val frag: Fragment, val isAlbum: Boolean): ListAdapter<Lis
     inner class HeaderViewHolder (private val binding: ListGridHeaderBinding): RecyclerView.ViewHolder(binding.root) {
         fun onBind() {
             binding.tvDate.text = SimpleDateFormat.getDateInstance(SimpleDateFormat.LONG).format(
-                Date((getItem(layoutPosition) as ListItem.Header).date)
+                Date(getItem(layoutPosition).id)
             )
         }
-        fun getItemDetails() : ItemDetailsLookup.ItemDetails<Uri> =
-            object : ItemDetailsLookup.ItemDetails<Uri>() {
+        fun getItemDetails() : ItemDetailsLookup.ItemDetails<Long> =
+            object : ItemDetailsLookup.ItemDetails<Long>() {
                 override fun getPosition(): Int =
                     layoutPosition
 
-                override fun getSelectionKey(): Uri =
-                    (getItem(layoutPosition) as ListItem.Header).date.toString().toUri()
+                override fun getSelectionKey(): Long =
+                  //  (getItem(layoutPosition) as ListItem.Header).date.toString().toUri()
+                    itemId
             }
     }
+
+    override fun getItemId(position: Int): Long =
+        getItem(position).id
 }

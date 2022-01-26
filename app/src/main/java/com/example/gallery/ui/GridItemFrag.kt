@@ -1,11 +1,9 @@
 package com.example.gallery.ui
 
-import android.net.Uri
 import android.os.Bundle
 import android.view.*
 import androidx.fragment.app.Fragment
 import androidx.core.view.ViewGroupCompat
-import androidx.core.view.WindowInsetsControllerCompat
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.selection.SelectionTracker
 import androidx.recyclerview.selection.StableIdKeyProvider
@@ -13,8 +11,6 @@ import androidx.recyclerview.selection.StorageStrategy
 import androidx.recyclerview.widget.GridLayoutManager
 import com.example.gallery.ListItem
 import com.example.gallery.MyItemDetailsLookup
-import com.example.gallery.MyItemKeyProvider
-import com.example.gallery.R
 import com.example.gallery.adapter.GridItemAdapter
 import com.example.gallery.databinding.FragmentGridItemBinding
 import com.google.android.material.transition.MaterialFadeThrough
@@ -56,17 +52,16 @@ class GridItemFrag : Fragment() {
             }
             layoutManager = manager
             setHasFixedSize(true)
-
         }
         val tracker = SelectionTracker.Builder(
             "GritItemFragSelectionId",
             binding.rvItems,
-            MyItemKeyProvider(adapter),
+            StableIdKeyProvider(binding.rvItems),
             MyItemDetailsLookup(binding.rvItems),
-            StorageStrategy.createParcelableStorage(Uri::class.java)
-        ).withSelectionPredicate(object : SelectionTracker.SelectionPredicate<Uri>() {
-            override fun canSetStateForKey(key: Uri, nextState: Boolean): Boolean =
-                key != Uri.EMPTY
+            StorageStrategy.createLongStorage()
+        ).withSelectionPredicate(object : SelectionTracker.SelectionPredicate<Long>() {
+            override fun canSetStateForKey(key: Long, nextState: Boolean): Boolean =
+                viewModel.recyclerViewItems.value?.contains(ListItem.Header(key)) == false
 
             override fun canSelectMultiple(): Boolean =
                 true
@@ -115,10 +110,9 @@ class GridItemFrag : Fragment() {
             }
         }
 
-        tracker.addObserver(object: SelectionTracker.SelectionObserver<Uri>() {
+        tracker.addObserver(object: SelectionTracker.SelectionObserver<Long>() {
             override fun onSelectionChanged() {
                 super.onSelectionChanged()
-
                 actionMode?.title = tracker.selection.size().toString()
                 if (actionMode == null) {
                     actionMode = (parentFragment as BottomNavFrag).startActionMode(callback)

@@ -22,9 +22,7 @@ sealed class ListItem {
 
     }
 
-    data class Header(val date: Long): ListItem() {
-        override val id = Long.MIN_VALUE
-    }
+    data class Header(override val id: Long): ListItem()
 
     class ListItemDiffCallback: DiffUtil.ItemCallback<ListItem>() {
         override fun areItemsTheSame(oldItem: ListItem, newItem: ListItem): Boolean {
@@ -32,7 +30,7 @@ sealed class ListItem {
         }
 
         override fun areContentsTheSame(oldItem: ListItem, newItem: ListItem): Boolean {
-            return if (oldItem is ListItem.MediaItem && newItem is ListItem.MediaItem) {
+            return if (oldItem is MediaItem && newItem is MediaItem) {
                 oldItem.uri == newItem.uri
             } else {
                 oldItem == newItem

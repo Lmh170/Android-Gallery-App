@@ -1,7 +1,6 @@
 package com.example.gallery.ui
 
 import android.content.res.Configuration
-import android.net.Uri
 import android.os.Bundle
 import android.view.*
 import androidx.fragment.app.Fragment
@@ -20,7 +19,6 @@ import com.google.android.material.transition.Hold
 import com.google.android.material.transition.MaterialSharedAxis
 import android.view.ViewGroup
 import com.example.gallery.ListItem
-import com.example.gallery.MyItemKeyProvider
 
 
 class AlbumDetailFrag : Fragment() {
@@ -44,9 +42,9 @@ class AlbumDetailFrag : Fragment() {
         val tracker = SelectionTracker.Builder(
             "GritItemFragSelectionId",
             binding.rvAlbums,
-            MyItemKeyProvider(adapter),
+            StableIdKeyProvider(binding.rvAlbums),
             MyItemDetailsLookup(binding.rvAlbums),
-            StorageStrategy.createParcelableStorage(Uri::class.java)
+            StorageStrategy.createLongStorage()
         ).build()
         adapter.tracker = tracker
         BottomNavFrag.enteringFromAlbum = true
@@ -92,7 +90,7 @@ class AlbumDetailFrag : Fragment() {
                   //  WindowCompat.setDecorFitsSystemWindows(requireActivity().window, false)
                 }
         }
-        tracker.addObserver(object: SelectionTracker.SelectionObserver<Uri>() {
+        tracker.addObserver(object: SelectionTracker.SelectionObserver<Long>() {
             var actionMode: ActionMode? = null
 
             override fun onSelectionChanged() {
