@@ -75,7 +75,8 @@ class GridItemAdapter(val frag: Fragment, val isAlbum: Boolean): ListAdapter<Lis
             }
             ITEM_VIEW_TYPE_HEADER -> {
                 HeaderViewHolder(
-                    ListGridHeaderBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+                    ListGridHeaderBinding.inflate(LayoutInflater.from(parent.context), parent,
+                        false)
                 )
             }
             else -> throw ClassCastException("Unknown viewType $viewType")
@@ -208,7 +209,7 @@ class GridItemAdapter(val frag: Fragment, val isAlbum: Boolean): ListAdapter<Lis
                     layoutPosition
 
                 override fun getSelectionKey(): Uri =
-                    Uri.EMPTY
+                    (getItem(layoutPosition) as ListItem.Header).date.toString().toUri()
             }
     }
 }

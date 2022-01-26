@@ -1,8 +1,8 @@
 package com.example.gallery
 
 import android.net.Uri
+import androidx.core.net.toUri
 import androidx.recyclerview.selection.ItemKeyProvider
-import androidx.recyclerview.widget.ListAdapter
 import com.example.gallery.adapter.GridItemAdapter
 
 class MyItemKeyProvider(private val adapter: GridItemAdapter): ItemKeyProvider<Uri>(SCOPE_CACHED) {
@@ -16,10 +16,16 @@ class MyItemKeyProvider(private val adapter: GridItemAdapter): ItemKeyProvider<U
 
     override fun getPosition(key: Uri): Int =
         adapter.currentList.indexOfFirst {
-            if (it is ListItem.MediaItem) {
-                it.uri == key
-            } else {
-                true
+            when (it) {
+                is ListItem.MediaItem -> {
+                    it.uri == key
+                }
+                is ListItem.Header -> {
+                    it.date.toString().toUri() == key
+                }
+                else -> {
+                    false
+                }
             }
         }
 }

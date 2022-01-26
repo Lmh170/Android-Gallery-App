@@ -11,6 +11,7 @@ import androidx.recyclerview.selection.SelectionTracker
 import androidx.recyclerview.selection.StableIdKeyProvider
 import androidx.recyclerview.selection.StorageStrategy
 import androidx.recyclerview.widget.GridLayoutManager
+import com.example.gallery.ListItem
 import com.example.gallery.MyItemDetailsLookup
 import com.example.gallery.MyItemKeyProvider
 import com.example.gallery.R
@@ -72,6 +73,8 @@ class GridItemFrag : Fragment() {
 
             override fun canSetStateAtPosition(position: Int, nextState: Boolean): Boolean =
                 true
+           //     position != viewModel.recyclerViewItems.value[position]
+//                viewModel.recyclerViewItems.value?.get(position) is ListItem.MediaItem
         }).build()
         adapter.tracker = tracker
         scrollToPosition()
