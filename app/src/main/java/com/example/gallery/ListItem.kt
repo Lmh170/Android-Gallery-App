@@ -22,9 +22,7 @@ sealed class ListItem {
 
     }
 
-    data class Header(val date: Long): ListItem() {
-        override val id = Long.MIN_VALUE
-    }
+    data class Header(override val id: Long): ListItem()
 
     class ListItemDiffCallback: DiffUtil.ItemCallback<ListItem>() {
         override fun areItemsTheSame(oldItem: ListItem, newItem: ListItem): Boolean {

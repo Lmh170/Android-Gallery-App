@@ -87,7 +87,11 @@ class BottomNavFrag : Fragment() {
                 controller.isAppearanceLightNavigationBars = true
             }
         }
+    }
 
+    fun startActionMode(callback: ActionMode.Callback): ActionMode {
+        activity?.window?.statusBarColor = resources.getColor(R.color.material_dynamic_primary95, activity?.theme)
+        return binding.tbMain.startActionMode(callback)
     }
 
     override fun onStart() {

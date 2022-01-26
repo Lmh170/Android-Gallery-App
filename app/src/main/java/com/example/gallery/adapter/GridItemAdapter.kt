@@ -24,6 +24,8 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.selection.ItemDetailsLookup
+import androidx.recyclerview.selection.SelectionTracker
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
@@ -47,10 +49,15 @@ import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
 
 class GridItemAdapter(val frag: Fragment, val isAlbum: Boolean): ListAdapter<ListItem, ViewHolder>(ListItem.ListItemDiffCallback()) {
-    val enterTransitionStarted: AtomicBoolean = AtomicBoolean()
+    private val enterTransitionStarted: AtomicBoolean = AtomicBoolean()
+    lateinit var tracker: SelectionTracker<Long>
 
     companion object {
         const val ITEM_VIEW_TYPE_HEADER = 8123
+    }
+
+    init {
+        setHasStableIds(true)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -93,7 +100,17 @@ class GridItemAdapter(val frag: Fragment, val isAlbum: Boolean): ListAdapter<Lis
     }
 
     inner class MediaItemHolder(val binding: ListGridMediaItemHolderBinding, val type: Int): RecyclerView.ViewHolder(binding.root) {
+        fun getItemDetails() : ItemDetailsLookup.ItemDetails<Long> =
+            object : ItemDetailsLookup.ItemDetails<Long>() {
+                override fun getPosition(): Int =
+                    layoutPosition
+
+                override fun getSelectionKey(): Long =
+                    itemId
+            }
+
         fun onBind() {
+            binding.image.isActivated = tracker.isSelected(itemId)
             if (binding.image.isActivated) {
                 binding.image.shapeAppearanceModel = ShapeAppearanceModel().withCornerSize(70f)
             } else {
@@ -147,9 +164,6 @@ class GridItemAdapter(val frag: Fragment, val isAlbum: Boolean): ListAdapter<Lis
                 .into(binding.image)
 
             binding.image.setOnClickListener {
-              //  println("layout: $layoutPosition itemList: ${(getItem(layoutPosition) as ListItem.MediaItem).listPosition} " +
-                //        "itemView: ${(getItem(layoutPosition) as ListItem.MediaItem).viewPagerPosition}")
-
                 MainActivity.currentListPosition = layoutPosition
                 MainActivity.currentViewPagerPosition = if (isAlbum){
                     layoutPosition
@@ -163,16 +177,16 @@ class GridItemAdapter(val frag: Fragment, val isAlbum: Boolean): ListAdapter<Lis
                     frag.prepareTransitions()
                     frag.findNavController().navigate(
                         R.id.action_bottomNavFrag_to_viewPagerFrag,
-                        null, // Bundle of args
-                        null, // NavOptions
+                        null,
+                        null,
                         extras)
                 } else if (frag is AlbumDetailFrag) {
                     val args = Bundle()
                     args.putBoolean("isAlbum", true)
                     frag.findNavController().navigate(
                         R.id.action_albumDetailFrag_to_viewPagerFrag,
-                        args, // Bundle of args
-                        null, // NavOptions
+                        args,
+                        null,
                         extras)
 
 
@@ -184,9 +198,18 @@ class GridItemAdapter(val frag: Fragment, val isAlbum: Boolean): ListAdapter<Lis
     inner class HeaderViewHolder (private val binding: ListGridHeaderBinding): RecyclerView.ViewHolder(binding.root) {
         fun onBind() {
             binding.tvDate.text = SimpleDateFormat.getDateInstance(SimpleDateFormat.LONG).format(
-                Date((getItem(layoutPosition) as ListItem.Header).date)
+                Date(itemId)
             )
         }
+
+        fun getItemDetails() : ItemDetailsLookup.ItemDetails<Long> =
+            object : ItemDetailsLookup.ItemDetails<Long>() {
+                override fun getPosition(): Int =
+                    layoutPosition
+
+                override fun getSelectionKey(): Long =
+                    itemId
+            }
     }
 
     override fun getItemId(position: Int): Long =

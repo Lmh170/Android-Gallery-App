@@ -13,17 +13,9 @@
         <!-- Customize your theme here. -->
         <item name="customColorValue">@color/material_dynamic_secondary90</item>
         <item name="windowActionModeOverlay">true</item>
-        <item name="actionBarTheme">@style/Theme.ActionBar</item>
-        <item name="actionModeBackground">@color/material_dynamic_tertiary30</item>
         <item name="actionModeCloseDrawable">@drawable/ic_baseline_close_24</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
-        <item name="android:fitsSystemWindows">false</item>
-    </style>
-
-    <style name="Theme.ActionBar" parent="ThemeOverlay.Material3.ActionBar">
-        <item name="colorPrimary">@color/material_dynamic_tertiary30</item>
-
     </style>
 
 </resources>

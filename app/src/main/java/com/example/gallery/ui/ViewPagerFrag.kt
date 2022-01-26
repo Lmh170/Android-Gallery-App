@@ -246,7 +246,7 @@ class ViewPagerFrag : Fragment() {
             binding.cvDelete.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 bottomMargin = insets.bottom + 5
             }
-            WindowInsetsCompat.CONSUMED
+            windowInsets
         }
         binding.cvShare.setOnClickListener {
             val currentItem = getCurrentItem() ?: return@setOnClickListener
