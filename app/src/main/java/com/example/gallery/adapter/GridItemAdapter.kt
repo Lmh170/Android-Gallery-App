@@ -106,28 +106,35 @@ class GridItemAdapter(val frag: Fragment, val isAlbum: Boolean): ListAdapter<Lis
                     layoutPosition
 
                 override fun getSelectionKey(): Long =
-                    itemId
+                    getItem(position).id
             }
 
         fun onBind() {
             binding.image.isActivated = tracker.isSelected(itemId)
             if (binding.image.isActivated) {
-                binding.image.shapeAppearanceModel = ShapeAppearanceModel().withCornerSize(70f)
+                binding.image.apply {
+                    shapeAppearanceModel = ShapeAppearanceModel().withCornerSize(70f)
+                    animate().scaleX(0.75f).scaleY(0.75f).duration = 100
+                }
             } else {
-                binding.image.shapeAppearanceModel = ShapeAppearanceModel().withCornerSize(0f)
+                binding.image.apply {
+                    scaleX = 1f
+                    scaleY = 1f
+                    shapeAppearanceModel = ShapeAppearanceModel().withCornerSize(0f)
+                }
             }
             if ((getItem(layoutPosition) as ListItem.MediaItem).type ==
                 MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO) {
                     binding.ivPlayMediaItem.visibility = View.VISIBLE
             }
-            binding.image.transitionName = (getItem(layoutPosition) as ListItem.MediaItem).id.toString()
+            binding.image.transitionName = itemId.toString()
 
-            Glide.with(binding.image).
-                load((getItem(layoutPosition) as ListItem.MediaItem).uri)
+            Glide.with(binding.image)
+                .load((getItem(layoutPosition) as ListItem.MediaItem).uri)
                 .centerCrop()
                 .signature(MediaStoreSignature(null,
                     (getItem(layoutPosition) as ListItem.MediaItem).dateModified, 0))
-              //  .thumbnail(0.2f)
+                .thumbnail(0.2f)
                 .listener(object : RequestListener<Drawable?> {
                     override fun onLoadFailed(
                         e: GlideException?, model: Any,
@@ -208,7 +215,7 @@ class GridItemAdapter(val frag: Fragment, val isAlbum: Boolean): ListAdapter<Lis
                     layoutPosition
 
                 override fun getSelectionKey(): Long =
-                    itemId
+                    getItem(position).id
             }
     }
 

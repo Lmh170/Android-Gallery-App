@@ -2,6 +2,9 @@ package com.example.gallery.ui
 
 import android.animation.Animator
 import android.annotation.SuppressLint
+import android.app.Activity
+import android.content.ContentUris
+import android.content.Context
 import android.content.Intent
 import android.media.MediaMetadataRetriever
 import android.net.Uri
@@ -12,6 +15,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.WindowInsets
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.SharedElementCallback
 import androidx.core.view.*
 import androidx.exifinterface.media.ExifInterface
@@ -19,6 +23,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
+import androidx.transition.TransitionManager
 import androidx.viewpager2.widget.MarginPageTransformer
 import androidx.viewpager2.widget.ViewPager2
 import com.example.gallery.ListItem
@@ -27,9 +32,11 @@ import com.example.gallery.adapter.ViewPagerAdapter
 import com.example.gallery.databinding.FragmentViewPagerBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.transition.MaterialContainerTransform
+import com.google.android.material.transition.MaterialFade
 import java.net.URLDecoder
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.collections.ArrayList
 
 class ViewPagerFrag : Fragment() {
     private lateinit var _binding: FragmentViewPagerBinding
@@ -38,6 +45,7 @@ class ViewPagerFrag : Fragment() {
     private var isSystemUiVisible = true
     private var shortAnimationDuration = 0L
     private var firstCurrentItem = 0
+    private var intentActionView = false
 
 
     override fun onCreateView(
@@ -48,9 +56,13 @@ class ViewPagerFrag : Fragment() {
             _binding = FragmentViewPagerBinding.inflate(inflater, container, false)
         }
         shortAnimationDuration = resources.getInteger(android.R.integer.config_shortAnimTime).toLong()
-
+        if (requireArguments().getParcelable<Uri>("item") != null) intentActionView = true
         binding.tbViewPager.setNavigationOnClickListener {
-            findNavController().navigateUp()
+            if (intentActionView) {
+                requireActivity().finish()
+            } else {
+                findNavController().navigateUp()
+            }
         }
         setUpViewpager()
         prepareSharedElementTransition()
@@ -61,155 +73,108 @@ class ViewPagerFrag : Fragment() {
     private fun setUpViewpager() {
         val adapter = ViewPagerAdapter(this)
 
-        if (requireArguments().getBoolean("isAlbum")) {
-            adapter.submitList(viewModel.albums.value?.find { it.name == MainActivity.currentAlbumName }?.mediaItems)
-       //     adapter.submitList(viewModel.albums.value?.get(MainActivity.currentAlbumPosition)?.mediaItems?.value)
-            viewModel.albums.observe(viewLifecycleOwner, {albums ->
-                val items = albums.find { it.name == MainActivity.currentAlbumName }?.mediaItems
-                (binding.viewPager.adapter as ViewPagerAdapter).submitList(items)
-            })
-     //       viewModel.albums.value?.get(MainActivity.currentAlbumPosition)?.mediaItems?.observe(viewLifecycleOwner, { items ->
-         //       (binding.viewPager.adapter as ViewPagerAdapter).submitList(items)
-        //    })
-        } else {
-            adapter.submitList(viewModel.viewPagerImages.value)
-            viewModel.viewPagerImages.observe(viewLifecycleOwner, { items ->
-                (binding.viewPager.adapter as ViewPagerAdapter).submitList(items)
-            })
+        when {
+            requireArguments().getBoolean("isAlbum") -> {
+                adapter.submitList(viewModel.albums.value?.find { it.name == MainActivity.currentAlbumName }?.mediaItems)
+                //     adapter.submitList(viewModel.albums.value?.get(MainActivity.currentAlbumPosition)?.mediaItems?.value)
+                viewModel.albums.observe(viewLifecycleOwner) { albums ->
+                    val items = albums.find { it.name == MainActivity.currentAlbumName }?.mediaItems
+                    (binding.viewPager.adapter as ViewPagerAdapter).submitList(items)
+                }
+            }
+            intentActionView -> {
+                requireActivity().contentResolver.query(
+                    requireArguments().getParcelable("item")!!,
+                    arrayOf(
+                        MediaStore.Files.FileColumns._ID,
+                        MediaStore.Files.FileColumns.MEDIA_TYPE,
+                        MediaStore.Files.FileColumns.DATE_MODIFIED
+                    ),
+                    null,
+                    null
+                )?.use {cursor ->
+                    val typeColumn =
+                        cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.MEDIA_TYPE)
+                    val idColumn =
+                        cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns._ID)
+                    val dateModifiedColumn =
+                        cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.DATE_MODIFIED)
+                    while (cursor.moveToNext()) {
+                        val type = cursor.getInt(typeColumn)
+                        val id = cursor.getLong(idColumn)
+                        val dateModified = cursor.getLong(dateModifiedColumn)
+                        adapter.submitList(listOf(
+                            ListItem.MediaItem(
+                                id,
+                                requireArguments().getParcelable("item")!!,
+                                "",
+                                type,
+                                dateModified,
+                                0,
+                                0
+                            ))
+                        )
+                    }
+                }
+            }
+            else -> {
+                adapter.submitList(viewModel.viewPagerImages.value)
+                viewModel.viewPagerImages.observe(viewLifecycleOwner) { items ->
+                    (binding.viewPager.adapter as ViewPagerAdapter).submitList(items)
+                }
+            }
         }
-
         binding.viewPager.apply {
             this.adapter = adapter
             firstCurrentItem = MainActivity.currentViewPagerPosition
             setCurrentItem(MainActivity.currentViewPagerPosition, false)
-            registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
-                override fun onPageSelected(position: Int) {
-                    MainActivity.currentViewPagerPosition = position
-                    if (requireArguments().getBoolean("isAlbum")) {
-                        MainActivity.currentListPosition = position
-                    } else {
-                        MainActivity.currentListPosition = viewModel.viewPagerImages.value?.get(position)!!.listPosition
+            if (!intentActionView) {
+                registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+                    override fun onPageSelected(position: Int) {
+                        MainActivity.currentViewPagerPosition = position
+                        if (requireArguments().getBoolean("isAlbum")) {
+                            MainActivity.currentListPosition = position
+                        } else {
+                            MainActivity.currentListPosition = viewModel.viewPagerImages.value?.get(position)!!.listPosition
+                        }
                     }
-                }
-            })
-            setPageTransformer(MarginPageTransformer(50))
+                })
+                setPageTransformer(MarginPageTransformer(50))
+            }
         }
     }
 
     fun showSystemUI() {
-        binding.tbViewPager.apply {
-            visibility = View.VISIBLE
-            animate().alpha(1f).duration = shortAnimationDuration
-        }
+        TransitionManager.beginDelayedTransition(binding.root, MaterialFade().apply {
+            duration = 250L
+            excludeTarget(binding.ivGradTop, true)
+            excludeTarget(binding.ivGardBottom, true)
+        })
 
-        binding.cvEdit.apply {
-            visibility = View.VISIBLE
-            animate().alpha(1f).duration = shortAnimationDuration
-        }
-        binding.cvShare.apply {
-            visibility = View.VISIBLE
-            animate().alpha(1f).duration = shortAnimationDuration
-        }
-        binding.cvInfo.apply {
-            visibility = View.VISIBLE
-            animate().alpha(1f).duration = shortAnimationDuration
-        }
-        binding.cvDelete.apply {
-            visibility = View.VISIBLE
-            animate().alpha(1f).duration = shortAnimationDuration
-        }
-        binding.ivGradTop.apply {
-            visibility = View.VISIBLE
-            animate().alpha(1f).duration = shortAnimationDuration
-        }
-        binding.ivGardBottom.apply {
-            visibility = View.VISIBLE
-            animate().alpha(1f).duration = shortAnimationDuration
-        }
+        binding.tbViewPager.visibility = View.VISIBLE
+        binding.cvShare.visibility = View.VISIBLE
+        binding.cvEdit.visibility = View.VISIBLE
+        binding.cvInfo.visibility = View.VISIBLE
+        binding.cvDelete.visibility = View.VISIBLE
+        binding.ivGradTop.visibility = View.VISIBLE
+        binding.ivGardBottom.visibility = View.VISIBLE
         WindowInsetsControllerCompat(requireActivity().window, requireActivity().window.decorView).show(WindowInsetsCompat.Type.systemBars())
-        /*
-        window.decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN)
-
-         */
     }
 
     fun hideSystemUI() {
-        binding.tbViewPager.apply {
-            animate().alpha(0f).setDuration(shortAnimationDuration).setListener(object : Animator.AnimatorListener {
-                override fun onAnimationStart(animation: Animator?) = Unit
-                override fun onAnimationEnd(animation: Animator?) {
-                    if (!isSystemUiVisible) visibility = View.GONE
-                }
-                override fun onAnimationCancel(animation: Animator?) = Unit
-                override fun onAnimationRepeat(animation: Animator?) = Unit
-            })
+        TransitionManager.beginDelayedTransition(binding.root, MaterialFade().apply {
+            duration = 150L
+            excludeTarget(binding.ivGradTop, true)
+            excludeTarget(binding.ivGardBottom, true)
+        })
 
-        }
-        binding.cvShare.apply {
-            animate().alpha(0f).setDuration(shortAnimationDuration).setListener(object : Animator.AnimatorListener {
-                override fun onAnimationStart(animation: Animator?) = Unit
-                override fun onAnimationEnd(animation: Animator?) {
-                    if (!isSystemUiVisible) visibility = View.GONE
-                }
-                override fun onAnimationCancel(animation: Animator?) = Unit
-                override fun onAnimationRepeat(animation: Animator?) = Unit
-            })
-        }
-        binding.cvEdit.apply {
-            animate().alpha(0f).setDuration(shortAnimationDuration).setListener(object : Animator.AnimatorListener {
-                override fun onAnimationStart(animation: Animator?) = Unit
-                override fun onAnimationEnd(animation: Animator?) {
-                    if (!isSystemUiVisible) visibility = View.GONE
-                }
-                override fun onAnimationCancel(animation: Animator?) = Unit
-                override fun onAnimationRepeat(animation: Animator?) = Unit
-            })
-        }
-        binding.cvInfo.apply {
-            animate().alpha(0f).setDuration(shortAnimationDuration).setListener(object : Animator.AnimatorListener {
-                override fun onAnimationStart(animation: Animator?) = Unit
-                override fun onAnimationEnd(animation: Animator?) {
-                    if (!isSystemUiVisible) visibility = View.GONE
-                }
-                override fun onAnimationCancel(animation: Animator?) = Unit
-                override fun onAnimationRepeat(animation: Animator?) = Unit
-            })
-            //   animate().alpha(0f).duration = shortAnimationDuration
-
-        }
-        binding.cvDelete.apply {
-            animate().alpha(0f).setDuration(shortAnimationDuration).setListener(object : Animator.AnimatorListener {
-                override fun onAnimationStart(animation: Animator?) = Unit
-                override fun onAnimationEnd(animation: Animator?) {
-                    if (!isSystemUiVisible) visibility = View.GONE
-                }
-                override fun onAnimationCancel(animation: Animator?) = Unit
-                override fun onAnimationRepeat(animation: Animator?) = Unit
-            })
-        }
-        binding.ivGradTop.apply {
-            animate().alpha(0f).setDuration(shortAnimationDuration).setListener(object : Animator.AnimatorListener {
-                override fun onAnimationStart(animation: Animator?) = Unit
-                override fun onAnimationEnd(animation: Animator?) {
-                    if (!isSystemUiVisible) visibility = View.GONE
-                }
-                override fun onAnimationCancel(animation: Animator?) = Unit
-                override fun onAnimationRepeat(animation: Animator?) = Unit
-            })
-        }
-        binding.ivGardBottom.apply {
-            animate().alpha(0f).setDuration(shortAnimationDuration).setListener(object : Animator.AnimatorListener {
-                override fun onAnimationStart(animation: Animator?) = Unit
-                override fun onAnimationEnd(animation: Animator?) {
-                    if (!isSystemUiVisible) visibility = View.GONE
-                }
-                override fun onAnimationCancel(animation: Animator?) = Unit
-                override fun onAnimationRepeat(animation: Animator?) = Unit
-            })
-        }
-
+        binding.tbViewPager.visibility = View.GONE
+        binding.cvShare.visibility = View.GONE
+        binding.cvEdit.visibility = View.GONE
+        binding.cvInfo.visibility = View.GONE
+        binding.cvDelete.visibility = View.GONE
+        binding.ivGradTop.visibility = View.GONE
+        binding.ivGardBottom.visibility = View.GONE
         WindowInsetsControllerCompat(requireActivity().window, binding.root).let { controller ->
             controller.hide(WindowInsetsCompat.Type.systemBars())
             controller.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_BARS_BY_SWIPE
@@ -250,23 +215,10 @@ class ViewPagerFrag : Fragment() {
         }
         binding.cvShare.setOnClickListener {
             val currentItem = getCurrentItem() ?: return@setOnClickListener
-            val share = Intent(Intent.ACTION_SEND)
-            share.data = currentItem.uri
-            share.type = activity?.contentResolver?.getType(currentItem.uri)
-            share.putExtra(Intent.EXTRA_STREAM, currentItem.uri)
-            share.flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
-            startActivity(Intent.createChooser(share, "Share with"))
+            share(currentItem, requireActivity())
         }
         binding.cvDelete.setOnClickListener {
-            MaterialAlertDialogBuilder(requireContext(), R.style.Theme_MaterialAlertDialog_Centered)
-                .setTitle("Permanently delete?")
-                .setMessage("This image will be permanently deleted.")
-                .setIcon(R.drawable.ic_outline_delete_24)
-                .setNegativeButton("Cancel", null)
-                .setPositiveButton("Delete") { _, _ ->
-                    viewModel.deleteImage(getCurrentItem())
-                }
-                .show()
+            getCurrentItem()?.let {delete(it, requireContext(), viewModel) }
         }
         binding.cvEdit.setOnClickListener {
             val currentItem = getCurrentItem() ?: return@setOnClickListener
@@ -274,7 +226,6 @@ class ViewPagerFrag : Fragment() {
             editIntent.type = activity?.contentResolver?.getType(currentItem.uri)
             editIntent.data = currentItem.uri
             editIntent.flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
-            //share.putExtra(Intent.EXTRA_STREAM, (getCurrentItem()?.uri))
             startActivity(Intent.createChooser(editIntent, "Edit with"))
         }
         binding.cvInfo.setOnClickListener {
@@ -297,6 +248,50 @@ class ViewPagerFrag : Fragment() {
 
              */
             showCurrentMediaDetails()
+        }
+    }
+
+    companion object {
+        fun delete(image: ListItem.MediaItem, context: Context, viewModel: MainViewModel) {
+            MaterialAlertDialogBuilder(context, R.style.Theme_MaterialAlertDialog_Centered)
+                .setTitle("Permanently delete?")
+                .setMessage("This item will be permanently deleted.")
+                .setIcon(R.drawable.ic_outline_delete_24)
+                .setNegativeButton("Cancel", null)
+                .setPositiveButton("Delete") { _, _ ->
+                    viewModel.deleteImage(image)
+                }
+                .show()
+        }
+        fun delete(images: List<ListItem.MediaItem>, context: Context, viewModel: MainViewModel) {
+            MaterialAlertDialogBuilder(context, R.style.Theme_MaterialAlertDialog_Centered)
+                .setTitle("Permanently delete?")
+                .setMessage("This items will be permanently deleted.")
+                .setIcon(R.drawable.ic_outline_delete_24)
+                .setNegativeButton("Cancel", null)
+                .setPositiveButton("Delete") { _, _ ->
+                    viewModel.deleteImages(images)
+                }
+                .show()
+        }
+        fun share(item: ListItem.MediaItem, activity: Activity) {
+            val share = Intent(Intent.ACTION_SEND)
+            share.data = item.uri
+            share.type = activity.contentResolver.getType(item.uri)
+            share.putExtra(Intent.EXTRA_STREAM, item.uri)
+            share.flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+            activity.startActivity(Intent.createChooser(share, "Share with"))
+        }
+        fun share(items: List<ListItem.MediaItem>, activity: Activity) {
+            val share = Intent(Intent.ACTION_SEND_MULTIPLE)
+            val uris = ArrayList<Uri>()
+            for (item in items){
+                uris.add(item.uri)
+            }
+            share.type = "*/*"
+            share.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris)
+            share.flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+            activity.startActivity(Intent.createChooser(share, "Share with"))
         }
     }
 

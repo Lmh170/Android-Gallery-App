@@ -21,6 +21,7 @@ import androidx.recyclerview.selection.StableIdKeyProvider
 import androidx.recyclerview.selection.StorageStrategy
 import com.example.gallery.ListItem
 import com.example.gallery.MyItemDetailsLookup
+import com.example.gallery.MyItemKeyProvider
 import com.example.gallery.R
 
 
@@ -28,6 +29,7 @@ class AlbumDetailFrag : Fragment() {
     private lateinit var _binding: FragmentAlbumDetailBinding
     private val binding get() = _binding
     private val viewModel: MainViewModel by activityViewModels()
+    private var actionMode: ActionMode? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -41,13 +43,12 @@ class AlbumDetailFrag : Fragment() {
         binding.rvAlbums.apply {
             this.adapter = adapter
             setHasFixedSize(true)
-            this.adapter = adapter
         }
 
         val tracker = SelectionTracker.Builder(
             "GritItemFragSelectionId",
             binding.rvAlbums,
-            StableIdKeyProvider(binding.rvAlbums),
+            MyItemKeyProvider(viewModel.albums, this),
             MyItemDetailsLookup(binding.rvAlbums),
             StorageStrategy.createLongStorage()
         ).build()
@@ -56,7 +57,7 @@ class AlbumDetailFrag : Fragment() {
 
         val callback = object : ActionMode.Callback {
             override fun onCreateActionMode(mode: ActionMode?, menu: Menu?): Boolean {
-                // menuInflater.inflate(R.menu.contextual_action_bar, menu)
+                activity?.menuInflater?.inflate(R.menu.contextual_action_bar, menu)
                 activity?.window?.statusBarColor = resources.getColor(R.color.material_dynamic_primary95, activity?.theme)
                 return true
             }
@@ -66,24 +67,32 @@ class AlbumDetailFrag : Fragment() {
             }
 
             override fun onActionItemClicked(mode: ActionMode?, item: MenuItem?): Boolean {
-                /*
                 return when (item?.itemId) {
-                     R.id.share -> {
-                         // Handle share icon press
-                         true
-                     }
-                     R.id.delete -> {
-                         // Handle delete icon press
-                         true
-                     }
-                     R.id.more -> {
-                         // Handle more item (inside overflow menu) press
-                         true
-                     }
-                     else -> false
-                 }
-                 */
-                return false
+                    R.id.shareContext -> {
+                        val items = mutableListOf<ListItem.MediaItem>()
+                        val album = viewModel.albums.value?.find { it.name == MainActivity.currentAlbumName }
+                        for (id in tracker.selection) {
+                            val selectedItem = album?.mediaItems?.find { it.id == id } ?: return false
+                            items.add(selectedItem)
+                        }
+                        ViewPagerFrag.share(items, requireActivity())
+                        tracker.clearSelection()
+                        actionMode?.finish()
+                        true
+                    }
+                    R.id.deleteContext -> {
+                        val items = mutableListOf<ListItem.MediaItem>()
+                        val album = viewModel.albums.value?.find { it.name == MainActivity.currentAlbumName }
+                        for (id in tracker.selection) {
+                            val selectedItem = album?.mediaItems?.find { it.id == id} ?: return false
+                            items.add(selectedItem)
+                        }
+                        ViewPagerFrag.delete(items, requireContext(), viewModel)
+                        actionMode?.finish()
+                        true
+                    }
+                    else -> false
+                }
             }
 
             override fun onDestroyActionMode(mode: ActionMode?) {
@@ -91,39 +100,32 @@ class AlbumDetailFrag : Fragment() {
                 Handler(Looper.getMainLooper()).postDelayed({
                     activity?.window?.statusBarColor = resources.getColor(android.R.color.transparent, activity?.theme)
                 }, 400)
+                actionMode = null
             }
         }
 
         tracker.addObserver(object: SelectionTracker.SelectionObserver<Long>() {
-            var actionMode: ActionMode? = null
-
             override fun onSelectionChanged() {
                 super.onSelectionChanged()
                 actionMode?.title = tracker.selection.size().toString()
                 if (actionMode == null) {
                     actionMode = binding.tbAlbum.startActionMode(callback)
-
-                    //    val inflater = requireActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
-                    //   val actionBinding = ActionModeToolbarBinding.inflate(inflater)
-                    //  actionMode?.customView = actionBinding.root
-                    //actionMode = activity?.startActionMode(callback)
                 } else if (tracker.selection.size() == 0) {
                     actionMode?.finish()
-                    actionMode = null
                 }
             }
         })
 
         BottomNavFrag.enteringFromAlbum = true
 
-        viewModel.albums.observe(viewLifecycleOwner, { albums->
+        viewModel.albums.observe(viewLifecycleOwner) { albums ->
             val items = albums.find { it.name == MainActivity.currentAlbumName }?.mediaItems
             val position = (binding.rvAlbums.layoutManager as GridLayoutManager)
                 .findFirstCompletelyVisibleItemPosition()
             (binding.rvAlbums.adapter as GridItemAdapter).submitList(items as List<ListItem>) {
                 if (position == 0) binding.rvAlbums.scrollToPosition(0)
             }
-        })
+        }
 
         binding.tbAlbum.title = MainActivity.currentAlbumName
 
@@ -139,16 +141,16 @@ class AlbumDetailFrag : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         postponeEnterTransition()
         setUpSystemBars()
-        viewModel.albums.observe(viewLifecycleOwner, { albums->
+        viewModel.albums.observe(viewLifecycleOwner) { albums ->
             val items = albums.find { it.name == MainActivity.currentAlbumName }?.mediaItems
             val position = (binding.rvAlbums.layoutManager as GridLayoutManager)
                 .findFirstCompletelyVisibleItemPosition()
             (binding.rvAlbums.adapter as GridItemAdapter).submitList(items as List<ListItem>) {
                 if (position == 0) binding.rvAlbums.scrollToPosition(0)
             }
-        })
+        }
 
-      //  (binding.rvAlbums.adapter as GridItemAdapter).submitList(
+        //  (binding.rvAlbums.adapter as GridItemAdapter).submitList(
       //      viewModel.albums.value?.find { it.name == MainActivity.currentAlbumName }?.mediaItems?.value
      //   ) {
 

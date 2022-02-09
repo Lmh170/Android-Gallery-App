@@ -4,9 +4,8 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.view.*
-import androidx.core.os.postDelayed
-import androidx.fragment.app.Fragment
 import androidx.core.view.ViewGroupCompat
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.selection.SelectionTracker
 import androidx.recyclerview.selection.StableIdKeyProvider
@@ -15,10 +14,11 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.gallery.ListItem
 import com.example.gallery.MyItemDetailsLookup
+import com.example.gallery.MyItemKeyProvider
+import com.example.gallery.R
 import com.example.gallery.adapter.GridItemAdapter
 import com.example.gallery.databinding.FragmentGridItemBinding
 import com.google.android.material.transition.MaterialFadeThrough
-import java.util.concurrent.atomic.AtomicBoolean
 
 class GridItemFrag : Fragment() {
     private lateinit var _binding: FragmentGridItemBinding
@@ -34,14 +34,14 @@ class GridItemFrag : Fragment() {
             _binding = FragmentGridItemBinding.inflate(inflater, container, false)
         }
 
-        viewModel.recyclerViewItems.observe(viewLifecycleOwner, { items ->
+        viewModel.recyclerViewItems.observe(viewLifecycleOwner
+        ) { items ->
             val position = (binding.rvItems.layoutManager as GridLayoutManager)
                 .findFirstCompletelyVisibleItemPosition()
-            (binding.rvItems.adapter as GridItemAdapter).submitList(items){
+            (binding.rvItems.adapter as GridItemAdapter).submitList(items) {
                 if (position == 0) binding.rvItems.scrollToPosition(0)
             }
-           }
-        )
+        }
         val adapter = GridItemAdapter(requireParentFragment(), false)
         binding.rvItems.apply {
             this.adapter = adapter
@@ -58,28 +58,31 @@ class GridItemFrag : Fragment() {
             setHasFixedSize(true)
         }
 
+        binding.rvItems.adapter
         val tracker = SelectionTracker.Builder(
             "GritItemFragSelectionId",
             binding.rvItems,
-            StableIdKeyProvider(binding.rvItems),
+            MyItemKeyProvider(viewModel.recyclerViewItems, this),
             MyItemDetailsLookup(binding.rvItems),
             StorageStrategy.createLongStorage()
         ).withSelectionPredicate(object : SelectionTracker.SelectionPredicate<Long>() {
             override fun canSetStateForKey(key: Long, nextState: Boolean): Boolean =
-                viewModel.recyclerViewItems.value?.contains(ListItem.Header(key)) == false
+             //   viewModel.recyclerViewItems.value?.contains(ListItem.Header(key)) == false
+                binding.rvItems.findViewHolderForItemId(key) !is GridItemAdapter.HeaderViewHolder
 
             override fun canSelectMultiple(): Boolean =
                 true
 
             override fun canSetStateAtPosition(position: Int, nextState: Boolean): Boolean =
-                position != RecyclerView.NO_POSITION
+                binding.rvItems.findViewHolderForAdapterPosition(position) !is GridItemAdapter.HeaderViewHolder
+
         }).build()
 
         adapter.tracker = tracker
 
         val callback = object : ActionMode.Callback {
             override fun onCreateActionMode(mode: ActionMode?, menu: Menu?): Boolean {
-                // menuInflater.inflate(R.menu.contextual_action_bar, menu)
+                activity?.menuInflater?.inflate(R.menu.contextual_action_bar, menu)
                 return true
             }
 
@@ -87,24 +90,36 @@ class GridItemFrag : Fragment() {
                 false
 
             override fun onActionItemClicked(mode: ActionMode?, item: MenuItem?): Boolean {
-                /*
                 return when (item?.itemId) {
-                     R.id.share -> {
-                         // Handle share icon press
+                     R.id.shareContext -> {
+                         val items = mutableListOf<ListItem.MediaItem>()
+                         for (id in tracker.selection) {
+                             val selectedItem = viewModel.recyclerViewItems.value?.find {
+                                 it.id == id
+                             } ?: return false
+                             items.add(selectedItem as ListItem.MediaItem)
+                         }
+                         ViewPagerFrag.share(items, requireActivity())
+                         tracker.clearSelection()
+                         actionMode?.finish()
                          true
                      }
-                     R.id.delete -> {
+                     R.id.deleteContext -> {
                          // Handle delete icon press
-                         true
-                     }
-                     R.id.more -> {
-                         // Handle more item (inside overflow menu) press
+                         val items = mutableListOf<ListItem.MediaItem>()
+                         for (id in tracker.selection) {
+                             val selectedItem = viewModel.recyclerViewItems.value?.find {
+                                 it.id == id
+                             } ?: return false
+                             items.add(selectedItem as ListItem.MediaItem)
+                         }
+                         ViewPagerFrag.delete(items, requireContext(), viewModel)
+                         tracker.clearSelection()
+                         actionMode?.finish()
                          true
                      }
                      else -> false
-                 }
-                 */
-                return false
+                }
             }
 
             override fun onDestroyActionMode(mode: ActionMode?) {
@@ -112,31 +127,27 @@ class GridItemFrag : Fragment() {
                 Handler(Looper.getMainLooper()).postDelayed({
                     activity?.window?.statusBarColor = resources.getColor(android.R.color.transparent, activity?.theme)
                 }, 400)
+                actionMode = null
             }
         }
-
         tracker.addObserver(object: SelectionTracker.SelectionObserver<Long>() {
             override fun onSelectionChanged() {
                 super.onSelectionChanged()
                 actionMode?.title = tracker.selection.size().toString()
+              //  clearTracker(tracker)
                 if (actionMode == null) {
                     actionMode = (parentFragment as BottomNavFrag).startActionMode(callback)
                     //    val inflater = requireActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
                     //   val actionBinding = ActionModeToolbarBinding.inflate(inflater)
                     //  actionMode?.customView = actionBinding.root
                     //actionMode = activity?.startActionMode(callback)
-                } else if (tracker.selection.size() == 0) {
+                }
+                if (tracker.selection.size() == 0) {
                     actionMode?.finish()
-                    actionMode = null
                 }
             }
 
-            override fun onSelectionCleared() {
-                actionMode = null
-            }
         })
-
-
         scrollToPosition()
         ViewGroupCompat.setTransitionGroup(binding.rvItems, true)
         exitTransition = MaterialFadeThrough()
@@ -144,7 +155,16 @@ class GridItemFrag : Fragment() {
         return binding.root
     }
 
-
+    fun clearTracker(tracker: SelectionTracker<Long>) {
+        if (tracker.selection.size() == 0) {
+            if (tracker.clearSelection()) {
+                actionMode?.finish()
+            } else {
+                tracker.setItemsSelected(mutableListOf(), false)
+                actionMode?.finish()
+            }
+        }
+    }
     private fun scrollToPosition() {
         binding.root.addOnLayoutChangeListener(object : View.OnLayoutChangeListener {
             override fun onLayoutChange(

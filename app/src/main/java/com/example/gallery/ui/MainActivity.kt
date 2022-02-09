@@ -14,15 +14,16 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.findFragment
+import androidx.navigation.Navigation
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.MemoryCategory
 import com.example.gallery.GlideApp
 import com.example.gallery.R
 import com.example.gallery.databinding.ActivityMainBinding
-
-private const val READ_EXTERNAL_STORAGE_REQUEST = 0x1045
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
@@ -41,15 +42,17 @@ class MainActivity : AppCompatActivity() {
                 viewModel.loadItems()
             }
         }
-        viewModel.permissionNeededForDelete.observe(this, { intentSender ->
+        viewModel.permissionNeededForDelete.observe(this) { intentSender ->
             val intentSenderRequest = IntentSenderRequest.Builder(intentSender).build()
             request.launch(intentSenderRequest)
-        })
+        }
+        // GlideApp.get(this).setMemoryCategory(MemoryCategory.HIGH)
+        testIntents()
+    }
 
+    private fun testIntents() {
         println("intent: data ${intent.data} type ${intent.type} flags ${intent.flags} action: ${intent.action}" +
-                "categories: ${intent.categories} scheme ${intent.scheme}")
-
-        GlideApp.get(this).setMemoryCategory(MemoryCategory.HIGH)
+                "categories: ${intent.categories} scheme ${intent.scheme} ${intent.getParcelableExtra<Uri>(Intent.EXTRA_STREAM)}")
     }
 
     override fun onStart() {
@@ -123,5 +126,6 @@ class MainActivity : AppCompatActivity() {
         var currentListPosition = 0
         var currentViewPagerPosition = 0
         lateinit var currentAlbumName: String
+        private const val READ_EXTERNAL_STORAGE_REQUEST = 0x1045
     }
 }

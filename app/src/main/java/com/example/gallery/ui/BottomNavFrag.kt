@@ -1,5 +1,6 @@
 package com.example.gallery.ui
 
+import android.content.Intent
 import android.content.res.Configuration
 import android.os.Bundle
 import android.view.*
@@ -8,7 +9,11 @@ import androidx.core.app.SharedElementCallback
 import androidx.core.view.*
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
+import androidx.fragment.app.findFragment
 import androidx.fragment.app.replace
+import androidx.navigation.findNavController
+import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import com.example.gallery.R
 import com.example.gallery.adapter.GridItemAdapter
@@ -20,12 +25,22 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 class BottomNavFrag : Fragment() {
     private lateinit var _binding: FragmentBottomNavBinding
-    private val binding get() = _binding
+    val binding get() = _binding
+    var actionMode: ActionMode? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        if (requireActivity().intent.action == Intent.ACTION_VIEW) {
+            val args = Bundle()
+            args.putParcelable("item", requireActivity().intent.data)
+            findNavController()
+                .navigate(
+                    R.id.action_bottomNavFrag_to_viewPagerFrag,
+                    args
+                )
+        }
         if (!::_binding.isInitialized){
             _binding = FragmentBottomNavBinding.inflate(inflater, container, false)
         }
@@ -35,8 +50,10 @@ class BottomNavFrag : Fragment() {
             prepareTransitions()
         }
 
-        binding.fcvBottomNav.updatePadding(0, 0, 0, binding.bnvMain.measuredHeight)
-        (activity as AppCompatActivity).setSupportActionBar(binding.tbMain)
+        binding.bnvMain.viewTreeObserver.addOnGlobalLayoutListener {
+            binding.fcvBottomNav.updatePadding(0, 0, 0, binding.bnvMain.height)
+        }
+
         binding.appBarLayout.statusBarForeground = MaterialShapeDrawable.createWithElevationOverlay(requireContext())
 
         binding.bnvMain.setOnItemReselectedListener {
@@ -61,6 +78,8 @@ class BottomNavFrag : Fragment() {
                     true
                 }
                 R.id.item_albus -> {
+                    actionMode?.finish()
+                    actionMode = null
                     childFragmentManager.commit {
                         replace<GridAlbumFrag>(R.id.fcvBottomNav)
                         setReorderingAllowed(true)
@@ -91,7 +110,8 @@ class BottomNavFrag : Fragment() {
 
     fun startActionMode(callback: ActionMode.Callback): ActionMode {
         activity?.window?.statusBarColor = resources.getColor(R.color.material_dynamic_primary95, activity?.theme)
-        return binding.tbMain.startActionMode(callback)
+        actionMode = binding.tbMain.startActionMode(callback)
+        return actionMode!!
     }
 
     override fun onStart() {

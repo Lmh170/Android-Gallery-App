@@ -25,9 +25,8 @@ sealed class ListItem {
     data class Header(override val id: Long): ListItem()
 
     class ListItemDiffCallback: DiffUtil.ItemCallback<ListItem>() {
-        override fun areItemsTheSame(oldItem: ListItem, newItem: ListItem): Boolean {
-            return oldItem.id == newItem.id
-        }
+        override fun areItemsTheSame(oldItem: ListItem, newItem: ListItem): Boolean =
+            oldItem.id == newItem.id
 
         override fun areContentsTheSame(oldItem: ListItem, newItem: ListItem): Boolean {
             return if (oldItem is MediaItem && newItem is MediaItem) {
