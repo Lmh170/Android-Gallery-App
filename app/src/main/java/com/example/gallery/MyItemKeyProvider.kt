@@ -1,5 +1,6 @@
 package com.example.gallery
 
+import android.content.ClipData.Item
 import android.util.SparseArray
 import androidx.collection.LongSparseArray
 import androidx.lifecycle.LiveData
@@ -45,3 +46,42 @@ class MyItemKeyProvider(): ItemKeyProvider<Long>(SCOPE_CACHED) {
     override fun getPosition(key: Long): Int =
         mKeyToPosition.get(key, RecyclerView.NO_POSITION)
 }
+
+
+/*
+class MyItemKeyProvider() : ItemKeyProvider<Long>(SCOPE_CACHED) {
+    private lateinit var items: List<ListItem>
+
+    constructor(
+        albums: LiveData<List<Album>>,
+        frag: AlbumDetailFrag
+    ) : this() {
+        albums.observe(frag.viewLifecycleOwner) { list ->
+            items = list.find { it.name == MainActivity.currentAlbumName }?.mediaItems!!
+        }
+    }
+
+    constructor(
+        items: LiveData<List<ListItem>>,
+        frag: GridItemFrag
+    ) : this() {
+        items.observe(frag.viewLifecycleOwner) {
+            this.items = it
+        }
+    }
+
+    override fun getKey(position: Int): Long {
+        return items[position].id
+    }
+
+    override fun getPosition(key: Long): Int {
+        items.forEachIndexed { index, listItem ->
+            if (listItem.id == key) return index
+        }
+        println("shit shit shit")
+        return RecyclerView.NO_POSITION
+    }
+}
+
+ */
+

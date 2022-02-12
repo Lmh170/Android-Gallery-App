@@ -1,19 +1,17 @@
 package com.example.gallery.ui
 
+import android.app.Activity
+import android.content.ClipData
 import android.content.Intent
 import android.content.res.Configuration
+import android.net.Uri
 import android.os.Bundle
 import android.view.*
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.SharedElementCallback
 import androidx.core.view.*
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
-import androidx.fragment.app.findFragment
 import androidx.fragment.app.replace
-import androidx.navigation.findNavController
-import androidx.navigation.fragment.NavHostFragment
-import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import com.example.gallery.R
 import com.example.gallery.adapter.GridItemAdapter
@@ -21,7 +19,6 @@ import com.example.gallery.databinding.FragmentBottomNavBinding
 import com.google.android.material.shape.MaterialShapeDrawable
 import com.google.android.material.transition.Hold
 import com.google.android.material.transition.MaterialSharedAxis
-import java.util.concurrent.atomic.AtomicBoolean
 
 class BottomNavFrag : Fragment() {
     private lateinit var _binding: FragmentBottomNavBinding
@@ -32,15 +29,6 @@ class BottomNavFrag : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        if (requireActivity().intent.action == Intent.ACTION_VIEW) {
-            val args = Bundle()
-            args.putParcelable("item", requireActivity().intent.data)
-            findNavController()
-                .navigate(
-                    R.id.action_bottomNavFrag_to_viewPagerFrag,
-                    args
-                )
-        }
         if (!::_binding.isInitialized){
             _binding = FragmentBottomNavBinding.inflate(inflater, container, false)
         }
@@ -49,7 +37,35 @@ class BottomNavFrag : Fragment() {
             postponeEnterTransition()
             prepareTransitions()
         }
+        if (requireActivity().intent.action == Intent.ACTION_PICK || requireActivity().intent.action ==
+                Intent.ACTION_GET_CONTENT) {
+            binding.tbMain.isTitleCentered = false
+            binding.tbMain.setNavigationIcon(R.drawable.ic_baseline_arrow_back_24)
+            binding.tbMain.setNavigationIconTint(resources.getColor(android.R.color.black, activity?.theme))
+            if (!requireActivity().intent.getBooleanExtra(Intent.EXTRA_ALLOW_MULTIPLE,
+                    false)) {
+                binding.tbMain.title = "Select an item"
+            } else {
+                binding.tbMain.title = "Select items"
+            }
+            binding.bnvMain.visibility = View.GONE
+            childFragmentManager.commit {
+                replace<GridAlbumFrag>(R.id.fcvBottomNav)
+                setReorderingAllowed(true)
+            }
+            binding.tbMain.setNavigationOnClickListener {
+                requireActivity().setResult(Activity.RESULT_CANCELED)
+                requireActivity().finish()
+                /*
+                val intent = Intent()
+                val clipData = ClipData.newUri(activity?.contentResolver, "", Uri.EMPTY)
+                clipData.
 
+                 */
+            }
+        } else {
+            binding.tbMain.inflateMenu(R.menu.action_bar_home)
+        }
         binding.bnvMain.viewTreeObserver.addOnGlobalLayoutListener {
             binding.fcvBottomNav.updatePadding(0, 0, 0, binding.bnvMain.height)
         }
@@ -68,21 +84,24 @@ class BottomNavFrag : Fragment() {
         }
         binding.bnvMain.setOnItemSelectedListener {
             when (it.itemId) {
-                R.id.item_photos -> {
-                    binding.appBarLayout.setExpanded(true)
+                R.id.miPhotos -> {
                     childFragmentManager.commit {
                         replace<GridItemFrag>(R.id.fcvBottomNav)
                         setReorderingAllowed(true)
                         MainActivity.currentListPosition = 0
+                    }.also {
+                        binding.appBarLayout.setExpanded(true)
                     }
                     true
                 }
-                R.id.item_albus -> {
+                R.id.miAlbums -> {
                     actionMode?.finish()
                     actionMode = null
                     childFragmentManager.commit {
                         replace<GridAlbumFrag>(R.id.fcvBottomNav)
                         setReorderingAllowed(true)
+                    }.also {
+                        binding.appBarLayout.setExpanded(true)
                     }
                     true
                 }
@@ -109,7 +128,7 @@ class BottomNavFrag : Fragment() {
     }
 
     fun startActionMode(callback: ActionMode.Callback): ActionMode {
-        activity?.window?.statusBarColor = resources.getColor(R.color.material_dynamic_primary95, activity?.theme)
+        activity?.window?.statusBarColor = resources.getColor(R.color.material_dynamic_neutral_variant20, activity?.theme)
         actionMode = binding.tbMain.startActionMode(callback)
         return actionMode!!
     }
@@ -147,7 +166,7 @@ class BottomNavFrag : Fragment() {
 
                     // Locate the ViewHolder for the clicked position.
                     val selectedViewHolder = frag.binding.rvItems
-                        .findViewHolderForAdapterPosition(MainActivity.currentListPosition) ?: return
+                        .findViewHolderForLayoutPosition(MainActivity.currentListPosition) ?: return
 
 //                    (exitTransition as Hold).excludeChildren((selectedViewHolder as GridAdapter.MediaItemHolder).binding.image, true)
 

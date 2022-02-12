@@ -31,17 +31,16 @@ class GridAlbumFrag : Fragment() {
             setHasFixedSize(true)
         }
         adapter.submitList(viewModel.albums.value)
-        viewModel.albums.observe(viewLifecycleOwner, { items ->
+        viewModel.albums.observe(viewLifecycleOwner) { items ->
             val position = (binding.rvAlbum.layoutManager as GridLayoutManager)
                 .findFirstCompletelyVisibleItemPosition()
             adapter.submitList(items) {
                 if (position == 0) binding.rvAlbum.scrollToPosition(0)
             }
-        })
+        }
         ViewGroupCompat.setTransitionGroup(binding.rvAlbum, true)
         enterTransition = MaterialFadeThrough()
         exitTransition = MaterialFadeThrough()
-        //enterTransition = MaterialSharedAxis(MaterialSharedAxis.Z, false)
         requireParentFragment().startPostponedEnterTransition()
         return binding.root
     }

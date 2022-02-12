@@ -16,24 +16,27 @@
         <action
             android:id="@+id/action_bottomNavFrag_to_albumDetailFrag"
             app:destination="@id/albumDetailFrag" />
+        <action
+            android:id="@+id/action_bottomNavFrag_to_videoPlayerFrag"
+            app:destination="@id/videoPlayerFrag" />
     </fragment>
     <fragment
         android:id="@+id/viewPagerFrag"
         android:name="com.example.gallery.ui.ViewPagerFrag"
         android:label="fragment_view_pager"
-        tools:layout="@layout/fragment_view_pager" >
+        tools:layout="@layout/fragment_view_pager">
         <argument
             android:name="isAlbum"
-            app:argType="boolean"
-            android:defaultValue="false" />
-        <action
-            android:id="@+id/action_viewPagerFrag_to_videoPlayer"
-            app:destination="@id/videoPlayer" />
+            android:defaultValue="false"
+            app:argType="boolean" />
         <argument
             android:name="item"
+            android:defaultValue="@null"
             app:argType="android.net.Uri"
-            app:nullable="true"
-            android:defaultValue="@null" />
+            app:nullable="true" />
+        <action
+            android:id="@+id/action_viewPagerFrag_to_videoPlayerFrag"
+            app:destination="@id/videoPlayerFrag" />
     </fragment>
     <fragment
         android:id="@+id/albumDetailFrag"
@@ -44,12 +47,12 @@
             android:id="@+id/action_albumDetailFrag_to_viewPagerFrag"
             app:destination="@id/viewPagerFrag" />
     </fragment>
-    <activity
-        android:id="@+id/videoPlayer"
-        android:name="com.example.gallery.ui.VideoPlayer"
-        android:label="VideoPlayer" >
+    <fragment
+        android:id="@+id/videoPlayerFrag"
+        android:name="com.example.gallery.ui.VideoPlayerFrag"
+        android:label="VideoPlayerFrag" >
         <argument
             android:name="videoUri"
             app:argType="android.net.Uri" />
-    </activity>
+    </fragment>
 </navigation>

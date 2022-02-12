@@ -1,9 +1,7 @@
 package com.example.gallery.ui
 
-import android.animation.Animator
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.content.ContentUris
 import android.content.Context
 import android.content.Intent
 import android.media.MediaMetadataRetriever
@@ -13,11 +11,12 @@ import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowInsets
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.SharedElementCallback
-import androidx.core.view.*
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
+import androidx.core.view.updateLayoutParams
 import androidx.exifinterface.media.ExifInterface
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -37,6 +36,11 @@ import java.net.URLDecoder
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
+import kotlin.collections.List
+import kotlin.collections.MutableMap
+import kotlin.collections.find
+import kotlin.collections.listOf
+import kotlin.collections.set
 
 class ViewPagerFrag : Fragment() {
     private lateinit var _binding: FragmentViewPagerBinding
@@ -47,7 +51,6 @@ class ViewPagerFrag : Fragment() {
     private var firstCurrentItem = 0
     private var intentActionView = false
 
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -55,8 +58,12 @@ class ViewPagerFrag : Fragment() {
         if (!::_binding.isInitialized){
             _binding = FragmentViewPagerBinding.inflate(inflater, container, false)
         }
+        if (requireArguments().getParcelable<Uri>("item") != null) {
+            intentActionView = true
+            binding.cvInfo.visibility = View.GONE
+            binding.cvDelete.visibility = View.GONE
+        }
         shortAnimationDuration = resources.getInteger(android.R.integer.config_shortAnimTime).toLong()
-        if (requireArguments().getParcelable<Uri>("item") != null) intentActionView = true
         binding.tbViewPager.setNavigationOnClickListener {
             if (intentActionView) {
                 requireActivity().finish()
@@ -76,46 +83,24 @@ class ViewPagerFrag : Fragment() {
         when {
             requireArguments().getBoolean("isAlbum") -> {
                 adapter.submitList(viewModel.albums.value?.find { it.name == MainActivity.currentAlbumName }?.mediaItems)
-                //     adapter.submitList(viewModel.albums.value?.get(MainActivity.currentAlbumPosition)?.mediaItems?.value)
                 viewModel.albums.observe(viewLifecycleOwner) { albums ->
                     val items = albums.find { it.name == MainActivity.currentAlbumName }?.mediaItems
                     (binding.viewPager.adapter as ViewPagerAdapter).submitList(items)
                 }
             }
             intentActionView -> {
-                requireActivity().contentResolver.query(
-                    requireArguments().getParcelable("item")!!,
-                    arrayOf(
-                        MediaStore.Files.FileColumns._ID,
-                        MediaStore.Files.FileColumns.MEDIA_TYPE,
-                        MediaStore.Files.FileColumns.DATE_MODIFIED
-                    ),
-                    null,
-                    null
-                )?.use {cursor ->
-                    val typeColumn =
-                        cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.MEDIA_TYPE)
-                    val idColumn =
-                        cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns._ID)
-                    val dateModifiedColumn =
-                        cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.DATE_MODIFIED)
-                    while (cursor.moveToNext()) {
-                        val type = cursor.getInt(typeColumn)
-                        val id = cursor.getLong(idColumn)
-                        val dateModified = cursor.getLong(dateModifiedColumn)
-                        adapter.submitList(listOf(
-                            ListItem.MediaItem(
-                                id,
-                                requireArguments().getParcelable("item")!!,
-                                "",
-                                type,
-                                dateModified,
-                                0,
-                                0
-                            ))
-                        )
-                    }
-                }
+                adapter.submitList(listOf(
+                    ListItem.MediaItem(
+                        0L,
+                        requireArguments().getParcelable("item")!!,
+                        "",
+                        0,
+                        0L,
+                        0,
+                        0
+                            )
+                )
+                )
             }
             else -> {
                 adapter.submitList(viewModel.viewPagerImages.value)
@@ -150,20 +135,23 @@ class ViewPagerFrag : Fragment() {
             excludeTarget(binding.ivGradTop, true)
             excludeTarget(binding.ivGardBottom, true)
         })
+        if (!intentActionView) {
+            binding.cvInfo.visibility = View.VISIBLE
+            binding.cvDelete.visibility = View.VISIBLE
 
+        }
+        binding.cvEdit.visibility = View.VISIBLE
         binding.tbViewPager.visibility = View.VISIBLE
         binding.cvShare.visibility = View.VISIBLE
-        binding.cvEdit.visibility = View.VISIBLE
-        binding.cvInfo.visibility = View.VISIBLE
-        binding.cvDelete.visibility = View.VISIBLE
         binding.ivGradTop.visibility = View.VISIBLE
         binding.ivGardBottom.visibility = View.VISIBLE
-        WindowInsetsControllerCompat(requireActivity().window, requireActivity().window.decorView).show(WindowInsetsCompat.Type.systemBars())
+        WindowInsetsControllerCompat(requireActivity().window, requireActivity().window.decorView)
+            .show(WindowInsetsCompat.Type.systemBars())
     }
 
     fun hideSystemUI() {
         TransitionManager.beginDelayedTransition(binding.root, MaterialFade().apply {
-            duration = 150L
+            duration = 180L
             excludeTarget(binding.ivGradTop, true)
             excludeTarget(binding.ivGardBottom, true)
         })
@@ -175,10 +163,8 @@ class ViewPagerFrag : Fragment() {
         binding.cvDelete.visibility = View.GONE
         binding.ivGradTop.visibility = View.GONE
         binding.ivGardBottom.visibility = View.GONE
-        WindowInsetsControllerCompat(requireActivity().window, binding.root).let { controller ->
-            controller.hide(WindowInsetsCompat.Type.systemBars())
-            controller.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_BARS_BY_SWIPE
-        }
+        WindowInsetsControllerCompat(requireActivity().window, requireActivity().window.decorView)
+            .hide(WindowInsetsCompat.Type.systemBars())
     }
 
     fun toggleSystemUI() {
@@ -421,12 +407,8 @@ class ViewPagerFrag : Fragment() {
     }
 
 
-    private fun getCurrentItem():ListItem.MediaItem?  {
-        return if (requireArguments().getBoolean("isAlbum")) {
-            viewModel.albums.value?.find { it.name == MainActivity.currentAlbumName }?.mediaItems?.get(binding.viewPager.currentItem)
-        } else {
-            viewModel.viewPagerImages.value?.get(binding.viewPager.currentItem)
-        }
+    private fun getCurrentItem(): ListItem.MediaItem?  {
+        return (binding.viewPager.adapter as ViewPagerAdapter).currentList[binding.viewPager.currentItem]
     }
 
     @SuppressLint("SimpleDateFormat")
@@ -523,7 +505,7 @@ class ViewPagerFrag : Fragment() {
                      */
 
                     val selectedViewHolder =
-                        (binding.viewPager.getChildAt(0) as RecyclerView?)?.findViewHolderForAdapterPosition(binding.viewPager.currentItem)
+                        (binding.viewPager.getChildAt(0) as RecyclerView?)?.findViewHolderForLayoutPosition(binding.viewPager.currentItem)
                             as ViewPagerAdapter.ViewHolder? ?: return
 
                //     selectedViewHolder.bindTransitionImage()

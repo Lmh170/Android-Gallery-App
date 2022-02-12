@@ -2,10 +2,13 @@ package com.example.gallery.adapter
 
 import android.content.Intent
 import android.graphics.drawable.Drawable
+import android.os.Bundle
 import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.navigation.NavOptions
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.load.DataSource
@@ -15,9 +18,10 @@ import com.bumptech.glide.request.target.Target
 import com.bumptech.glide.signature.MediaStoreSignature
 import com.example.gallery.GlideApp
 import com.example.gallery.ListItem
+import com.example.gallery.R
 import com.example.gallery.databinding.ViewPagerItemHolderBinding
 import com.example.gallery.ui.MainActivity
-import com.example.gallery.ui.VideoPlayer
+import com.example.gallery.ui.VideoPlayerFrag
 import com.example.gallery.ui.ViewPagerFrag
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -40,14 +44,9 @@ class ViewPagerAdapter(val frag: ViewPagerFrag): ListAdapter<ListItem.MediaItem,
             if ((getItem(layoutPosition) as ListItem.MediaItem).type == MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO) {
                 binding.ivPlayButton.visibility = View.VISIBLE
                 binding.ivPlayButton.setOnClickListener {
-                    val intent = Intent(frag.context, VideoPlayer::class.java).apply {
-                        // putExtra("videoUri", getItem(layoutPosition).uri)
-                        data = getItem(layoutPosition).uri
-                    }
-
-                  //  frag.findNavController().navigate(R.id.action_viewPagerFrag_to_videoPlayer, intent.data)
-                    frag.startActivity(intent)
-
+                    val args = Bundle()
+                    args.putParcelable("videoUri", (getItem(layoutPosition) as ListItem.MediaItem).uri)
+                    frag.findNavController().navigate(R.id.action_viewPagerFrag_to_videoPlayerFrag, args, null, null)
                 }
             } else {
                 binding.pagerImage.enableZooming()
@@ -57,7 +56,6 @@ class ViewPagerAdapter(val frag: ViewPagerFrag): ListAdapter<ListItem.MediaItem,
 
             GlideApp.with(binding.pagerImage)
                 .load(getItem(layoutPosition).uri)
-                .thumbnail(0.2f)
                 .signature(MediaStoreSignature(null, getItem(layoutPosition).dateModified, 0))
                 .listener(object : RequestListener<Drawable> {
                 override fun onLoadFailed(

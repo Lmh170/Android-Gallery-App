@@ -7,11 +7,11 @@ import android.view.*
 import androidx.core.view.ViewGroupCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.recyclerview.selection.ItemDetailsLookup
+import androidx.recyclerview.selection.OnItemActivatedListener
 import androidx.recyclerview.selection.SelectionTracker
-import androidx.recyclerview.selection.StableIdKeyProvider
 import androidx.recyclerview.selection.StorageStrategy
 import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.example.gallery.ListItem
 import com.example.gallery.MyItemDetailsLookup
 import com.example.gallery.MyItemKeyProvider
@@ -25,6 +25,7 @@ class GridItemFrag : Fragment() {
     val binding get() = _binding
     private val viewModel: MainViewModel by activityViewModels()
     var actionMode: ActionMode? = null
+    private lateinit var tracker: SelectionTracker<Long>
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -59,7 +60,7 @@ class GridItemFrag : Fragment() {
         }
 
         binding.rvItems.adapter
-        val tracker = SelectionTracker.Builder(
+        tracker = SelectionTracker.Builder(
             "GritItemFragSelectionId",
             binding.rvItems,
             MyItemKeyProvider(viewModel.recyclerViewItems, this),
@@ -67,14 +68,15 @@ class GridItemFrag : Fragment() {
             StorageStrategy.createLongStorage()
         ).withSelectionPredicate(object : SelectionTracker.SelectionPredicate<Long>() {
             override fun canSetStateForKey(key: Long, nextState: Boolean): Boolean =
-             //   viewModel.recyclerViewItems.value?.contains(ListItem.Header(key)) == false
-                binding.rvItems.findViewHolderForItemId(key) !is GridItemAdapter.HeaderViewHolder
+                binding.rvItems.findViewHolderForItemId(key) !is GridItemAdapter.HeaderViewHolder &&
+                        binding.rvItems.findViewHolderForItemId(key) != null
 
             override fun canSelectMultiple(): Boolean =
                 true
 
             override fun canSetStateAtPosition(position: Int, nextState: Boolean): Boolean =
-                binding.rvItems.findViewHolderForAdapterPosition(position) !is GridItemAdapter.HeaderViewHolder
+                binding.rvItems.findViewHolderForLayoutPosition(position) !is GridItemAdapter.HeaderViewHolder &&
+                        binding.rvItems.findViewHolderForLayoutPosition(position) != null
 
         }).build()
 
@@ -91,7 +93,7 @@ class GridItemFrag : Fragment() {
 
             override fun onActionItemClicked(mode: ActionMode?, item: MenuItem?): Boolean {
                 return when (item?.itemId) {
-                     R.id.shareContext -> {
+                     R.id.miShare -> {
                          val items = mutableListOf<ListItem.MediaItem>()
                          for (id in tracker.selection) {
                              val selectedItem = viewModel.recyclerViewItems.value?.find {
@@ -104,7 +106,7 @@ class GridItemFrag : Fragment() {
                          actionMode?.finish()
                          true
                      }
-                     R.id.deleteContext -> {
+                     R.id.miDelete -> {
                          // Handle delete icon press
                          val items = mutableListOf<ListItem.MediaItem>()
                          for (id in tracker.selection) {
@@ -114,7 +116,6 @@ class GridItemFrag : Fragment() {
                              items.add(selectedItem as ListItem.MediaItem)
                          }
                          ViewPagerFrag.delete(items, requireContext(), viewModel)
-                         tracker.clearSelection()
                          actionMode?.finish()
                          true
                      }
@@ -134,19 +135,13 @@ class GridItemFrag : Fragment() {
             override fun onSelectionChanged() {
                 super.onSelectionChanged()
                 actionMode?.title = tracker.selection.size().toString()
-              //  clearTracker(tracker)
                 if (actionMode == null) {
                     actionMode = (parentFragment as BottomNavFrag).startActionMode(callback)
-                    //    val inflater = requireActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
-                    //   val actionBinding = ActionModeToolbarBinding.inflate(inflater)
-                    //  actionMode?.customView = actionBinding.root
-                    //actionMode = activity?.startActionMode(callback)
                 }
                 if (tracker.selection.size() == 0) {
                     actionMode?.finish()
                 }
             }
-
         })
         scrollToPosition()
         ViewGroupCompat.setTransitionGroup(binding.rvItems, true)
@@ -155,16 +150,6 @@ class GridItemFrag : Fragment() {
         return binding.root
     }
 
-    fun clearTracker(tracker: SelectionTracker<Long>) {
-        if (tracker.selection.size() == 0) {
-            if (tracker.clearSelection()) {
-                actionMode?.finish()
-            } else {
-                tracker.setItemsSelected(mutableListOf(), false)
-                actionMode?.finish()
-            }
-        }
-    }
     private fun scrollToPosition() {
         binding.root.addOnLayoutChangeListener(object : View.OnLayoutChangeListener {
             override fun onLayoutChange(

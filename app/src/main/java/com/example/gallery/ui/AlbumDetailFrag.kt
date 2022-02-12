@@ -1,6 +1,10 @@
 package com.example.gallery.ui
 
+import android.app.Activity
+import android.content.ClipData
+import android.content.Intent
 import android.content.res.Configuration
+import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -17,7 +21,6 @@ import com.google.android.material.transition.Hold
 import com.google.android.material.transition.MaterialSharedAxis
 import android.view.ViewGroup
 import androidx.recyclerview.selection.SelectionTracker
-import androidx.recyclerview.selection.StableIdKeyProvider
 import androidx.recyclerview.selection.StorageStrategy
 import com.example.gallery.ListItem
 import com.example.gallery.MyItemDetailsLookup
@@ -45,76 +48,116 @@ class AlbumDetailFrag : Fragment() {
             setHasFixedSize(true)
         }
 
-        val tracker = SelectionTracker.Builder(
-            "GritItemFragSelectionId",
-            binding.rvAlbums,
-            MyItemKeyProvider(viewModel.albums, this),
-            MyItemDetailsLookup(binding.rvAlbums),
-            StorageStrategy.createLongStorage()
-        ).build()
+        if (requireActivity().intent.action == Intent.ACTION_PICK || requireActivity().intent.action ==
+                Intent.ACTION_GET_CONTENT &&
+            requireActivity().intent.getBooleanExtra(Intent.EXTRA_ALLOW_MULTIPLE, false) ||
+                requireActivity().intent.action == Intent.ACTION_MAIN) {
+            val tracker = SelectionTracker.Builder(
+                "GritItemFragSelectionId",
+                binding.rvAlbums,
+                MyItemKeyProvider(viewModel.albums, this),
+                MyItemDetailsLookup(binding.rvAlbums),
+                StorageStrategy.createLongStorage()
+            ).withSelectionPredicate(object : SelectionTracker.SelectionPredicate<Long>() {
+                override fun canSetStateForKey(key: Long, nextState: Boolean): Boolean =
+                    binding.rvAlbums.findViewHolderForItemId(key) != null
 
-        adapter.tracker = tracker
+                override fun canSelectMultiple(): Boolean =
+                    true
 
-        val callback = object : ActionMode.Callback {
-            override fun onCreateActionMode(mode: ActionMode?, menu: Menu?): Boolean {
-                activity?.menuInflater?.inflate(R.menu.contextual_action_bar, menu)
-                activity?.window?.statusBarColor = resources.getColor(R.color.material_dynamic_primary95, activity?.theme)
-                return true
-            }
+                override fun canSetStateAtPosition(position: Int, nextState: Boolean): Boolean =
+                    binding.rvAlbums.findViewHolderForLayoutPosition(position) != null
 
-            override fun onPrepareActionMode(mode: ActionMode?, menu: Menu?): Boolean {
-                return false
-            }
+            }).build()
 
-            override fun onActionItemClicked(mode: ActionMode?, item: MenuItem?): Boolean {
-                return when (item?.itemId) {
-                    R.id.shareContext -> {
-                        val items = mutableListOf<ListItem.MediaItem>()
-                        val album = viewModel.albums.value?.find { it.name == MainActivity.currentAlbumName }
-                        for (id in tracker.selection) {
-                            val selectedItem = album?.mediaItems?.find { it.id == id } ?: return false
-                            items.add(selectedItem)
+            adapter.tracker = tracker
+
+            val callback = object : ActionMode.Callback {
+                override fun onCreateActionMode(mode: ActionMode?, menu: Menu?): Boolean {
+                    if (requireActivity().intent.getBooleanExtra(Intent.EXTRA_ALLOW_MULTIPLE,
+                                false)) {
+                        binding.fabDone.show()
+                        binding.fabDone.setOnClickListener {
+                            val intent = Intent()
+                            val items = mutableListOf<Uri>()
+                            for (key in tracker.selection) {
+                                viewModel.albums.value?.find {
+                                    it.name == MainActivity.currentAlbumName
+                                }?.mediaItems?.find {
+                                    it.id == key
+                                }?.uri?.let { it1 -> items.add(it1) }
+                            }
+                            intent.clipData = ClipData.newUri(requireActivity().contentResolver, "uris", items[0])
+                            for (i in 1 until items.size) {
+                                intent.clipData?.addItem(ClipData.Item(items[i]))
+                            }
+                            requireActivity().setResult(Activity.RESULT_OK, intent)
+                            requireActivity().finish()
                         }
-                        ViewPagerFrag.share(items, requireActivity())
-                        tracker.clearSelection()
-                        actionMode?.finish()
-                        true
+                        return true
                     }
-                    R.id.deleteContext -> {
-                        val items = mutableListOf<ListItem.MediaItem>()
-                        val album = viewModel.albums.value?.find { it.name == MainActivity.currentAlbumName }
-                        for (id in tracker.selection) {
-                            val selectedItem = album?.mediaItems?.find { it.id == id} ?: return false
-                            items.add(selectedItem)
+                    activity?.menuInflater?.inflate(R.menu.contextual_action_bar, menu)
+                    activity?.window?.statusBarColor = resources.getColor(R.color.material_dynamic_neutral_variant20, activity?.theme)
+                    return true
+                }
+
+                override fun onPrepareActionMode(mode: ActionMode?, menu: Menu?): Boolean {
+                    return false
+                }
+
+                override fun onActionItemClicked(mode: ActionMode?, item: MenuItem?): Boolean {
+                    return when (item?.itemId) {
+                        R.id.miShare -> {
+                            val items = mutableListOf<ListItem.MediaItem>()
+                            for (id in tracker.selection) {
+                                val selectedItem = adapter.currentList.find { it.id == id } as ListItem.MediaItem? ?: return false
+                                items.add(selectedItem)
+                            }
+                            ViewPagerFrag.share(items, requireActivity())
+                            tracker.clearSelection()
+                            actionMode?.finish()
+                            true
                         }
-                        ViewPagerFrag.delete(items, requireContext(), viewModel)
-                        actionMode?.finish()
-                        true
+                        R.id.miDelete -> {
+                            val items = mutableListOf<ListItem.MediaItem>()
+                            for (id in tracker.selection) {
+                                val selectedItem = adapter.currentList.find { it.id == id} as ListItem.MediaItem? ?: return false
+                                items.add(selectedItem)
+                            }
+                            ViewPagerFrag.delete(items, requireContext(), viewModel)
+                            actionMode?.finish()
+                            true
+                        }
+                        else -> false
                     }
-                    else -> false
+                }
+
+                override fun onDestroyActionMode(mode: ActionMode?) {
+                    tracker.clearSelection()
+                    Handler(Looper.getMainLooper()).postDelayed({
+                        activity?.window?.statusBarColor = resources.getColor(android.R.color.transparent, activity?.theme)
+                    }, 400)
+                    if (requireActivity().intent.getBooleanExtra(Intent.EXTRA_ALLOW_MULTIPLE,
+                            false)) {
+                        binding.fabDone.hide()
+                    }
+                    actionMode = null
                 }
             }
 
-            override fun onDestroyActionMode(mode: ActionMode?) {
-                tracker.clearSelection()
-                Handler(Looper.getMainLooper()).postDelayed({
-                    activity?.window?.statusBarColor = resources.getColor(android.R.color.transparent, activity?.theme)
-                }, 400)
-                actionMode = null
-            }
+            tracker.addObserver(object: SelectionTracker.SelectionObserver<Long>() {
+                override fun onSelectionChanged() {
+                    super.onSelectionChanged()
+                    actionMode?.title = tracker.selection.size().toString()
+                    if (actionMode == null) {
+                        actionMode = binding.tbAlbum.startActionMode(callback)
+                    } else if (tracker.selection.size() == 0) {
+                        actionMode?.finish()
+                    }
+                }
+            })
+
         }
-
-        tracker.addObserver(object: SelectionTracker.SelectionObserver<Long>() {
-            override fun onSelectionChanged() {
-                super.onSelectionChanged()
-                actionMode?.title = tracker.selection.size().toString()
-                if (actionMode == null) {
-                    actionMode = binding.tbAlbum.startActionMode(callback)
-                } else if (tracker.selection.size() == 0) {
-                    actionMode?.finish()
-                }
-            }
-        })
 
         BottomNavFrag.enteringFromAlbum = true
 
@@ -229,7 +272,7 @@ class AlbumDetailFrag : Fragment() {
 
                     // Locate the ViewHolder for the clicked position.
                     val selectedViewHolder = binding.rvAlbums
-                        .findViewHolderForAdapterPosition(MainActivity.currentListPosition) ?: return
+                        .findViewHolderForLayoutPosition(MainActivity.currentListPosition) ?: return
 //                    (exitTransition as Hold).excludeChildren((selectedViewHolder as GridAdapter.MediaItemHolder).binding.image, true)
 
                     // Map the first shared element name to the child ImageView.

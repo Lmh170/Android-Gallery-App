@@ -40,5 +40,16 @@
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
         app:spanCount="4" />
 
+    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+        android:id="@+id/fabDone"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="16dp"
+        android:text="Done"
+        android:visibility="gone"
+        app:icon="@drawable/ic_outline_done_24"
+        app:layout_behavior="@string/fab_transformation_scrim_behavior" />
+
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

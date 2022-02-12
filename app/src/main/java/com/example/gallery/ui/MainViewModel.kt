@@ -48,6 +48,16 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun loadItems(source: Uri, mimeType: String? = null) {
+        viewModelScope.launch {
+            val imageList = queryImages(source, mimeType)
+            val viewPagerImageList = extractItems(imageList)
+            _viewPagerImages.postValue(viewPagerImageList)
+            _recyclerViewItems.postValue(imageList)
+            _albums.postValue(getAlbums(viewPagerImageList))
+        }
+    }
+
     fun deleteImage(image: ListItem.MediaItem?) {
         if (image == null) return
         viewModelScope.launch {
@@ -148,6 +158,86 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                         lastDate.get(Calendar.DAY_OF_MONTH) > selectedDate.get(Calendar.DAY_OF_MONTH) ||
                             lastDate.get(Calendar.MONTH) > selectedDate.get(Calendar.MONTH) ||
                             lastDate.get(Calendar.YEAR) > selectedDate.get(Calendar.YEAR))  {
+                        selectedDate.set(Calendar.HOUR, 0)
+                        selectedDate.set(Calendar.MINUTE, 0)
+                        selectedDate.set(Calendar.SECOND, 0)
+                        images += ListItem.Header(selectedDate.timeInMillis)
+                        lastDate = selectedDate
+                        listPosition += 1
+                    }
+                    viewPagerPosition += 1
+                    listPosition += 1
+                    images += ListItem.MediaItem(id, uri, album, type, dateModified, viewPagerPosition, listPosition)
+                }
+            }
+        }
+        return images
+    }
+
+    private suspend fun queryImages(source: Uri, mimeType: String?): List<ListItem> {
+        val images = mutableListOf<ListItem>()
+        var listPosition = -1 // because the first item has the index 0
+        var viewPagerPosition = -1 // because the first item has the index 0
+
+        withContext(Dispatchers.IO) {
+            val projection = arrayOf(
+                MediaStore.Files.FileColumns.BUCKET_DISPLAY_NAME,
+                MediaStore.Files.FileColumns._ID,
+                MediaStore.Files.FileColumns.DATE_ADDED,
+                MediaStore.Files.FileColumns.DATE_MODIFIED
+            )
+
+            val selection = if (mimeType != null){
+                MediaStore.Files.FileColumns.MIME_TYPE + "=" + mimeType
+            } else {
+                null
+            }
+
+            val sortOrder = "${MediaStore.Files.FileColumns.DATE_ADDED} DESC"
+
+            getApplication<Application>().contentResolver.query(
+                source,
+                projection,
+                selection,
+                null,
+                sortOrder
+            )?.use { cursor ->
+                val idColumn =
+                    cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns._ID)
+                val dateAddedColumn =
+                    cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.DATE_ADDED)
+                val buckedDisplayNameColumn =
+                    cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.BUCKET_DISPLAY_NAME)
+                val dateModifiedColumn =
+                    cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.DATE_MODIFIED)
+                var lastDate : Calendar? = null
+                while (cursor.moveToNext()) {
+                    val id = cursor.getLong(idColumn)
+                    var dateAdded = cursor.getLong(dateAddedColumn)
+                    val dateModified = cursor.getLong(dateModifiedColumn)
+
+                    // convert seconds to milliseconds
+                    if (dateAdded < 1000000000000L) dateAdded *= 1000
+                    val album = cursor.getString(buckedDisplayNameColumn)
+                    val uri = if (source == MediaStore.Images.Media.EXTERNAL_CONTENT_URI) {
+                        ContentUris.withAppendedId(
+                            MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id)
+                    } else {
+                        ContentUris.withAppendedId(
+                            MediaStore.Video.Media.EXTERNAL_CONTENT_URI, id)
+                    }
+                    val type = if (source == MediaStore.Images.Media.EXTERNAL_CONTENT_URI) {
+                        MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE
+                    } else {
+                        MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO
+                    }
+
+                    val selectedDate = Calendar.getInstance()
+                    selectedDate.timeInMillis = dateAdded
+                    if (lastDate == null ||
+                        lastDate.get(Calendar.DAY_OF_MONTH) > selectedDate.get(Calendar.DAY_OF_MONTH) ||
+                        lastDate.get(Calendar.MONTH) > selectedDate.get(Calendar.MONTH) ||
+                        lastDate.get(Calendar.YEAR) > selectedDate.get(Calendar.YEAR))  {
                         selectedDate.set(Calendar.HOUR, 0)
                         selectedDate.set(Calendar.MINUTE, 0)
                         selectedDate.set(Calendar.SECOND, 0)
