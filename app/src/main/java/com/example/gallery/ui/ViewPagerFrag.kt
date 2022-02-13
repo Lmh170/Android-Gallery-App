@@ -55,14 +55,18 @@ class ViewPagerFrag : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        if (!::_binding.isInitialized){
-            _binding = FragmentViewPagerBinding.inflate(inflater, container, false)
+        if (::_binding.isInitialized) {
+            return binding.root
         }
+
+        _binding = FragmentViewPagerBinding.inflate(inflater, container, false)
+
         if (requireArguments().getParcelable<Uri>("item") != null) {
             intentActionView = true
             binding.cvInfo.visibility = View.GONE
             binding.cvDelete.visibility = View.GONE
         }
+
         shortAnimationDuration = resources.getInteger(android.R.integer.config_shortAnimTime).toLong()
         binding.tbViewPager.setNavigationOnClickListener {
             if (intentActionView) {

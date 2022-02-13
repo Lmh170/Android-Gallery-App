@@ -53,7 +53,7 @@ import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
 
 class GridItemAdapter(private val frag: Fragment, private val isAlbum: Boolean): ListAdapter<ListItem, ViewHolder>(ListItem.ListItemDiffCallback()) {
-    private val enterTransitionStarted: AtomicBoolean = AtomicBoolean()
+    val enterTransitionStarted: AtomicBoolean = AtomicBoolean()
     var tracker: SelectionTracker<Long>? = null
 
     companion object {

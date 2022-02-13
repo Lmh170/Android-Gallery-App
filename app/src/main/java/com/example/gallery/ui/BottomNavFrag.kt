@@ -29,14 +29,16 @@ class BottomNavFrag : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        if (!::_binding.isInitialized){
-            _binding = FragmentBottomNavBinding.inflate(inflater, container, false)
+        if (::_binding.isInitialized){
+            val frag = childFragmentManager.findFragmentById(R.id.fcvBottomNav)
+            if (frag is GridItemFrag){
+                postponeEnterTransition()
+                prepareTransitions()
+            }
+            return binding.root
         }
-        val frag = childFragmentManager.findFragmentById(R.id.fcvBottomNav)
-        if (frag is GridItemFrag){
-            postponeEnterTransition()
-            prepareTransitions()
-        }
+        _binding = FragmentBottomNavBinding.inflate(inflater, container, false)
+
         if (requireActivity().intent.action == Intent.ACTION_PICK || requireActivity().intent.action ==
                 Intent.ACTION_GET_CONTENT) {
             binding.tbMain.isTitleCentered = false
@@ -56,12 +58,6 @@ class BottomNavFrag : Fragment() {
             binding.tbMain.setNavigationOnClickListener {
                 requireActivity().setResult(Activity.RESULT_CANCELED)
                 requireActivity().finish()
-                /*
-                val intent = Intent()
-                val clipData = ClipData.newUri(activity?.contentResolver, "", Uri.EMPTY)
-                clipData.
-
-                 */
             }
         } else {
             binding.tbMain.inflateMenu(R.menu.action_bar_home)
@@ -108,12 +104,8 @@ class BottomNavFrag : Fragment() {
                 else -> false
             }
         }
-        return binding.root
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
         prepareTransitions()
+        return binding.root
     }
 
     private fun setUpSystemBars() {
@@ -139,17 +131,11 @@ class BottomNavFrag : Fragment() {
     }
 
     fun prepareTransitions() {
-
-    //     exitTransition = TransitionInflater.from(context)
-      //    .inflateTransition(R.transition.grid_exit_transition)
         exitTransition = if (enteringFromAlbum) {
             MaterialSharedAxis(MaterialSharedAxis.Z, false)
         } else {
             Hold()
         }
-        //     reenterTransition = MaterialElevationScale(true)
-        //  exitTransition = Hold()
-        // A similar mapping is set at the ImagePagerFragment with a setEnterSharedElementCallback.
         setExitSharedElementCallback(
             object : SharedElementCallback() {
                 override fun onMapSharedElements(
@@ -168,15 +154,13 @@ class BottomNavFrag : Fragment() {
                     val selectedViewHolder = frag.binding.rvItems
                         .findViewHolderForLayoutPosition(MainActivity.currentListPosition) ?: return
 
-//                    (exitTransition as Hold).excludeChildren((selectedViewHolder as GridAdapter.MediaItemHolder).binding.image, true)
-
-
                     // Map the first shared element name to the child ImageView.
                     sharedElements[names[0]] =
                         (selectedViewHolder as GridItemAdapter.MediaItemHolder).binding.image
 
                 }
-            })
+            }
+        )
     }
 
     companion object {
