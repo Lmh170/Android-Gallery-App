@@ -7,8 +7,6 @@ import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.navigation.NavOptions
-import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.load.DataSource
@@ -18,35 +16,38 @@ import com.bumptech.glide.request.target.Target
 import com.bumptech.glide.signature.MediaStoreSignature
 import com.example.gallery.GlideApp
 import com.example.gallery.ListItem
-import com.example.gallery.R
 import com.example.gallery.databinding.ViewPagerItemHolderBinding
 import com.example.gallery.ui.MainActivity
-import com.example.gallery.ui.VideoPlayerFrag
+import com.example.gallery.ui.VideoPlayerActivity
 import com.example.gallery.ui.ViewPagerFrag
 import java.util.concurrent.atomic.AtomicBoolean
 
-class ViewPagerAdapter(val frag: ViewPagerFrag): ListAdapter<ListItem.MediaItem, ViewPagerAdapter.ViewHolder>(ListItem.MediaItem.DiffCallback) {
+class ViewPagerAdapter(val frag: ViewPagerFrag): ListAdapter<ListItem.MediaItem, ViewPagerAdapter.ViewHolderPager>(ListItem.MediaItem.DiffCallback) {
     val enterTransitionStarted: AtomicBoolean = AtomicBoolean()
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        return  ViewHolder(
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolderPager {
+        return  ViewHolderPager(
             ViewPagerItemHolderBinding.inflate(LayoutInflater.from(parent.context),
                 parent, false)
         )
     }
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.onBind()
+    override fun onBindViewHolder(holderPager: ViewHolderPager, position: Int) {
+        holderPager.onBind()
     }
 
-    inner class ViewHolder(val binding: ViewPagerItemHolderBinding): RecyclerView.ViewHolder(binding.root) {
+    inner class ViewHolderPager(val binding: ViewPagerItemHolderBinding): RecyclerView.ViewHolder(binding.root) {
         fun onBind() {
             if ((getItem(layoutPosition) as ListItem.MediaItem).type == MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO) {
                 binding.ivPlayButton.visibility = View.VISIBLE
                 binding.ivPlayButton.setOnClickListener {
                     val args = Bundle()
                     args.putParcelable("videoUri", (getItem(layoutPosition) as ListItem.MediaItem).uri)
-                    frag.findNavController().navigate(R.id.action_viewPagerFrag_to_videoPlayerFrag, args, null, null)
+                  //  frag.findNavController().navigate(R.id.action_viewPagerFrag_to_videoPlayerFrag, args, null, null)
+                    val intent = Intent(frag.context, VideoPlayerActivity::class.java).apply {
+                        data = (getItem(layoutPosition) as ListItem.MediaItem).uri
+                    }
+                    frag.startActivity(intent)
                 }
             } else {
                 binding.pagerImage.enableZooming()
@@ -90,44 +91,6 @@ class ViewPagerAdapter(val frag: ViewPagerFrag): ListAdapter<ListItem.MediaItem,
                     return false
                 }
                 }).into(binding.pagerImage)
-/*
-                .into(object: CustomViewTarget<ZoomableImageView, Drawable>(binding.pagerImage) {
-                    override fun onLoadFailed(errorDrawable: Drawable?) {
-                        TODO("Not yet implemented")
-                    }
-
-                    override fun onResourceReady(
-                        resource: Drawable,
-                        transition: Transition<in Drawable>?
-                    ) {
-                        binding.pagerImage.updateLayoutParams<FrameLayout.LayoutParams> {
-                            this.height = resource.intrinsicHeight
-                        }
-               //         myGraphView.setLayoutParams(LayoutParams(width, height))
-                        TODO("Not yet implemented")
-                    }
-
-                    override fun onResourceCleared(placeholder: Drawable?) {
-                        TODO("Not yet implemented")
-                    }
-
-
-                })
-                    /*
-                .into( SimpleTarget<ImageView, Bitmap>() {
-                    @Override
-                    public void onResourceReady(Bitmap bitmap,
-                        Transition<? super Bitmap> transition) {
-                        int w = bitmap.getWidth();
-                        int h = bitmap.getHeight()
-                        mImageView.setImageBitmap(bitmap);
-                    }
-                });
-
- */
-
-                     */
-
             binding.pagerImage.setOnClickListener { frag.toggleSystemUI() }
             binding.root.setOnClickListener { frag.toggleSystemUI() }
         }

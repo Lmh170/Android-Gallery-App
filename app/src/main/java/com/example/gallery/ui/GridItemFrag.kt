@@ -1,5 +1,6 @@
 package com.example.gallery.ui
 
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -18,6 +19,7 @@ import com.example.gallery.MyItemKeyProvider
 import com.example.gallery.R
 import com.example.gallery.adapter.GridItemAdapter
 import com.example.gallery.databinding.FragmentGridItemBinding
+import com.google.android.material.elevation.SurfaceColors
 import com.google.android.material.transition.MaterialFadeThrough
 
 class GridItemFrag : Fragment() {
@@ -31,14 +33,21 @@ class GridItemFrag : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        viewModel.recyclerViewItems.observe(viewLifecycleOwner) { items ->
+            val position = (binding.rvItems.layoutManager as GridLayoutManager)
+                .findFirstCompletelyVisibleItemPosition()
+            (binding.rvItems.adapter as GridItemAdapter).submitList(items) {
+                if (position == 0) binding.rvItems.scrollToPosition(0)
+            }
+        }
         if (::_binding.isInitialized) {
             (binding.rvItems.adapter as GridItemAdapter).enterTransitionStarted.set(false)
             binding.rvItems.apply {
-                val manager = GridLayoutManager(context, spanCount)
+                val manager = GridLayoutManager(context, resources.getInteger(R.integer.spanCount))
                 manager.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
                     override fun getSpanSize(position: Int): Int {
                         return when (adapter?.getItemViewType(position)) {
-                            GridItemAdapter.ITEM_VIEW_TYPE_HEADER -> spanCount
+                            GridItemAdapter.ITEM_VIEW_TYPE_HEADER -> resources.getInteger(R.integer.spanCount)
                             else -> 1
                         }
                     }
@@ -48,20 +57,13 @@ class GridItemFrag : Fragment() {
             }
         } else {
             _binding = FragmentGridItemBinding.inflate(inflater, container, false)
-            viewModel.recyclerViewItems.observe(viewLifecycleOwner) { items ->
-                val position = (binding.rvItems.layoutManager as GridLayoutManager)
-                    .findFirstCompletelyVisibleItemPosition()
-                (binding.rvItems.adapter as GridItemAdapter).submitList(items) {
-                    if (position == 0) binding.rvItems.scrollToPosition(0)
-                }
-            }
             binding.rvItems.apply {
                 this.adapter = GridItemAdapter(requireParentFragment(), false)
-                val manager = GridLayoutManager(context, spanCount)
+                val manager = GridLayoutManager(context, resources.getInteger(R.integer.spanCount))
                 manager.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
                     override fun getSpanSize(position: Int): Int {
                         return when (adapter?.getItemViewType(position)) {
-                            GridItemAdapter.ITEM_VIEW_TYPE_HEADER -> spanCount
+                            GridItemAdapter.ITEM_VIEW_TYPE_HEADER -> resources.getInteger(R.integer.spanCount)
                             else -> 1
                         }
                     }
@@ -72,7 +74,7 @@ class GridItemFrag : Fragment() {
             tracker = SelectionTracker.Builder(
                 "GritItemFragSelectionId",
                 binding.rvItems,
-                MyItemKeyProvider(viewModel.recyclerViewItems, this),
+                MyItemKeyProvider(viewModel),
                 MyItemDetailsLookup(binding.rvItems),
                 StorageStrategy.createLongStorage()
             ).withSelectionPredicate(object : SelectionTracker.SelectionPredicate<Long>() {
@@ -133,7 +135,12 @@ class GridItemFrag : Fragment() {
                 override fun onDestroyActionMode(mode: ActionMode?) {
                     tracker.clearSelection()
                     Handler(Looper.getMainLooper()).postDelayed({
-                        activity?.window?.statusBarColor = resources.getColor(android.R.color.transparent, activity?.theme)
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                            activity?.window?.statusBarColor = resources.getColor(android.R.color.transparent,
+                            requireActivity().theme)
+                        } else {
+                            activity?.window?.statusBarColor = resources.getColor(android.R.color.transparent)
+                        }
                     }, 400)
                     actionMode = null
                 }
@@ -152,10 +159,10 @@ class GridItemFrag : Fragment() {
             })
         }
 
-        scrollToPosition()
-        ViewGroupCompat.setTransitionGroup(binding.rvItems, true)
+        binding.rvItems.isTransitionGroup = true
         exitTransition = MaterialFadeThrough()
         enterTransition = MaterialFadeThrough()
+        scrollToPosition()
         return binding.root
     }
 
@@ -190,9 +197,4 @@ class GridItemFrag : Fragment() {
             }
         })
     }
-
-    companion object {
-        var spanCount = 4
-    }
-
 }

@@ -4,20 +4,17 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.media.MediaMetadataRetriever
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
-import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.core.app.SharedElementCallback
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.view.updateLayoutParams
-import androidx.exifinterface.media.ExifInterface
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
@@ -29,17 +26,13 @@ import com.example.gallery.ListItem
 import com.example.gallery.R
 import com.example.gallery.adapter.ViewPagerAdapter
 import com.example.gallery.databinding.FragmentViewPagerBinding
+import com.example.gallery.databinding.ViewDialogInfoBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.transition.MaterialContainerTransform
 import com.google.android.material.transition.MaterialFade
 import java.net.URLDecoder
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.collections.ArrayList
-import kotlin.collections.List
-import kotlin.collections.MutableMap
-import kotlin.collections.find
-import kotlin.collections.listOf
 import kotlin.collections.set
 
 class ViewPagerFrag : Fragment() {
@@ -49,34 +42,37 @@ class ViewPagerFrag : Fragment() {
     private var isSystemUiVisible = true
     private var shortAnimationDuration = 0L
     private var firstCurrentItem = 0
-    private var intentActionView = false
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        if (::_binding.isInitialized) {
+        when {
+            requireArguments().getBoolean("isAlbum") -> {
+                viewModel.albums.observe(viewLifecycleOwner) { albums ->
+                    val items = albums.find { it.name == MainActivity.currentAlbumName }?.mediaItems
+                    (binding.viewPager.adapter as ViewPagerAdapter).submitList(items)
+                }
+            }
+            else -> {
+                viewModel.viewPagerImages.observe(viewLifecycleOwner) { items ->
+                    (binding.viewPager.adapter as ViewPagerAdapter).submitList(items)
+                }
+            }
+        }
+        prepareSharedElementTransition()
+        if (::_binding.isInitialized){
             return binding.root
         }
-
+        
         _binding = FragmentViewPagerBinding.inflate(inflater, container, false)
-
-        if (requireArguments().getParcelable<Uri>("item") != null) {
-            intentActionView = true
-            binding.cvInfo.visibility = View.GONE
-            binding.cvDelete.visibility = View.GONE
-        }
 
         shortAnimationDuration = resources.getInteger(android.R.integer.config_shortAnimTime).toLong()
         binding.tbViewPager.setNavigationOnClickListener {
-            if (intentActionView) {
-                requireActivity().finish()
-            } else {
-                findNavController().navigateUp()
-            }
+            findNavController().navigateUp()
         }
+        viewModel.loadItems()
         setUpViewpager()
-        prepareSharedElementTransition()
         setUpViews()
         return binding.root
     }
@@ -84,52 +80,28 @@ class ViewPagerFrag : Fragment() {
     private fun setUpViewpager() {
         val adapter = ViewPagerAdapter(this)
 
-        when {
-            requireArguments().getBoolean("isAlbum") -> {
-                adapter.submitList(viewModel.albums.value?.find { it.name == MainActivity.currentAlbumName }?.mediaItems)
-                viewModel.albums.observe(viewLifecycleOwner) { albums ->
-                    val items = albums.find { it.name == MainActivity.currentAlbumName }?.mediaItems
-                    (binding.viewPager.adapter as ViewPagerAdapter).submitList(items)
-                }
-            }
-            intentActionView -> {
-                adapter.submitList(listOf(
-                    ListItem.MediaItem(
-                        0L,
-                        requireArguments().getParcelable("item")!!,
-                        "",
-                        0,
-                        0L,
-                        0,
-                        0
-                            )
-                )
-                )
-            }
-            else -> {
-                adapter.submitList(viewModel.viewPagerImages.value)
-                viewModel.viewPagerImages.observe(viewLifecycleOwner) { items ->
-                    (binding.viewPager.adapter as ViewPagerAdapter).submitList(items)
-                }
-            }
-        }
         binding.viewPager.apply {
             this.adapter = adapter
+            if (requireArguments().getBoolean("isAlbum")) {
+                adapter.submitList(viewModel.albums.value?.find { it.name == MainActivity.currentAlbumName }?.mediaItems)
+            } else {
+                adapter.submitList(viewModel.viewPagerImages.value)
+            }
+
             firstCurrentItem = MainActivity.currentViewPagerPosition
             setCurrentItem(MainActivity.currentViewPagerPosition, false)
-            if (!intentActionView) {
-                registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
-                    override fun onPageSelected(position: Int) {
-                        MainActivity.currentViewPagerPosition = position
-                        if (requireArguments().getBoolean("isAlbum")) {
-                            MainActivity.currentListPosition = position
-                        } else {
-                            MainActivity.currentListPosition = viewModel.viewPagerImages.value?.get(position)!!.listPosition
-                        }
+
+            registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+                override fun onPageSelected(position: Int) {
+                    MainActivity.currentViewPagerPosition = position
+                    if (requireArguments().getBoolean("isAlbum")) {
+                        MainActivity.currentListPosition = position
+                    } else {
+                        MainActivity.currentListPosition = viewModel.viewPagerImages.value?.get(position)!!.listPosition
                     }
-                })
-                setPageTransformer(MarginPageTransformer(50))
-            }
+                }
+            })
+            setPageTransformer(MarginPageTransformer(50))
         }
     }
 
@@ -139,18 +111,19 @@ class ViewPagerFrag : Fragment() {
             excludeTarget(binding.ivGradTop, true)
             excludeTarget(binding.ivGardBottom, true)
         })
-        if (!intentActionView) {
-            binding.cvInfo.visibility = View.VISIBLE
-            binding.cvDelete.visibility = View.VISIBLE
 
-        }
+        binding.cvInfo.visibility = View.VISIBLE
+        binding.cvDelete.visibility = View.VISIBLE
+
         binding.cvEdit.visibility = View.VISIBLE
         binding.tbViewPager.visibility = View.VISIBLE
         binding.cvShare.visibility = View.VISIBLE
         binding.ivGradTop.visibility = View.VISIBLE
         binding.ivGardBottom.visibility = View.VISIBLE
-        WindowInsetsControllerCompat(requireActivity().window, requireActivity().window.decorView)
-            .show(WindowInsetsCompat.Type.systemBars())
+        val windowInsetsController =
+            ViewCompat.getWindowInsetsController(requireActivity().window.decorView) ?: return
+        // Hide both the status bar and the navigation bar
+        windowInsetsController.show(WindowInsetsCompat.Type.systemBars())
     }
 
     fun hideSystemUI() {
@@ -167,8 +140,14 @@ class ViewPagerFrag : Fragment() {
         binding.cvDelete.visibility = View.GONE
         binding.ivGradTop.visibility = View.GONE
         binding.ivGardBottom.visibility = View.GONE
-        WindowInsetsControllerCompat(requireActivity().window, requireActivity().window.decorView)
-            .hide(WindowInsetsCompat.Type.systemBars())
+
+        val windowInsetsController =
+                ViewCompat.getWindowInsetsController(requireActivity().window.decorView) ?: return
+            // Configure the behavior of the hidden system bars
+        windowInsetsController.systemBarsBehavior =
+                WindowInsetsControllerCompat.BEHAVIOR_SHOW_BARS_BY_TOUCH
+            // Hide both the status bar and the navigation bar
+        windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
     }
 
     fun toggleSystemUI() {
@@ -219,15 +198,16 @@ class ViewPagerFrag : Fragment() {
             startActivity(Intent.createChooser(editIntent, "Edit with"))
         }
         binding.cvInfo.setOnClickListener {
-            /*
+
             val currentItem = getCurrentItem() ?: return@setOnClickListener
+            val infos = viewModel.getImageInfo(currentItem.uri)
             val inflater = requireActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
             val binding = ViewDialogInfoBinding.inflate(inflater)
-            binding.tvDateAdded.text = SimpleDateFormat.getDateInstance().format(Date(currentItem.dateAdded))
-            binding.tvName.text = currentItem.name
-            binding.tvTimeAdded.text = SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT).format(Date(currentItem.dateAdded))
-            binding.tvPath.text = currentItem.path
-            binding.tvSize.text = currentItem.size.div(1000000).toString() + " MB"
+            binding.tvDateAdded.text = SimpleDateFormat.getDateInstance().format(Date(infos[0].toLong()))
+            binding.tvName.text = infos[3]
+            binding.tvTimeAdded.text = SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT).format(Date(infos[0].toLong()))
+            binding.tvPath.text = infos[2]
+            binding.tvSize.text = infos[0].toLong().div(1000000).toString() + " MB"
 
             MaterialAlertDialogBuilder(requireContext(), R.style.Theme_MaterialAlertDialog_Centered)
                 .setTitle("Info")
@@ -236,9 +216,14 @@ class ViewPagerFrag : Fragment() {
                 .setPositiveButton("Close", null)
                 .show()
 
-             */
-            showCurrentMediaDetails()
+
+            // showCurrentMediaDetails()
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        WindowInsetsControllerCompat(requireActivity().window, requireActivity().window.decorView).show(WindowInsetsCompat.Type.systemBars())
     }
 
     companion object {
@@ -284,17 +269,27 @@ class ViewPagerFrag : Fragment() {
             activity.startActivity(Intent.createChooser(share, "Share with"))
         }
     }
-
+/*
     private fun showCurrentMediaDetails() {
         val item = getCurrentItem() ?:return
 
-        val mediaCursor = requireActivity().contentResolver.query(
-            item.uri,
+        val projection = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             arrayOf(
                 MediaStore.MediaColumns.RELATIVE_PATH,
                 MediaStore.MediaColumns.DISPLAY_NAME,
                 MediaStore.MediaColumns.SIZE
-            ),
+            )
+        } else {
+            arrayOf(
+                MediaStore.MediaColumns.DATA,
+                MediaStore.MediaColumns.DISPLAY_NAME,
+                MediaStore.MediaColumns.SIZE
+            )
+        }
+
+        val mediaCursor = viewModel.getApplication<Application>().contentResolver.query(
+            item.uri,
+            projection,
             null,
             null,
         )
@@ -306,11 +301,14 @@ class ViewPagerFrag : Fragment() {
             return
         }
 
-        val relativePath = mediaCursor.getString(0)
-        val fileName = mediaCursor.getString(1)
-        val size = mediaCursor.getInt(2)
+       val relativePath = mediaCursor.getString(0)
+      val fileName = mediaCursor.getString(1)
+       val size = mediaCursor.getInt(2)
 
         mediaCursor.close()
+
+        var infos = viewModel.getImageInfo(item)
+
 
         var dateAdded : String? = null
         var dateModified : String? = null
@@ -358,6 +356,8 @@ class ViewPagerFrag : Fragment() {
             iStream.close()
         }
 
+
+
         val alertDialog = MaterialAlertDialogBuilder(requireContext())
         alertDialog.setIcon(R.drawable.ic_outline_info_24)
         alertDialog.setTitle("File Details")
@@ -369,7 +369,12 @@ class ViewPagerFrag : Fragment() {
         detailsBuilder.append("\n\n")
 
         detailsBuilder.append("File Path: \n")
-        detailsBuilder.append(getRelativePath(item.uri, relativePath, fileName))
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            detailsBuilder.append(getRelativePath(item.uri, relativePath, fileName))
+        } else {
+            detailsBuilder.append(relativePath)
+        }
+
         detailsBuilder.append("\n\n")
 
         detailsBuilder.append("File Size: \n")
@@ -409,10 +414,13 @@ class ViewPagerFrag : Fragment() {
 
         alertDialog.show()
     }
-
-
+*/
     private fun getCurrentItem(): ListItem.MediaItem?  {
-        return (binding.viewPager.adapter as ViewPagerAdapter).currentList[binding.viewPager.currentItem]
+        return try {
+            (binding.viewPager.adapter as ViewPagerAdapter).currentList[binding.viewPager.currentItem]
+        } catch (e: IndexOutOfBoundsException) {
+            null
+        }
     }
 
     @SuppressLint("SimpleDateFormat")
@@ -461,7 +469,6 @@ class ViewPagerFrag : Fragment() {
     }
 
     private fun getRelativePath(uri: Uri, path: String?, fileName: String) : String {
-
         if (path==null) {
             val dPath = URLDecoder.decode(
                 uri.lastPathSegment,
@@ -487,7 +494,11 @@ class ViewPagerFrag : Fragment() {
 
     private fun prepareSharedElementTransition() {
         sharedElementEnterTransition = MaterialContainerTransform().apply {
-            scrimColor = resources.getColor(android.R.color.black, requireActivity().theme)
+            scrimColor = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                resources.getColor(android.R.color.black, requireActivity().theme)
+            } else {
+                resources.getColor(android.R.color.black)
+            }
         }
 
         // A similar mapping is set at the GridFragment with a setExitSharedElementCallback.
@@ -510,7 +521,7 @@ class ViewPagerFrag : Fragment() {
 
                     val selectedViewHolder =
                         (binding.viewPager.getChildAt(0) as RecyclerView?)?.findViewHolderForLayoutPosition(binding.viewPager.currentItem)
-                            as ViewPagerAdapter.ViewHolder? ?: return
+                            as ViewPagerAdapter.ViewHolderPager? ?: return
 
                //     selectedViewHolder.bindTransitionImage()
                   //  selectedViewHolder.binding.transitionImage.visibility = View.VISIBLE

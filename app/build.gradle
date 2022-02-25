@@ -10,7 +10,7 @@ android {
 
     defaultConfig {
         applicationId "com.example.gallery"
-        minSdk 29
+        minSdk 21
         targetSdk 31
         versionCode 1
         versionName "1-alpha01"
@@ -52,15 +52,18 @@ dependencies {
     implementation 'androidx.recyclerview:recyclerview-selection:1.1.0'
 
     // ViewModel
-    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.4.0'
-    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.4.0'
+    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.4.1'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.4.1'
 
     // Navigation
-    implementation 'androidx.navigation:navigation-fragment-ktx:2.4.0'
-    implementation 'androidx.navigation:navigation-ui-ktx:2.4.0'
-    androidTestImplementation 'androidx.navigation:navigation-testing:2.4.0'
+    implementation 'androidx.navigation:navigation-fragment-ktx:2.4.1'
+    implementation 'androidx.navigation:navigation-ui-ktx:2.4.1'
+    androidTestImplementation 'androidx.navigation:navigation-testing:2.4.1'
 
     // Glide
     implementation 'com.github.bumptech.glide:glide:4.13.0'
     kapt 'com.github.bumptech.glide:compiler:4.13.0'
+
+    // ExoPlayer
+    implementation 'com.google.android.exoplayer:exoplayer:2.16.1'
 }

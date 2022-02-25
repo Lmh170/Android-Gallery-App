@@ -11,7 +11,7 @@
         android:layout_height="match_parent"
         android:scaleType="centerInside"
         tools:srcCompat="@tools:sample/avatars"
-        android:background="@android:color/black"/>
+        android:background="@android:color/black" />
 
     <ImageView
         android:id="@+id/ivPlayButton"

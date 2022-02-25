@@ -4,10 +4,12 @@ import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
 import android.provider.Settings
 import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
@@ -15,6 +17,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
+import androidx.navigation.NavController
+import androidx.navigation.NavDestination
 import androidx.navigation.fragment.NavHostFragment
 import com.example.gallery.R
 import com.example.gallery.databinding.ActivityMainBinding
@@ -22,6 +26,7 @@ import com.example.gallery.databinding.ActivityMainBinding
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private val viewModel: MainViewModel by viewModels()
+    lateinit var restoreRequest: ActivityResultLauncher<IntentSenderRequest>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         viewModel.loadItems()
@@ -31,12 +36,21 @@ class MainActivity : AppCompatActivity() {
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
-        val request = registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) {
-            if (it.resultCode == RESULT_OK) {
-                viewModel.deletePendingImage()
-                viewModel.loadItems()
+        val request =
+            registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) {
+                if (it.resultCode == RESULT_OK) {
+                    viewModel.deletePendingImage()
+                    viewModel.loadItems()
+                }
             }
-        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            restoreRequest =
+                registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) {
+                    if (it.resultCode == RESULT_OK) {
+                        viewModel.loadBin()
+                    }
+            }
+    }
         viewModel.permissionNeededForDelete.observe(this) { intentSender ->
             val intentSenderRequest = IntentSenderRequest.Builder(intentSender).build()
             request.launch(intentSenderRequest)
@@ -49,14 +63,8 @@ class MainActivity : AppCompatActivity() {
                 "categories: ${intent.categories} scheme ${intent.scheme} ${intent.getParcelableExtra<Uri>(Intent.EXTRA_STREAM)}")
 
         val frag = supportFragmentManager.findFragmentById(R.id.fcvMain) as NavHostFragment
-        if (intent.action == Intent.ACTION_VIEW) {
-            val args = Bundle()
-            // Todo() add view support
-            args.putParcelable("item", intent.data)
-            frag.navController.navigate(
-                    R.id.action_bottomNavFrag_to_viewPagerFrag,
-                    args
-            )
+        frag.navController.addOnDestinationChangedListener { controller, destination, arguments ->
+         //   viewModel.loadItems()
         }
     }
 
@@ -155,8 +163,9 @@ class MainActivity : AppCompatActivity() {
                 Manifest.permission.READ_EXTERNAL_STORAGE,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE
             )
-         //   ActivityCompat.requestPermissions(this, permissions, READ_EXTERNAL_STORAGE_REQUEST)
-            requestPermissions(permissions, READ_EXTERNAL_STORAGE_REQUEST)
+
+            ActivityCompat.requestPermissions(this, permissions, READ_EXTERNAL_STORAGE_REQUEST)
+           // requestPermissions(permissions, READ_EXTERNAL_STORAGE_REQUEST)
         }
     }
 

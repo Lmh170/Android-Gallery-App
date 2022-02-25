@@ -4,10 +4,11 @@ import android.app.Application
 import android.app.RecoverableSecurityException
 import android.content.ContentUris
 import android.content.IntentSender
-import android.media.browse.MediaBrowser
 import android.net.Uri
 import android.os.Build
+import android.os.Bundle
 import android.provider.MediaStore
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -28,6 +29,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _albums = MutableLiveData<List<Album>>()
     val albums: LiveData<List<Album>> get() = _albums
+
+    private val _bin = MutableLiveData<List<ListItem.MediaItem>>()
+    val bin: LiveData<List<ListItem.MediaItem>> get() = _bin
 
     private var pendingDeleteImage: ListItem.MediaItem? = null
     private var pendingDeleteImages: List<ListItem.MediaItem>? = null
@@ -124,27 +128,17 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 null,
                 sortOrder
             )?.use { cursor ->
-                val typeColumn =
-                    cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.MEDIA_TYPE)
-                val idColumn =
-                    cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns._ID)
-                val dateAddedColumn =
-                    cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.DATE_ADDED)
-                val buckedDisplayNameColumn =
-                    cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.BUCKET_DISPLAY_NAME)
-                val dateModifiedColumn =
-                    cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.DATE_MODIFIED)
                 var lastDate : Calendar? = null
                 while (cursor.moveToNext()) {
-                    val type = cursor.getInt(typeColumn)
-                    val id = cursor.getLong(idColumn)
-                    var dateAdded = cursor.getLong(dateAddedColumn)
-                    val dateModified = cursor.getLong(dateModifiedColumn)
+                    val album = cursor.getString(0)
+                    val type = cursor.getInt(2)
+                    val id = cursor.getLong(1)
+                    var dateAdded = cursor.getLong(3)
+                    val dateModified = cursor.getLong(4)
 
                     // convert seconds to milliseconds
                     if (dateAdded < 1000000000000L) dateAdded *= 1000
 
-                    val album = cursor.getString(buckedDisplayNameColumn)
                     val uri = if (type == MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE) {
                         ContentUris.withAppendedId(
                             MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id)
@@ -202,23 +196,15 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 null,
                 sortOrder
             )?.use { cursor ->
-                val idColumn =
-                    cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns._ID)
-                val dateAddedColumn =
-                    cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.DATE_ADDED)
-                val buckedDisplayNameColumn =
-                    cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.BUCKET_DISPLAY_NAME)
-                val dateModifiedColumn =
-                    cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.DATE_MODIFIED)
                 var lastDate : Calendar? = null
                 while (cursor.moveToNext()) {
-                    val id = cursor.getLong(idColumn)
-                    var dateAdded = cursor.getLong(dateAddedColumn)
-                    val dateModified = cursor.getLong(dateModifiedColumn)
+                    val album = cursor.getString(0)
+                    val id = cursor.getLong(1)
+                    var dateAdded = cursor.getLong(2)
+                    val dateModified = cursor.getLong(3)
 
                     // convert seconds to milliseconds
                     if (dateAdded < 1000000000000L) dateAdded *= 1000
-                    val album = cursor.getString(buckedDisplayNameColumn)
                     val uri = if (source == MediaStore.Images.Media.EXTERNAL_CONTENT_URI) {
                         ContentUris.withAppendedId(
                             MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id)
@@ -256,35 +242,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private suspend fun getAlbums(mediaItems: List<ListItem.MediaItem>?): List<Album> {
         val albums = mutableListOf<Album>()
-        /*
-        if (mediaItems == null) return albums
-        withContext(Dispatchers.Main) {
-            albums.add(Album("null", MutableLiveData<List<ListItem.MediaItem>>()))
-
-            for (item in mediaItems) {
-                for (i in albums.indices) {
-                    if (item.album == albums[i].name){
-                        break
-                    } else if (i == albums.lastIndex){
-                        albums.add(Album(item.album, MutableLiveData<List<ListItem.MediaItem>>()))
-                    }
-                }
-            }
-            albums.removeAt(0)
-
-            for (album in albums) {
-                val items: MutableList<ListItem.MediaItem> = mutableListOf()
-                for (item in mediaItems) {
-                    if (item.album == album.name) {
-                        items.add(item)
-                    }
-                }
-                album._mediaItems.postValue(items)
-            }
-        }
-       return albums
-
-         */
         mediaItems ?: return albums
 
         withContext(Dispatchers.Main){
@@ -306,6 +263,49 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         return albums
     }
 
+    fun getImageInfo(source: Uri): List<String> {
+        val info = mutableListOf<String>()
+
+        val projection = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            arrayOf(
+                MediaStore.Files.FileColumns.DATE_ADDED,
+                MediaStore.Files.FileColumns.SIZE,
+                MediaStore.Files.FileColumns.RELATIVE_PATH,
+                MediaStore.Files.FileColumns.DISPLAY_NAME
+            )
+        } else {
+            arrayOf(
+                MediaStore.Files.FileColumns.DATE_ADDED,
+                MediaStore.Files.FileColumns.SIZE,
+                MediaStore.Files.FileColumns.DATA,
+                MediaStore.Files.FileColumns.DISPLAY_NAME
+            )
+        }
+
+        getApplication<Application>().contentResolver.query(
+            source,
+            projection,
+            null,
+            null,
+            null
+        )?.use { cursor ->
+            cursor.moveToFirst()
+            var dateAdded = cursor.getLong(0)
+            val size = cursor.getLong(1)
+            val path = cursor.getString(2)
+            val name = cursor.getString(3)
+
+                // convert seconds to milliseconds
+            if (dateAdded < 1000000000000L) dateAdded *= 1000
+
+            info += dateAdded.toString()
+            info += size.toString()
+            info += path
+            info += name
+        }
+        return info
+    }
+
     private suspend fun performDeleteImage(image: ListItem.MediaItem) {
         withContext(Dispatchers.IO) {
             try {
@@ -320,23 +320,28 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                         "${MediaStore.Files.FileColumns._ID} = ?",
                         arrayOf(image.id.toString())
                     )
+                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) loadItems()
                 }
             } catch (e: SecurityException) {
-                pendingDeleteImage = image
-                val recoverableSecurityException =
-                    e as? RecoverableSecurityException
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    pendingDeleteImage = image
+                    val recoverableSecurityException = e as? RecoverableSecurityException
                         ?: throw e
-                val intentSender = recoverableSecurityException.userAction.actionIntent.intentSender
-                _permissionNeededForDelete.postValue(intentSender)
+                    val intentSender = recoverableSecurityException.userAction.actionIntent.intentSender
+                    _permissionNeededForDelete.postValue(intentSender)
+                } else {
+                    throw e
+                }
             }
         }
     }
-    private suspend fun performDeleteImages(images: List<ListItem.MediaItem>) {
+
+    private suspend fun performDeleteImages(items: List<ListItem.MediaItem>) {
         withContext(Dispatchers.IO) {
             try {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                     val uris = mutableListOf<Uri>()
-                    for (image in images) {
+                    for (image in items) {
                         uris.add(image.uri)
                     }
                     val pendingIntent = MediaStore.createTrashRequest(getApplication<Application>().contentResolver,
@@ -344,24 +349,78 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     pendingDeleteImages = null // because the item will be deleted with request == no further action needed
                     _permissionNeededForDelete.postValue(pendingIntent.intentSender)
                 } else {
-                    var ids = arrayOf<String>()
-                    for (image in images) {
-                        ids += (image.id.toString())
+                    for (item in items) {
+                        val uri = if (item.type == MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE) {
+                            ContentUris.withAppendedId(
+                                MediaStore.Images.Media.EXTERNAL_CONTENT_URI, item.id)
+                        } else {
+                            ContentUris.withAppendedId(
+                                MediaStore.Video.Media.EXTERNAL_CONTENT_URI, item.id)
+                        }
+                        getApplication<Application>().contentResolver.delete(
+                            uri,
+                            "${MediaStore.Files.FileColumns._ID} = ?",
+                            arrayOf(item.id.toString())
+                        )
                     }
-                    getApplication<Application>().contentResolver.delete(
-                        MediaStore.Files.getContentUri(MediaStore.VOLUME_EXTERNAL),
-                        "${MediaStore.Files.FileColumns._ID} = ?",
-                        ids
-                    )
+                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) loadItems()
                 }
             } catch (e: SecurityException) {
-                pendingDeleteImages = images
-                val recoverableSecurityException =
-                    e as? RecoverableSecurityException
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    pendingDeleteImages = items
+                    val recoverableSecurityException = e as? RecoverableSecurityException
                         ?: throw e
-                val intentSender = recoverableSecurityException.userAction.actionIntent.intentSender
-                _permissionNeededForDelete.postValue(intentSender)
+                    val intentSender = recoverableSecurityException.userAction.actionIntent.intentSender
+                    _permissionNeededForDelete.postValue(intentSender)
+                } else {
+                    throw e
+                }
             }
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.R)
+    private suspend fun queryBin(): List<ListItem.MediaItem> {
+        val images = mutableListOf<ListItem.MediaItem>()
+
+        withContext(Dispatchers.IO) {
+            val projection = arrayOf(
+                MediaStore.Files.FileColumns._ID,
+                MediaStore.Files.FileColumns.MEDIA_TYPE
+            )
+
+            val contentUri = MediaStore.Files.getContentUri(MediaStore.VOLUME_EXTERNAL)
+            val bundle = Bundle()
+            bundle.putInt(MediaStore.QUERY_ARG_MATCH_TRASHED, MediaStore.MATCH_ONLY)
+            getApplication<Application>().contentResolver.query(
+                contentUri,
+                projection,
+                bundle,
+                null
+            )?.use { cursor ->
+                while (cursor.moveToNext()) {
+                    val id = cursor.getLong(0)
+                    val type = cursor.getInt(1)
+
+                    val uri = if (type == MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE) {
+                        ContentUris.withAppendedId(
+                            MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id)
+                    } else {
+                        ContentUris.withAppendedId(
+                            MediaStore.Video.Media.EXTERNAL_CONTENT_URI, id)
+                    }
+                    images += ListItem.MediaItem(id, uri, "", type, 0L, 0, 0)
+                }
+            }
+        }
+        images.reverse()
+        return images
+    }
+
+    @RequiresApi(Build.VERSION_CODES.R)
+    fun loadBin() {
+        viewModelScope.launch {
+            _bin.postValue(queryBin())
         }
     }
 }

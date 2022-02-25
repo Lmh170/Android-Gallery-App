@@ -17,8 +17,8 @@
             android:id="@+id/action_bottomNavFrag_to_albumDetailFrag"
             app:destination="@id/albumDetailFrag" />
         <action
-            android:id="@+id/action_bottomNavFrag_to_videoPlayerFrag"
-            app:destination="@id/videoPlayerFrag" />
+            android:id="@+id/action_bottomNavFrag_to_binFrag"
+            app:destination="@id/binFrag" />
     </fragment>
     <fragment
         android:id="@+id/viewPagerFrag"
@@ -34,9 +34,6 @@
             android:defaultValue="@null"
             app:argType="android.net.Uri"
             app:nullable="true" />
-        <action
-            android:id="@+id/action_viewPagerFrag_to_videoPlayerFrag"
-            app:destination="@id/videoPlayerFrag" />
     </fragment>
     <fragment
         android:id="@+id/albumDetailFrag"
@@ -48,11 +45,8 @@
             app:destination="@id/viewPagerFrag" />
     </fragment>
     <fragment
-        android:id="@+id/videoPlayerFrag"
-        android:name="com.example.gallery.ui.VideoPlayerFrag"
-        android:label="VideoPlayerFrag" >
-        <argument
-            android:name="videoUri"
-            app:argType="android.net.Uri" />
-    </fragment>
+        android:id="@+id/binFrag"
+        android:name="com.example.gallery.ui.BinFrag"
+        android:label="fragment_bin"
+        tools:layout="@layout/fragment_bin" />
 </navigation>

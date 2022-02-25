@@ -18,7 +18,7 @@
             android:layout_height="wrap_content"
             android:text="Date added:"
             android:textColor="?attr/colorOnSurface"
-            android:textSize="20sp"
+            android:textSize="16sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -30,7 +30,7 @@
             android:layout_marginTop="5dp"
             android:text="00.00.0000"
             android:textColor="?attr/colorOnSurface"
-            android:textSize="20sp"
+            android:textSize="16sp"
             app:layout_constraintEnd_toStartOf="@+id/tvDot_"
             app:layout_constraintStart_toEndOf="@+id/ivCal"
             app:layout_constraintTop_toBottomOf="@+id/tvDateHolder" />
@@ -40,26 +40,26 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            android:layout_marginTop="22dp"
             android:layout_marginEnd="8dp"
+            android:layout_marginTop="5dp"
             android:text="·"
             android:textColor="?attr/colorOnSurface"
-            android:textSize="34sp"
+            android:textSize="16sp"
             app:layout_constraintEnd_toStartOf="@+id/tvTimeAdded"
             app:layout_constraintStart_toEndOf="@+id/tvDateAdded"
-            app:layout_constraintTop_toTopOf="@+id/tvDateHolder" />
+            app:layout_constraintTop_toBottomOf="@+id/tvDateHolder" />
 
         <TextView
             android:id="@+id/tvTimeAdded"
             android:layout_width="0dp"
+            android:layout_marginTop="5dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
             android:text="0:00"
             android:textColor="?attr/colorOnSurface"
-            android:textSize="20sp"
+            android:textSize="16sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/tvDot_"
-            app:layout_constraintTop_toTopOf="@+id/tvDateHolder" />
+            app:layout_constraintTop_toBottomOf="@+id/tvDateHolder" />
 
         <ImageView
             android:id="@+id/ivCal"
@@ -77,7 +77,7 @@
             android:layout_marginTop="20dp"
             android:text="Name:"
             android:textColor="?attr/colorOnSurface"
-            android:textSize="20sp"
+            android:textSize="16sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/tvDateAdded" />
 
@@ -97,7 +97,7 @@
             android:layout_marginTop="5dp"
             android:text="TextView"
             android:textColor="?attr/colorOnSurface"
-            android:textSize="20sp"
+            android:textSize="16sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/ivImg"
             app:layout_constraintTop_toBottomOf="@+id/tvNameHolder" />
@@ -109,7 +109,7 @@
             android:layout_marginTop="20dp"
             android:text="Path:"
             android:textColor="?attr/colorOnSurface"
-            android:textSize="20sp"
+            android:textSize="16sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/tvName" />
 
@@ -130,7 +130,7 @@
             android:layout_marginTop="5dp"
             android:text="TextView"
             android:textColor="?attr/colorOnSurface"
-            android:textSize="20sp"
+            android:textSize="16sp"
             app:layout_constraintStart_toEndOf="@+id/imageView"
             app:layout_constraintTop_toBottomOf="@+id/tvPathHolder" />
 
@@ -141,7 +141,7 @@
             android:layout_marginTop="20dp"
             android:text="Size:"
             android:textColor="?attr/colorOnSurface"
-            android:textSize="20sp"
+            android:textSize="16sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/tvPath" />
 
@@ -162,7 +162,7 @@
             android:layout_marginTop="5dp"
             android:text="TextView"
             android:textColor="?attr/colorOnSurface"
-            android:textSize="20sp"
+            android:textSize="16sp"
             app:layout_constraintStart_toEndOf="@+id/imageView3"
             app:layout_constraintTop_toBottomOf="@+id/tvSizeHolder" />
 

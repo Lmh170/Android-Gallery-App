@@ -7,4 +7,4 @@
     android:layout_height="match_parent"
     tools:context=".ui.GridAlbumFrag"
     app:layoutManager="GridLayoutManager"
-    app:spanCount="2" />
+    android:transitionGroup="true"/>

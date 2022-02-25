@@ -31,8 +31,11 @@ class GridAlbumAdapter(private val frag: BottomNavFrag): ListAdapter<Album, Grid
 
             binding.ivThumbnailAlbum.setOnClickListener {
                 frag.exitTransition = MaterialSharedAxis(MaterialSharedAxis.Z, true)
+                frag.enterTransition = MaterialSharedAxis(MaterialSharedAxis.Z, true)
+
                 MainActivity.currentListPosition = 0
                 MainActivity.currentAlbumName = getItem(layoutPosition).name
+                frag.setSharedAxisTransition()
                 frag.findNavController().navigate(
                     R.id.action_bottomNavFrag_to_albumDetailFrag,
                     null,

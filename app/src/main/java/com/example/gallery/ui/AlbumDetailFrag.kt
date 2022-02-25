@@ -5,6 +5,7 @@ import android.content.ClipData
 import android.content.Intent
 import android.content.res.Configuration
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -26,6 +27,7 @@ import com.example.gallery.ListItem
 import com.example.gallery.MyItemDetailsLookup
 import com.example.gallery.MyItemKeyProvider
 import com.example.gallery.R
+import com.google.android.material.elevation.SurfaceColors
 
 
 class AlbumDetailFrag : Fragment() {
@@ -39,7 +41,16 @@ class AlbumDetailFrag : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        viewModel.albums.observe(viewLifecycleOwner) { albums ->
+            val items = albums.find { it.name == MainActivity.currentAlbumName }?.mediaItems
+            val position = (binding.rvAlbums.layoutManager as GridLayoutManager)
+                .findFirstCompletelyVisibleItemPosition()
+            (binding.rvAlbums.adapter as GridItemAdapter).submitList(items as List<ListItem>?) {
+                if (position == 0) binding.rvAlbums.scrollToPosition(0)
+            }
+        }
         if (::_binding.isInitialized) return binding.root
+
         _binding = FragmentAlbumDetailBinding.inflate(inflater, container, false)
 
         val adapter = GridItemAdapter(this@AlbumDetailFrag, true)
@@ -55,7 +66,7 @@ class AlbumDetailFrag : Fragment() {
             val tracker = SelectionTracker.Builder(
                 "GritItemFragSelectionId",
                 binding.rvAlbums,
-                MyItemKeyProvider(viewModel.albums, this),
+                MyItemKeyProvider(viewModel, true),
                 MyItemDetailsLookup(binding.rvAlbums),
                 StorageStrategy.createLongStorage()
             ).withSelectionPredicate(object : SelectionTracker.SelectionPredicate<Long>() {
@@ -97,7 +108,7 @@ class AlbumDetailFrag : Fragment() {
                         return true
                     }
                     activity?.menuInflater?.inflate(R.menu.contextual_action_bar, menu)
-                    activity?.window?.statusBarColor = resources.getColor(R.color.material_dynamic_neutral_variant20, activity?.theme)
+                    activity?.window?.statusBarColor = SurfaceColors.getColorForElevation(requireContext(), binding.appBarLayout.elevation)
                     return true
                 }
 
@@ -135,7 +146,7 @@ class AlbumDetailFrag : Fragment() {
                 override fun onDestroyActionMode(mode: ActionMode?) {
                     tracker.clearSelection()
                     Handler(Looper.getMainLooper()).postDelayed({
-                        activity?.window?.statusBarColor = resources.getColor(android.R.color.transparent, activity?.theme)
+                        activity?.window?.statusBarColor = SurfaceColors.getColorForElevation(requireContext(), binding.appBarLayout.elevation)
                     }, 400)
                     if (requireActivity().intent.getBooleanExtra(Intent.EXTRA_ALLOW_MULTIPLE,
                             false)) {
@@ -159,17 +170,6 @@ class AlbumDetailFrag : Fragment() {
 
         }
 
-        BottomNavFrag.enteringFromAlbum = true
-
-        viewModel.albums.observe(viewLifecycleOwner) { albums ->
-            val items = albums.find { it.name == MainActivity.currentAlbumName }?.mediaItems
-            val position = (binding.rvAlbums.layoutManager as GridLayoutManager)
-                .findFirstCompletelyVisibleItemPosition()
-            (binding.rvAlbums.adapter as GridItemAdapter).submitList(items as List<ListItem>) {
-                if (position == 0) binding.rvAlbums.scrollToPosition(0)
-            }
-        }
-
         binding.tbAlbum.title = MainActivity.currentAlbumName
 
         binding.tbAlbum.setNavigationOnClickListener {
@@ -184,45 +184,7 @@ class AlbumDetailFrag : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         postponeEnterTransition()
         setUpSystemBars()
-        viewModel.albums.observe(viewLifecycleOwner) { albums ->
-            val items = albums.find { it.name == MainActivity.currentAlbumName }?.mediaItems
-            val position = (binding.rvAlbums.layoutManager as GridLayoutManager)
-                .findFirstCompletelyVisibleItemPosition()
-            (binding.rvAlbums.adapter as GridItemAdapter).submitList(items as List<ListItem>) {
-                if (position == 0) binding.rvAlbums.scrollToPosition(0)
-            }
-        }
-
-        //  (binding.rvAlbums.adapter as GridItemAdapter).submitList(
-      //      viewModel.albums.value?.find { it.name == MainActivity.currentAlbumName }?.mediaItems?.value
-     //   ) {
-
-            scrollToPosition()
-            /*
-            val firstPosition = (binding.rvAlbums.layoutManager as GridLayoutManager)
-                .findFirstVisibleItemPosition()
-            val lastPosition = (binding.rvAlbums.layoutManager as GridLayoutManager)
-                .findLastVisibleItemPosition()
-            val viewAtPosition =
-                binding.rvAlbums.layoutManager!!.findViewByPosition(MainActivity.currentListPosition)
-            println("first $firstPosition last $lastPosition")
-            if (viewAtPosition != null || !(MainActivity.currentListPosition < firstPosition || MainActivity.currentListPosition > lastPosition)) {
-                //   postponeEnterTransition()
-                scrollToPosition()
-
-            } else {
-                scrollToPosition()
-                // postponeEnterTransition()
-                println("in if")
-            }
-//        scrollToPosition()
-            setUpSystemBars()
-            //    prepareTransitions()
-            */
-    //    }
-
-
-
+        scrollToPosition()
     }
 
     private fun scrollToPosition() {

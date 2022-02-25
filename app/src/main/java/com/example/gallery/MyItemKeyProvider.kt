@@ -6,15 +6,13 @@ import androidx.collection.LongSparseArray
 import androidx.lifecycle.LiveData
 import androidx.recyclerview.selection.ItemKeyProvider
 import androidx.recyclerview.widget.RecyclerView
-import com.example.gallery.ui.AlbumDetailFrag
-import com.example.gallery.ui.GridItemFrag
-import com.example.gallery.ui.MainActivity
+import com.example.gallery.ui.*
 
 // an adapted version of StableIdKeyProvider as it cannot handle changing datasets
-class MyItemKeyProvider(): ItemKeyProvider<Long>(SCOPE_CACHED) {
+class MyItemKeyProvider(private val viewModel: MainViewModel, private val isAlbum: Boolean = false): ItemKeyProvider<Long>(SCOPE_CACHED) {
     private val mPositionToKey = SparseArray<Long>()
     private val mKeyToPosition = LongSparseArray<Int>()
-
+/*
     constructor(
         albums: LiveData<List<Album>>,
         frag: AlbumDetailFrag
@@ -29,7 +27,7 @@ class MyItemKeyProvider(): ItemKeyProvider<Long>(SCOPE_CACHED) {
 
     constructor(
         items: LiveData<List<ListItem>>,
-        frag: GridItemFrag
+        frag: BottomNavFrag
     ) : this() {
         items.observe(frag.viewLifecycleOwner) {
             it.forEachIndexed { index, listItem ->
@@ -39,12 +37,28 @@ class MyItemKeyProvider(): ItemKeyProvider<Long>(SCOPE_CACHED) {
         }
     }
 
-    override fun getKey(position: Int): Long? =
-        mPositionToKey.get(position)
+ */
+
+    override fun getKey(position: Int): Long? {
+        return if (isAlbum) {
+            viewModel.albums.value?.find { it.name == MainActivity.currentAlbumName }?.mediaItems
+            ?.get(position)?.id
+        } else {
+            viewModel.recyclerViewItems.value?.get(position)?.id
+        }
+    }
+        // mPositionToKey.get(position)
 
 
-    override fun getPosition(key: Long): Int =
-        mKeyToPosition.get(key, RecyclerView.NO_POSITION)
+    override fun getPosition(key: Long): Int {
+        return if (isAlbum) {
+            viewModel.albums.value?.find { it.name == MainActivity.currentAlbumName }?.mediaItems
+                ?.indexOfFirst { it.id == key } ?: RecyclerView.NO_POSITION
+        } else {
+            viewModel.recyclerViewItems.value?.indexOfFirst { it.id == key } ?: RecyclerView.NO_POSITION
+        }
+    }
+       // mKeyToPosition.get(key, RecyclerView.NO_POSITION)
 }
 
 

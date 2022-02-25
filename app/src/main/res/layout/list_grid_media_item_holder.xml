@@ -26,11 +26,11 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
         android:layout_marginEnd="10dp"
-        android:minWidth="22dp"
-        android:minHeight="22dp"
+        android:contentDescription="play_button"
+        android:minWidth="20dp"
+        android:minHeight="20dp"
         android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/ic_baseline_play_circle_outline_24"
-        android:contentDescription="play_button" />
+        app:srcCompat="@drawable/ic_baseline_play_circle_filled_24" />
 </androidx.constraintlayout.widget.ConstraintLayout>

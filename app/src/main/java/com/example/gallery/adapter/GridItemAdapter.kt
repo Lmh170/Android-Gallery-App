@@ -18,11 +18,13 @@ package com.example.gallery.adapter
 import android.app.Activity
 import android.content.Intent
 import android.graphics.drawable.Drawable
+import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.IntentSenderRequest
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.navigation.fragment.findNavController
@@ -45,6 +47,7 @@ import com.example.gallery.R
 import com.example.gallery.databinding.ListGridHeaderBinding
 import com.example.gallery.databinding.ListGridMediaItemHolderBinding
 import com.example.gallery.ui.AlbumDetailFrag
+import com.example.gallery.ui.BinFrag
 import com.example.gallery.ui.BottomNavFrag
 import com.example.gallery.ui.MainActivity
 import com.google.android.material.shape.ShapeAppearanceModel
@@ -192,36 +195,47 @@ class GridItemAdapter(private val frag: Fragment, private val isAlbum: Boolean):
                             return@setOnClickListener
                         }
                 }
-                MainActivity.currentListPosition = layoutPosition
-                MainActivity.currentViewPagerPosition = if (isAlbum){
-                    layoutPosition
-                } else {
-                    (getItem(layoutPosition) as ListItem.MediaItem).viewPagerPosition
+                if (frag !is BinFrag){
+                    MainActivity.currentListPosition = layoutPosition
+                    MainActivity.currentViewPagerPosition = if (isAlbum){
+                        layoutPosition
+                    } else {
+                        (getItem(layoutPosition) as ListItem.MediaItem).viewPagerPosition
+                    }
                 }
 
                 val extras = FragmentNavigatorExtras(it to it.transitionName)
-                if (frag is BottomNavFrag) {
-                    BottomNavFrag.enteringFromAlbum = false
-                    frag.prepareTransitions()
-                    frag.findNavController().navigate(
-                        R.id.action_bottomNavFrag_to_viewPagerFrag,
-                        null,
-                        null,
-                        extras)
-                } else if (frag is AlbumDetailFrag) {
-                    val args = Bundle()
-                    args.putBoolean("isAlbum", true)
-                    frag.findNavController().navigate(
-                        R.id.action_albumDetailFrag_to_viewPagerFrag,
-                        args,
-                        null,
-                        extras)
+                when (frag) {
+                    is BottomNavFrag -> {
+                        frag.setHoldTransition()
+                        frag.prepareTransitions()
+                        frag.findNavController().navigate(
+                            R.id.action_bottomNavFrag_to_viewPagerFrag,
+                            null,
+                            null,
+                            extras)
+                    }
+                    is AlbumDetailFrag -> {
+                        val args = Bundle()
+                        args.putBoolean("isAlbum", true)
+                        frag.findNavController().navigate(
+                            R.id.action_albumDetailFrag_to_viewPagerFrag,
+                            args,
+                            null,
+                            extras)
+                    }
+                    is BinFrag -> {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                            val senderRequest = MediaStore.createTrashRequest(frag.requireActivity().application.contentResolver,
+                                listOf((getItem(layoutPosition) as ListItem.MediaItem).uri), false).intentSender
+                            val intentSenderRequest = IntentSenderRequest.Builder(senderRequest).build()
+                            (frag.requireActivity() as MainActivity).restoreRequest.launch(intentSenderRequest)
+                        }
+                    }
                 }
             }
         }
     }
-
-
 
     inner class HeaderViewHolder (private val binding: ListGridHeaderBinding): RecyclerView.ViewHolder(binding.root) {
         fun onBind() {
