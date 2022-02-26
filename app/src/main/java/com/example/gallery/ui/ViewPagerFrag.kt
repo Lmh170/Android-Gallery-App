@@ -200,14 +200,14 @@ class ViewPagerFrag : Fragment() {
         binding.cvInfo.setOnClickListener {
 
             val currentItem = getCurrentItem() ?: return@setOnClickListener
-            val infos = viewModel.getImageInfo(currentItem.uri)
+            val info = viewModel.getImageInfo(currentItem.uri)
             val inflater = requireActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
             val binding = ViewDialogInfoBinding.inflate(inflater)
-            binding.tvDateAdded.text = SimpleDateFormat.getDateInstance().format(Date(infos[0].toLong()))
-            binding.tvName.text = infos[3]
-            binding.tvTimeAdded.text = SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT).format(Date(infos[0].toLong()))
-            binding.tvPath.text = infos[2]
-            binding.tvSize.text = infos[0].toLong().div(1000000).toString() + " MB"
+            binding.tvDateAdded.text = SimpleDateFormat.getDateInstance().format(Date(info[0].toLong()))
+            binding.tvName.text = info[3]
+            binding.tvTimeAdded.text = SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT).format(Date(info[0].toLong()))
+            binding.tvPath.text = info[2]
+            binding.tvSize.text = info[1] + " MB"
 
             MaterialAlertDialogBuilder(requireContext(), R.style.Theme_MaterialAlertDialog_Centered)
                 .setTitle("Info")

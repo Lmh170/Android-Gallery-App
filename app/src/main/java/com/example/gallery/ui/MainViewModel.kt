@@ -19,6 +19,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.*
+import kotlin.math.pow
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val _recyclerViewItems = MutableLiveData<List<ListItem>>()
@@ -269,7 +270,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         val projection = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             arrayOf(
                 MediaStore.Files.FileColumns.DATE_ADDED,
-                MediaStore.Files.FileColumns.SIZE,
+                MediaStore.MediaColumns.SIZE,
                 MediaStore.Files.FileColumns.RELATIVE_PATH,
                 MediaStore.Files.FileColumns.DISPLAY_NAME
             )
@@ -291,15 +292,18 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         )?.use { cursor ->
             cursor.moveToFirst()
             var dateAdded = cursor.getLong(0)
-            val size = cursor.getLong(1)
+            val size = String.format(
+                "%.2f",
+                (cursor.getLong(1) / (1024f * 1024f))
+            )
             val path = cursor.getString(2)
             val name = cursor.getString(3)
 
-                // convert seconds to milliseconds
+            // convert seconds to milliseconds
             if (dateAdded < 1000000000000L) dateAdded *= 1000
 
             info += dateAdded.toString()
-            info += size.toString()
+            info += size
             info += path
             info += name
         }
@@ -312,7 +316,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                     val pendingIntent = MediaStore.createTrashRequest(getApplication<Application>().contentResolver,
                         listOf(image.uri), true)
-                    pendingDeleteImage = null // because the item will be deleted with request == no further action needed
+                    pendingDeleteImage = null // item will be deleted with request
                     _permissionNeededForDelete.postValue(pendingIntent.intentSender)
                 } else {
                     getApplication<Application>().contentResolver.delete(
