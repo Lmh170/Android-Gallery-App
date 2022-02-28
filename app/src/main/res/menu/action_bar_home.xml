@@ -4,6 +4,6 @@
 
     <item
         android:id="@+id/miTrash"
-        android:title="Trash"
+        android:title="@string/bin"
         app:showAsAction="never"/>
 </menu>

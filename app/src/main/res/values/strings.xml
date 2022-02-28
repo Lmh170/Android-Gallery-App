@@ -7,4 +7,9 @@
     <string name="time_bar">Time Bar</string>
     <string name="item_size">%1$s MB</string>
     <string name="close">Close</string>
+    <string name="select_single_item">Select an item</string>
+    <string name="select_multiple_items">Select items</string>
+    <string name="bin">Bin</string>
+    <string name="photos">Photos</string>
+    <string name="albums">Albums</string>
 </resources>

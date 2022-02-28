@@ -163,9 +163,9 @@ class BottomNavFrag : Fragment() {
         }
         if (!requireActivity().intent.getBooleanExtra(Intent.EXTRA_ALLOW_MULTIPLE,
                 false)) {
-            binding.tbMain.title = "Select an item"
+            binding.tbMain.title = getString(R.string.select_single_item)
         } else {
-            binding.tbMain.title = "Select items"
+            binding.tbMain.title = getString(R.string.select_multiple_items)
         }
         binding.bnvMain.visibility = View.GONE
         childFragmentManager.commit {
