@@ -8,7 +8,6 @@ import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
 import android.provider.Settings
-import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -17,11 +16,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
-import androidx.navigation.NavController
-import androidx.navigation.NavDestination
-import androidx.navigation.fragment.NavHostFragment
-import com.example.gallery.R
 import com.example.gallery.databinding.ActivityMainBinding
+import com.google.android.material.snackbar.Snackbar
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
@@ -29,7 +25,6 @@ class MainActivity : AppCompatActivity() {
     lateinit var restoreRequest: ActivityResultLauncher<IntentSenderRequest>
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        viewModel.loadItems()
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -54,17 +49,6 @@ class MainActivity : AppCompatActivity() {
         viewModel.permissionNeededForDelete.observe(this) { intentSender ->
             val intentSenderRequest = IntentSenderRequest.Builder(intentSender).build()
             request.launch(intentSenderRequest)
-        }
-        testIntents()
-    }
-
-    private fun testIntents() {
-        println("intent: data ${intent.data} type ${intent.type} flags ${intent.flags} action: ${intent.action}" +
-                "categories: ${intent.categories} scheme ${intent.scheme} ${intent.getParcelableExtra<Uri>(Intent.EXTRA_STREAM)}")
-
-        val frag = supportFragmentManager.findFragmentById(R.id.fcvMain) as NavHostFragment
-        frag.navController.addOnDestinationChangedListener { controller, destination, arguments ->
-         //   viewModel.loadItems()
         }
     }
 
@@ -117,22 +101,30 @@ class MainActivity : AppCompatActivity() {
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         when (requestCode) {
-            READ_EXTERNAL_STORAGE_REQUEST -> {
+            EXTERNAL_STORAGE_REQUEST -> {
                 // If request is cancelled, the result arrays are empty.
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     viewModel.loadItems()
                 } else {
                     // If we weren't granted the permission, check to see if we should show
                     // rationale for the permission.
-                    val showRationale =
+                    val showRationale = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                         ActivityCompat.shouldShowRequestPermissionRationale(
                             this,
                             Manifest.permission.READ_EXTERNAL_STORAGE
                         )
+                    } else {
+                        ActivityCompat.shouldShowRequestPermissionRationale(
+                            this,
+                            Manifest.permission.WRITE_EXTERNAL_STORAGE
+                        )
+                    }
 
                     if (showRationale) {
-                         // Todo()
-                        Toast.makeText(this, "App requires access to storage to access your Photos", Toast.LENGTH_SHORT).show()
+                        Snackbar.make(binding.root, "App requires access to storage to access your Photos", Snackbar.LENGTH_INDEFINITE)
+                            .setAction("Grant Permission") {
+                                requestPermission()
+                            }.show()
                     } else {
                         goToSettings()
                     }
@@ -159,13 +151,18 @@ class MainActivity : AppCompatActivity() {
 
     private fun requestPermission() {
         if (!haveStoragePermission()) {
-            val permissions = arrayOf(
-                Manifest.permission.READ_EXTERNAL_STORAGE,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE
-            )
+            val permissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                arrayOf(
+                    Manifest.permission.READ_EXTERNAL_STORAGE
+                )
+            } else {
+                arrayOf(
+                    Manifest.permission.READ_EXTERNAL_STORAGE,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+                )
+            }
 
-            ActivityCompat.requestPermissions(this, permissions, READ_EXTERNAL_STORAGE_REQUEST)
-           // requestPermissions(permissions, READ_EXTERNAL_STORAGE_REQUEST)
+            ActivityCompat.requestPermissions(this, permissions, EXTERNAL_STORAGE_REQUEST)
         }
     }
 
@@ -173,6 +170,6 @@ class MainActivity : AppCompatActivity() {
         var currentListPosition = 0
         var currentViewPagerPosition = 0
         lateinit var currentAlbumName: String
-        private const val READ_EXTERNAL_STORAGE_REQUEST = 0x1045
+        private const val EXTERNAL_STORAGE_REQUEST = 0x1045
     }
 }

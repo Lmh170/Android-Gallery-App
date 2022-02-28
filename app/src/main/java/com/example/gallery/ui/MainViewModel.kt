@@ -1,5 +1,6 @@
 package com.example.gallery.ui
 
+import android.annotation.SuppressLint
 import android.app.Application
 import android.app.RecoverableSecurityException
 import android.content.ContentUris
@@ -19,7 +20,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.*
-import kotlin.math.pow
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val _recyclerViewItems = MutableLiveData<List<ListItem>>()
@@ -39,10 +39,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val _permissionNeededForDelete = MutableLiveData<IntentSender>()
     val permissionNeededForDelete: LiveData<IntentSender> = _permissionNeededForDelete
 
-    /**
-     * Performs a one shot load of images from [MediaStore.Images.Media.EXTERNAL_CONTENT_URI] into
-     * the [_recyclerViewItems] [LiveData] above.
-     */
     fun loadItems() {
         viewModelScope.launch {
             val imageList = queryImages()
@@ -98,6 +94,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         return viewPagerImages
     }
 
+    @SuppressLint("InlinedApi")
     private suspend fun queryImages(): List<ListItem> {
         val images = mutableListOf<ListItem>()
         var listPosition = -1 // because the first item has the index 0
@@ -169,13 +166,14 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         return images
     }
 
+    @SuppressLint("InlinedApi")
     private suspend fun queryImages(source: Uri, mimeType: String?): List<ListItem> {
         val images = mutableListOf<ListItem>()
         var listPosition = -1 // because the first item has the index 0
         var viewPagerPosition = -1 // because the first item has the index 0
 
         withContext(Dispatchers.IO) {
-            val projection = arrayOf(
+            @Suppress("DEPRECATION") val projection = arrayOf(
                 MediaStore.Files.FileColumns.BUCKET_DISPLAY_NAME,
                 MediaStore.Files.FileColumns._ID,
                 MediaStore.Files.FileColumns.DATE_ADDED,
@@ -234,7 +232,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     }
                     viewPagerPosition += 1
                     listPosition += 1
-                    images += ListItem.MediaItem(id, uri, album, type, dateModified, viewPagerPosition, listPosition)
+                    images += ListItem.MediaItem(id, uri, album, type, dateModified,
+                        viewPagerPosition, listPosition)
                 }
             }
         }
@@ -267,7 +266,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun getImageInfo(source: Uri): List<String> {
         val info = mutableListOf<String>()
 
-        val projection = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        @Suppress("DEPRECATION") val projection = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             arrayOf(
                 MediaStore.Files.FileColumns.DATE_ADDED,
                 MediaStore.MediaColumns.SIZE,
@@ -314,7 +313,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         withContext(Dispatchers.IO) {
             try {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                    val pendingIntent = MediaStore.createTrashRequest(getApplication<Application>().contentResolver,
+                    val pendingIntent = MediaStore.createTrashRequest(getApplication<Application>()
+                        .contentResolver,
                         listOf(image.uri), true)
                     pendingDeleteImage = null // item will be deleted with request
                     _permissionNeededForDelete.postValue(pendingIntent.intentSender)
@@ -331,7 +331,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     pendingDeleteImage = image
                     val recoverableSecurityException = e as? RecoverableSecurityException
                         ?: throw e
-                    val intentSender = recoverableSecurityException.userAction.actionIntent.intentSender
+                    val intentSender = recoverableSecurityException.userAction.actionIntent
+                        .intentSender
                     _permissionNeededForDelete.postValue(intentSender)
                 } else {
                     throw e
@@ -348,9 +349,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     for (image in items) {
                         uris.add(image.uri)
                     }
-                    val pendingIntent = MediaStore.createTrashRequest(getApplication<Application>().contentResolver,
+                    val pendingIntent = MediaStore.createTrashRequest(getApplication<Application>()
+                        .contentResolver,
                         uris, true)
-                    pendingDeleteImages = null // because the item will be deleted with request == no further action needed
+                    pendingDeleteImages = null // item will be deleted with request
                     _permissionNeededForDelete.postValue(pendingIntent.intentSender)
                 } else {
                     for (item in items) {
@@ -374,7 +376,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     pendingDeleteImages = items
                     val recoverableSecurityException = e as? RecoverableSecurityException
                         ?: throw e
-                    val intentSender = recoverableSecurityException.userAction.actionIntent.intentSender
+                    val intentSender = recoverableSecurityException.userAction.actionIntent
+                        .intentSender
                     _permissionNeededForDelete.postValue(intentSender)
                 } else {
                     throw e
@@ -413,7 +416,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                         ContentUris.withAppendedId(
                             MediaStore.Video.Media.EXTERNAL_CONTENT_URI, id)
                     }
-                    images += ListItem.MediaItem(id, uri, "", type, 0L, 0, 0)
+                    images += ListItem.MediaItem(id, uri, "", type, 0L,
+                        0, 0)
                 }
             }
         }

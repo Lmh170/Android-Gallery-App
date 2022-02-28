@@ -22,7 +22,8 @@ import com.example.gallery.ui.VideoPlayerActivity
 import com.example.gallery.ui.ViewPagerFrag
 import java.util.concurrent.atomic.AtomicBoolean
 
-class ViewPagerAdapter(val frag: ViewPagerFrag): ListAdapter<ListItem.MediaItem, ViewPagerAdapter.ViewHolderPager>(ListItem.MediaItem.DiffCallback) {
+class ViewPagerAdapter(val frag: ViewPagerFrag): ListAdapter<ListItem.MediaItem,
+        ViewPagerAdapter.ViewHolderPager>(ListItem.MediaItem.DiffCallback) {
     val enterTransitionStarted: AtomicBoolean = AtomicBoolean()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolderPager {
@@ -36,14 +37,13 @@ class ViewPagerAdapter(val frag: ViewPagerFrag): ListAdapter<ListItem.MediaItem,
         holderPager.onBind()
     }
 
-    inner class ViewHolderPager(val binding: ViewPagerItemHolderBinding): RecyclerView.ViewHolder(binding.root) {
+    inner class ViewHolderPager(val binding: ViewPagerItemHolderBinding):
+        RecyclerView.ViewHolder(binding.root) {
         fun onBind() {
-            if ((getItem(layoutPosition) as ListItem.MediaItem).type == MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO) {
+            if ((getItem(layoutPosition) as ListItem.MediaItem).type ==
+                MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO) {
                 binding.ivPlayButton.visibility = View.VISIBLE
                 binding.ivPlayButton.setOnClickListener {
-                    val args = Bundle()
-                    args.putParcelable("videoUri", (getItem(layoutPosition) as ListItem.MediaItem).uri)
-                  //  frag.findNavController().navigate(R.id.action_viewPagerFrag_to_videoPlayerFrag, args, null, null)
                     val intent = Intent(frag.context, VideoPlayerActivity::class.java).apply {
                         data = (getItem(layoutPosition) as ListItem.MediaItem).uri
                     }
@@ -57,7 +57,8 @@ class ViewPagerAdapter(val frag: ViewPagerFrag): ListAdapter<ListItem.MediaItem,
 
             GlideApp.with(binding.pagerImage)
                 .load(getItem(layoutPosition).uri)
-                .signature(MediaStoreSignature(null, getItem(layoutPosition).dateModified, 0))
+                .signature(MediaStoreSignature(null, getItem(layoutPosition)
+                    .dateModified, 0))
                 .listener(object : RequestListener<Drawable> {
                 override fun onLoadFailed(
                     e: GlideException?,
@@ -94,6 +95,5 @@ class ViewPagerAdapter(val frag: ViewPagerFrag): ListAdapter<ListItem.MediaItem,
             binding.pagerImage.setOnClickListener { frag.toggleSystemUI() }
             binding.root.setOnClickListener { frag.toggleSystemUI() }
         }
-
     }
 }

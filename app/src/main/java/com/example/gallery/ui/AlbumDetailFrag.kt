@@ -29,7 +29,6 @@ import com.example.gallery.MyItemKeyProvider
 import com.example.gallery.R
 import com.google.android.material.elevation.SurfaceColors
 
-
 class AlbumDetailFrag : Fragment() {
     private lateinit var _binding: FragmentAlbumDetailBinding
     private val binding get() = _binding
@@ -63,111 +62,7 @@ class AlbumDetailFrag : Fragment() {
                 Intent.ACTION_GET_CONTENT &&
             requireActivity().intent.getBooleanExtra(Intent.EXTRA_ALLOW_MULTIPLE, false) ||
                 requireActivity().intent.action == Intent.ACTION_MAIN) {
-            val tracker = SelectionTracker.Builder(
-                "GritItemFragSelectionId",
-                binding.rvAlbums,
-                MyItemKeyProvider(viewModel, true),
-                MyItemDetailsLookup(binding.rvAlbums),
-                StorageStrategy.createLongStorage()
-            ).withSelectionPredicate(object : SelectionTracker.SelectionPredicate<Long>() {
-                override fun canSetStateForKey(key: Long, nextState: Boolean): Boolean =
-                    binding.rvAlbums.findViewHolderForItemId(key) != null
-
-                override fun canSelectMultiple(): Boolean =
-                    true
-
-                override fun canSetStateAtPosition(position: Int, nextState: Boolean): Boolean =
-                    binding.rvAlbums.findViewHolderForLayoutPosition(position) != null
-
-            }).build()
-
-            adapter.tracker = tracker
-
-            val callback = object : ActionMode.Callback {
-                override fun onCreateActionMode(mode: ActionMode?, menu: Menu?): Boolean {
-                    if (requireActivity().intent.getBooleanExtra(Intent.EXTRA_ALLOW_MULTIPLE,
-                                false)) {
-                        binding.fabDone.show()
-                        binding.fabDone.setOnClickListener {
-                            val intent = Intent()
-                            val items = mutableListOf<Uri>()
-                            for (key in tracker.selection) {
-                                viewModel.albums.value?.find {
-                                    it.name == MainActivity.currentAlbumName
-                                }?.mediaItems?.find {
-                                    it.id == key
-                                }?.uri?.let { it1 -> items.add(it1) }
-                            }
-                            intent.clipData = ClipData.newUri(requireActivity().contentResolver, "uris", items[0])
-                            for (i in 1 until items.size) {
-                                intent.clipData?.addItem(ClipData.Item(items[i]))
-                            }
-                            requireActivity().setResult(Activity.RESULT_OK, intent)
-                            requireActivity().finish()
-                        }
-                        return true
-                    }
-                    activity?.menuInflater?.inflate(R.menu.contextual_action_bar, menu)
-                    activity?.window?.statusBarColor = SurfaceColors.getColorForElevation(requireContext(), binding.appBarLayout.elevation)
-                    return true
-                }
-
-                override fun onPrepareActionMode(mode: ActionMode?, menu: Menu?): Boolean {
-                    return false
-                }
-
-                override fun onActionItemClicked(mode: ActionMode?, item: MenuItem?): Boolean {
-                    return when (item?.itemId) {
-                        R.id.miShare -> {
-                            val items = mutableListOf<ListItem.MediaItem>()
-                            for (id in tracker.selection) {
-                                val selectedItem = adapter.currentList.find { it.id == id } as ListItem.MediaItem? ?: return false
-                                items.add(selectedItem)
-                            }
-                            ViewPagerFrag.share(items, requireActivity())
-                            tracker.clearSelection()
-                            actionMode?.finish()
-                            true
-                        }
-                        R.id.miDelete -> {
-                            val items = mutableListOf<ListItem.MediaItem>()
-                            for (id in tracker.selection) {
-                                val selectedItem = adapter.currentList.find { it.id == id} as ListItem.MediaItem? ?: return false
-                                items.add(selectedItem)
-                            }
-                            ViewPagerFrag.delete(items, requireContext(), viewModel)
-                            actionMode?.finish()
-                            true
-                        }
-                        else -> false
-                    }
-                }
-
-                override fun onDestroyActionMode(mode: ActionMode?) {
-                    tracker.clearSelection()
-                    Handler(Looper.getMainLooper()).postDelayed({
-                        activity?.window?.statusBarColor = SurfaceColors.getColorForElevation(requireContext(), binding.appBarLayout.elevation)
-                    }, 400)
-                    if (requireActivity().intent.getBooleanExtra(Intent.EXTRA_ALLOW_MULTIPLE,
-                            false)) {
-                        binding.fabDone.hide()
-                    }
-                    actionMode = null
-                }
-            }
-
-            tracker.addObserver(object: SelectionTracker.SelectionObserver<Long>() {
-                override fun onSelectionChanged() {
-                    super.onSelectionChanged()
-                    actionMode?.title = tracker.selection.size().toString()
-                    if (actionMode == null) {
-                        actionMode = binding.tbAlbum.startActionMode(callback)
-                    } else if (tracker.selection.size() == 0) {
-                        actionMode?.finish()
-                    }
-                }
-            })
-
+            setUpRecyclerViewSelection()
         }
 
         binding.tbAlbum.title = MainActivity.currentAlbumName
@@ -185,6 +80,124 @@ class AlbumDetailFrag : Fragment() {
         postponeEnterTransition()
         setUpSystemBars()
         scrollToPosition()
+    }
+
+    private fun setUpRecyclerViewSelection() {
+        val tracker = SelectionTracker.Builder(
+            "GritItemFragSelectionId",
+            binding.rvAlbums,
+            MyItemKeyProvider(viewModel, true),
+            MyItemDetailsLookup(binding.rvAlbums),
+            StorageStrategy.createLongStorage()
+        ).withSelectionPredicate(object : SelectionTracker.SelectionPredicate<Long>() {
+            override fun canSetStateForKey(key: Long, nextState: Boolean): Boolean =
+                binding.rvAlbums.findViewHolderForItemId(key) != null
+
+            override fun canSelectMultiple(): Boolean =
+                true
+
+            override fun canSetStateAtPosition(position: Int, nextState: Boolean): Boolean =
+                binding.rvAlbums.findViewHolderForLayoutPosition(position) != null
+
+        }).build()
+
+        (binding.rvAlbums.adapter as GridItemAdapter).tracker = tracker
+
+        val callback = object : ActionMode.Callback {
+            override fun onCreateActionMode(mode: ActionMode?, menu: Menu?): Boolean {
+                if (requireActivity().intent.getBooleanExtra(Intent.EXTRA_ALLOW_MULTIPLE,
+                        false)) {
+                    binding.fabDone.show()
+                    binding.fabDone.setOnClickListener {
+                        val intent = Intent()
+                        val items = mutableListOf<Uri>()
+                        for (key in tracker.selection) {
+                            viewModel.albums.value?.find {
+                                it.name == MainActivity.currentAlbumName
+                            }?.mediaItems?.find {
+                                it.id == key
+                            }?.uri?.let { it1 -> items.add(it1) }
+                        }
+                        intent.clipData = ClipData.newUri(requireActivity().contentResolver,
+                            "uris", items[0])
+                        for (i in 1 until items.size) {
+                            intent.clipData?.addItem(ClipData.Item(items[i]))
+                        }
+                        requireActivity().setResult(Activity.RESULT_OK, intent)
+                        requireActivity().finish()
+                    }
+                    return true
+                }
+                activity?.menuInflater?.inflate(R.menu.contextual_action_bar, menu)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    activity?.window?.statusBarColor = SurfaceColors.getColorForElevation(
+                        requireContext(), binding.appBarLayout.elevation)
+                }
+                return true
+            }
+
+            override fun onPrepareActionMode(mode: ActionMode?, menu: Menu?): Boolean {
+                return false
+            }
+
+            override fun onActionItemClicked(mode: ActionMode?, item: MenuItem?): Boolean {
+                return when (item?.itemId) {
+                    R.id.miShare -> {
+                        val items = mutableListOf<ListItem.MediaItem>()
+                        for (id in tracker.selection) {
+                            val selectedItem = (binding.rvAlbums.adapter as GridItemAdapter)
+                                .currentList.find {
+                                it.id == id } as ListItem.MediaItem? ?: return false
+                            items.add(selectedItem)
+                        }
+                        ViewPagerFrag.share(items, requireActivity())
+                        tracker.clearSelection()
+                        actionMode?.finish()
+                        true
+                    }
+                    R.id.miDelete -> {
+                        val items = mutableListOf<ListItem.MediaItem>()
+                        for (id in tracker.selection) {
+                            val selectedItem = (binding.rvAlbums.adapter as GridItemAdapter)
+                                .currentList.find {
+                                it.id == id} as ListItem.MediaItem? ?: return false
+                            items.add(selectedItem)
+                        }
+                        ViewPagerFrag.delete(items, requireContext(), viewModel)
+                        actionMode?.finish()
+                        true
+                    }
+                    else -> false
+                }
+            }
+
+            override fun onDestroyActionMode(mode: ActionMode?) {
+                tracker.clearSelection()
+                Handler(Looper.getMainLooper()).postDelayed({
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                        activity?.window?.statusBarColor = SurfaceColors.getColorForElevation(
+                            requireContext(), binding.appBarLayout.elevation)
+                    }
+                }, 400)
+                if (requireActivity().intent.getBooleanExtra(Intent.EXTRA_ALLOW_MULTIPLE,
+                        false)) {
+                    binding.fabDone.hide()
+                }
+                actionMode = null
+            }
+        }
+
+        tracker.addObserver(object: SelectionTracker.SelectionObserver<Long>() {
+            override fun onSelectionChanged() {
+                super.onSelectionChanged()
+                actionMode?.title = tracker.selection.size().toString()
+                if (actionMode == null) {
+                    actionMode = binding.tbAlbum.startActionMode(callback)
+                } else if (tracker.selection.size() == 0) {
+                    actionMode?.finish()
+                }
+            }
+        })
     }
 
     private fun scrollToPosition() {
@@ -243,7 +256,8 @@ class AlbumDetailFrag : Fragment() {
                         (selectedViewHolder as GridItemAdapter.MediaItemHolder).binding.image
 
                 }
-            })
+            }
+        )
     }
 
     private fun setUpSystemBars() {

@@ -1,20 +1,15 @@
 package com.example.gallery.ui
 
-import android.app.Application
-import android.content.ContentUris
 import android.os.Build
 import android.os.Bundle
-import android.provider.MediaStore
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.RequiresApi
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
-import com.example.gallery.ListItem
-import com.example.gallery.R
 import com.example.gallery.adapter.GridItemAdapter
 import com.example.gallery.databinding.FragmentBinBinding
 import com.google.android.material.transition.MaterialSharedAxis
@@ -47,8 +42,6 @@ class BinFrag : Fragment() {
 
         enterTransition = MaterialSharedAxis(MaterialSharedAxis.Z,true)
         returnTransition = MaterialSharedAxis(MaterialSharedAxis.Z,false)
-
-        // binding.rvBin.isTransitionGroup = true
 
         binding.tbBin.setNavigationOnClickListener {
             viewModel.loadItems()

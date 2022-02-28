@@ -1,15 +1,9 @@
 package com.example.gallery.ui
 
-import android.graphics.drawable.ColorDrawable
 import android.os.Build
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowInsets
-import android.widget.MediaController
-import android.widget.VideoView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.*
 import androidx.transition.TransitionManager
@@ -35,8 +29,6 @@ class VideoPlayerActivity : AppCompatActivity() {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             window.statusBarColor = resources.getColor(android.R.color.black, theme)
-        } else {
-            window.statusBarColor = resources.getColor(android.R.color.black)
         }
 
         binding.tbVideo.setNavigationOnClickListener {
@@ -51,8 +43,8 @@ class VideoPlayerActivity : AppCompatActivity() {
 
         ViewCompat.setOnApplyWindowInsetsListener(window.decorView) { _, windowInsets ->
             val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
-            binding.tbVideo.updateLayoutParams<ViewGroup.MarginLayoutParams>{
-                topMargin = insets.top
+            binding.exoPlayer.findViewById<View>(R.id.exo_progress).updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                bottomMargin = insets.bottom + 10
             }
             windowInsets
         }

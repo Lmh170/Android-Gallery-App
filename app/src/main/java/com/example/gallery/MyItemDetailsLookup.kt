@@ -1,6 +1,5 @@
 package com.example.gallery
 
-import android.net.Uri
 import android.view.MotionEvent
 import androidx.recyclerview.selection.ItemDetailsLookup
 import androidx.recyclerview.widget.RecyclerView

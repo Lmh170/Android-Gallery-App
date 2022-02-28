@@ -1,28 +1,15 @@
 package com.example.gallery.ui
 
 import android.content.Intent
-import android.graphics.drawable.Drawable
 import android.os.Bundle
-import android.os.PersistableBundle
-import android.provider.MediaStore
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.*
 import androidx.transition.TransitionManager
-import androidx.viewpager2.widget.MarginPageTransformer
-import androidx.viewpager2.widget.ViewPager2
-import com.bumptech.glide.load.DataSource
-import com.bumptech.glide.load.engine.GlideException
-import com.bumptech.glide.request.RequestListener
-import com.bumptech.glide.request.target.Target
-import com.bumptech.glide.signature.MediaStoreSignature
 import com.example.gallery.GlideApp
 import com.example.gallery.ListItem
-import com.example.gallery.adapter.ViewPagerAdapter
 import com.example.gallery.databinding.ActivityImageViewerBinding
-import com.example.gallery.databinding.FragmentViewPagerBinding
-import com.example.gallery.databinding.ViewPagerItemHolderBinding
 import com.google.android.material.transition.MaterialFade
 
 class ImageViewerActivity: AppCompatActivity() {
@@ -104,7 +91,7 @@ class ImageViewerActivity: AppCompatActivity() {
             .hide(WindowInsetsCompat.Type.systemBars())
     }
 
-    fun toggleSystemUI() {
+    private fun toggleSystemUI() {
         if (isSystemUiVisible) hideSystemUI() else showSystemUI()
         isSystemUiVisible = !isSystemUiVisible
     }

@@ -1,5 +1,10 @@
 <resources>
     <string name="app_name">Gallery</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="share">Share</string>
+    <string name="edit">Edit</string>
+    <string name="info">Info</string>
+    <string name="delete">Delete</string>
+    <string name="time_bar">Time Bar</string>
+    <string name="item_size">%1$s MB</string>
+    <string name="close">Close</string>
 </resources>

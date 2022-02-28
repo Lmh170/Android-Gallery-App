@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/clMain"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -20,7 +21,8 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:srcCompat="@drawable/gradient_background" />
+        app:srcCompat="@drawable/gradient_background"
+        tools:ignore="ContentDescription" />
 
     <ImageView
         android:id="@+id/ivGradTop"
@@ -29,7 +31,8 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/gradient_background_flipped" />
+        app:srcCompat="@drawable/gradient_background_flipped"
+        tools:ignore="ContentDescription" />
 
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/tbViewPager"
@@ -39,7 +42,8 @@
         app:navigationIcon="@drawable/ic_baseline_arrow_back_24"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:navigationIconTint="@android:color/white"/>
+        app:navigationIconTint="@android:color/white"
+        android:fitsSystemWindows="true"/>
 
     <androidx.cardview.widget.CardView
         android:id="@+id/cvShare"
@@ -53,7 +57,8 @@
         app:cardElevation="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/cvEdit"
-        app:layout_constraintStart_toStartOf="parent">
+        app:layout_constraintStart_toStartOf="parent"
+        android:fitsSystemWindows="true">
 
         <TextView
             android:id="@+id/tvShare"
@@ -61,10 +66,11 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_margin="15dp"
-            android:text="Share"
+            android:text="@string/share"
             android:textColor="@android:color/white"
             app:drawableTint="@android:color/white"
-            app:drawableTopCompat="@drawable/ic_outline_share_24" />
+            app:drawableTopCompat="@drawable/ic_outline_share_24"
+            android:fitsSystemWindows="true"/>
 
     </androidx.cardview.widget.CardView>
 
@@ -80,7 +86,8 @@
         app:cardElevation="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/cvInfo"
-        app:layout_constraintStart_toEndOf="@+id/cvShare">
+        app:layout_constraintStart_toEndOf="@+id/cvShare"
+        android:fitsSystemWindows="true">
 
         <TextView
             android:id="@+id/tvEdit"
@@ -88,7 +95,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_margin="15dp"
-            android:text="Edit"
+            android:text="@string/edit"
             android:textColor="@android:color/white"
             app:drawableTint="@android:color/white"
             app:drawableTopCompat="@drawable/ic_outline_edit_24" />
@@ -107,7 +114,8 @@
         app:cardElevation="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/cvDelete"
-        app:layout_constraintStart_toEndOf="@+id/cvEdit">
+        app:layout_constraintStart_toEndOf="@+id/cvEdit"
+        android:fitsSystemWindows="true">
 
         <TextView
             android:id="@+id/tvInfo"
@@ -115,7 +123,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_margin="15dp"
-            android:text="Info"
+            android:text="@string/info"
             android:textColor="@android:color/white"
             app:drawableTint="@android:color/white"
             app:drawableTopCompat="@drawable/ic_outline_info_24" />
@@ -134,7 +142,8 @@
         app:cornerRadius="30dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/cvInfo">
+        app:layout_constraintStart_toEndOf="@+id/cvInfo"
+        android:fitsSystemWindows="true">
 
         <TextView
             android:id="@+id/tvDelete"
@@ -142,7 +151,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_margin="15dp"
-            android:text="Delete"
+            android:text="@string/delete"
             android:textColor="@android:color/white"
             app:drawableTint="@android:color/white"
             app:drawableTopCompat="@drawable/ic_outline_delete_24" />

@@ -1,15 +1,19 @@
 package com.example.gallery.ui
 
 import android.app.Activity
-import android.content.ClipData
 import android.content.Intent
 import android.content.res.Configuration
-import android.net.Uri
+import android.graphics.drawable.ColorDrawable
 import android.os.Build
 import android.os.Bundle
-import android.view.*
+import android.view.ActionMode
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import androidx.core.app.SharedElementCallback
-import androidx.core.view.*
+import androidx.core.view.WindowInsetsControllerCompat
+import androidx.core.view.updateLayoutParams
+import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
 import androidx.fragment.app.replace
@@ -18,15 +22,20 @@ import androidx.recyclerview.widget.GridLayoutManager
 import com.example.gallery.R
 import com.example.gallery.adapter.GridItemAdapter
 import com.example.gallery.databinding.FragmentBottomNavBinding
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.elevation.SurfaceColors
+import com.google.android.material.navigation.NavigationBarView
 import com.google.android.material.shape.MaterialShapeDrawable
 import com.google.android.material.transition.Hold
 import com.google.android.material.transition.MaterialSharedAxis
+import kotlin.collections.List
+import kotlin.collections.MutableMap
+import kotlin.collections.set
 
 class BottomNavFrag : Fragment() {
     private lateinit var _binding: FragmentBottomNavBinding
     val binding get() = _binding
-    var actionMode: ActionMode? = null
+    private var actionMode: ActionMode? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -42,30 +51,10 @@ class BottomNavFrag : Fragment() {
         }
         _binding = FragmentBottomNavBinding.inflate(inflater, container, false)
 
-        if (requireActivity().intent.action == Intent.ACTION_PICK || requireActivity().intent.action ==
+        if (requireActivity().intent.action == Intent.ACTION_PICK || requireActivity()
+                .intent.action ==
                 Intent.ACTION_GET_CONTENT) {
-            binding.tbMain.isTitleCentered = false
-            binding.tbMain.setNavigationIcon(R.drawable.ic_baseline_arrow_back_24)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                binding.tbMain.setNavigationIconTint(resources.getColor(android.R.color.black, activity?.theme))
-            } else {
-                binding.tbMain.setNavigationIconTint(resources.getColor(android.R.color.black))
-            }
-            if (!requireActivity().intent.getBooleanExtra(Intent.EXTRA_ALLOW_MULTIPLE,
-                    false)) {
-                binding.tbMain.title = "Select an item"
-            } else {
-                binding.tbMain.title = "Select items"
-            }
-            binding.bnvMain.visibility = View.GONE
-            childFragmentManager.commit {
-                replace<GridAlbumFrag>(R.id.fcvBottomNav)
-                setReorderingAllowed(true)
-            }
-            binding.tbMain.setNavigationOnClickListener {
-                requireActivity().setResult(Activity.RESULT_CANCELED)
-                requireActivity().finish()
-            }
+          setUpToolbarForIntent()
         } else {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 binding.tbMain.inflateMenu(R.menu.action_bar_home)
@@ -82,23 +71,44 @@ class BottomNavFrag : Fragment() {
                 }
             }
         }
-        binding.bnvMain.viewTreeObserver.addOnGlobalLayoutListener {
-            binding.fcvBottomNav.updatePadding(0, 0, 0, binding.bnvMain.height)
-        }
+        setUpNavigationView()
+        prepareTransitions()
+        return binding.root
+    }
 
-        binding.appBarLayout.statusBarForeground = MaterialShapeDrawable.createWithElevationOverlay(requireContext())
-
-        binding.bnvMain.setOnItemReselectedListener {
-            val fragment = childFragmentManager.findFragmentById(R.id.fcvBottomNav)
-            if (fragment is GridItemFrag) {
-                fragment.binding.rvItems.scrollToPosition(0)
-                binding.appBarLayout.setExpanded(true)
-            } else if (fragment is GridAlbumFrag) {
-                fragment.binding.rvAlbum.scrollToPosition(0)
-                binding.appBarLayout.setExpanded(true)
+    private fun setUpSystemBars() {
+        val nightModeFlags: Int = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
+        if (nightModeFlags == Configuration.UI_MODE_NIGHT_NO ||
+            nightModeFlags == Configuration.UI_MODE_NIGHT_UNDEFINED) {
+            WindowInsetsControllerCompat(requireActivity().window, binding.root).let { controller ->
+                controller.isAppearanceLightStatusBars = true
+                controller.isAppearanceLightNavigationBars = true
             }
         }
-        binding.bnvMain.setOnItemSelectedListener {
+    }
+
+    private fun setUpNavigationView() {
+        if (binding.bnvMain is BottomNavigationView) {
+            binding.bnvMain.viewTreeObserver.addOnGlobalLayoutListener {
+                binding.fcvBottomNav.updatePadding(bottom = binding.bnvMain.height)
+            }
+            binding.appBarLayout.statusBarForeground = MaterialShapeDrawable
+                .createWithElevationOverlay(binding.appBarLayout.context)
+        } else {
+            binding.tbMain.setBackgroundColor(SurfaceColors.SURFACE_2.getColor(requireContext()))
+            binding.tbMain.viewTreeObserver.addOnGlobalLayoutListener {
+                binding.bnvMain.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                    topMargin = binding.appBarLayout.height
+                }
+            }
+            binding.bnvMain.viewTreeObserver.addOnGlobalLayoutListener {
+                binding.fcvBottomNav.updatePadding(left = binding.bnvMain.width)
+            }
+            binding.appBarLayout.statusBarForeground = ColorDrawable(SurfaceColors.SURFACE_2.getColor(
+                requireContext()))
+        }
+
+        (binding.bnvMain as NavigationBarView).setOnItemSelectedListener {
             when (it.itemId) {
                 R.id.miPhotos -> {
                     childFragmentManager.commit {
@@ -124,23 +134,55 @@ class BottomNavFrag : Fragment() {
                 else -> false
             }
         }
-        prepareTransitions()
-        return binding.root
+        (binding.bnvMain as NavigationBarView).setOnItemReselectedListener {
+            when (it.itemId) {
+                R.id.miPhotos -> {
+                    val frag = childFragmentManager
+                        .findFragmentById(R.id.fcvBottomNav) as GridItemFrag? ?: return@setOnItemReselectedListener
+                    frag.binding.rvItems.scrollToPosition(0)
+                }
+                R.id.miAlbums -> {
+                    val frag = childFragmentManager
+                        .findFragmentById(R.id.fcvBottomNav) as GridAlbumFrag? ?: return@setOnItemReselectedListener
+                    frag.binding.rvAlbum.scrollToPosition(0)
+                }
+            }
+            binding.appBarLayout.setExpanded(true)
+        }
     }
 
-    private fun setUpSystemBars() {
-        val nightModeFlags: Int = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
-        if (nightModeFlags == Configuration.UI_MODE_NIGHT_NO ||
-            nightModeFlags == Configuration.UI_MODE_NIGHT_UNDEFINED) {
-            WindowInsetsControllerCompat(requireActivity().window, binding.root).let { controller ->
-                controller.isAppearanceLightStatusBars = true
-                controller.isAppearanceLightNavigationBars = true
-            }
+    private fun setUpToolbarForIntent() {
+        binding.tbMain.isTitleCentered = false
+        binding.tbMain.setNavigationIcon(R.drawable.ic_baseline_arrow_back_24)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            binding.tbMain.setNavigationIconTint(resources.getColor(android.R.color.black,
+                activity?.theme))
+        } else {
+            @Suppress("DEPRECATION")
+            binding.tbMain.setNavigationIconTint(resources.getColor(android.R.color.black))
+        }
+        if (!requireActivity().intent.getBooleanExtra(Intent.EXTRA_ALLOW_MULTIPLE,
+                false)) {
+            binding.tbMain.title = "Select an item"
+        } else {
+            binding.tbMain.title = "Select items"
+        }
+        binding.bnvMain.visibility = View.GONE
+        childFragmentManager.commit {
+            replace<GridAlbumFrag>(R.id.fcvBottomNav)
+            setReorderingAllowed(true)
+        }
+        binding.tbMain.setNavigationOnClickListener {
+            requireActivity().setResult(Activity.RESULT_CANCELED)
+            requireActivity().finish()
         }
     }
 
     fun startActionMode(callback: ActionMode.Callback): ActionMode {
-        activity?.window?.statusBarColor =  SurfaceColors.getColorForElevation(requireContext(), binding.appBarLayout.elevation) //resources.getColor(R.color.material_dynamic_neutral_variant20, activity?.theme)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            activity?.window?.statusBarColor =  SurfaceColors.getColorForElevation(
+                requireContext(), binding.appBarLayout.elevation)
+        }
         actionMode = binding.tbMain.startActionMode(callback)
         return actionMode!!
     }
@@ -167,8 +209,10 @@ class BottomNavFrag : Fragment() {
                     names: List<String>,
                     sharedElements: MutableMap<String, View>
                 ) {
-                    val frag: GridItemFrag = childFragmentManager.findFragmentById(R.id.fcvBottomNav) as GridItemFrag
-                    if ((frag.binding.rvItems.layoutManager as GridLayoutManager).findFirstCompletelyVisibleItemPosition() != 0) {
+                    val frag: GridItemFrag = childFragmentManager
+                        .findFragmentById(R.id.fcvBottomNav) as GridItemFrag
+                    if ((frag.binding.rvItems.layoutManager as GridLayoutManager)
+                            .findFirstCompletelyVisibleItemPosition() != 0) {
                         binding.appBarLayout.setExpanded(false, false)
                     }
 

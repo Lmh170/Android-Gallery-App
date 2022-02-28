@@ -1,19 +1,15 @@
 package com.example.gallery.ui
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.ViewGroupCompat
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.GridLayoutManager
-import com.example.gallery.Album
 import com.example.gallery.R
 import com.example.gallery.adapter.GridAlbumAdapter
-import com.example.gallery.adapter.GridItemAdapter
 import com.example.gallery.databinding.FragmentGridAlbumBinding
 import com.google.android.material.transition.MaterialFadeThrough
 
