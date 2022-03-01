@@ -20,7 +20,7 @@ class VideoPlayerActivity : AppCompatActivity() {
     private var player: ExoPlayer? = null
     private var currentWindow = 0
     private var playbackPosition = 0L
-    private var isUiHidden = true
+    private var isUiHidden = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,14 +43,21 @@ class VideoPlayerActivity : AppCompatActivity() {
 
         ViewCompat.setOnApplyWindowInsetsListener(window.decorView) { _, windowInsets ->
             val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
-            binding.exoPlayer.findViewById<View>(R.id.exo_progress).updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                bottomMargin = insets.bottom + 10
-            }
+            binding.exoPlayer.updatePadding(bottom = insets.bottom)
             windowInsets
         }
 
-        binding.exoPlayer.setControllerVisibilityListener {
-            toggleSystemUi()
+        binding.exoPlayer.apply {
+            setShowNextButton(false)
+            setShowPreviousButton(false)
+            setControllerVisibilityListener {
+                if (binding.exoPlayer.isControllerFullyVisible) {
+                    showSystemUi()
+                } else {
+                    hideSystemUi()
+                }
+                println("notified ${binding.exoPlayer.isControllerFullyVisible}")
+            }
         }
     }
 

@@ -6,10 +6,9 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import androidx.core.app.SharedElementCallback
+import androidx.core.view.GestureDetectorCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
@@ -22,6 +21,7 @@ import androidx.viewpager2.widget.MarginPageTransformer
 import androidx.viewpager2.widget.ViewPager2
 import com.example.gallery.ListItem
 import com.example.gallery.R
+import com.example.gallery.adapter.GridItemAdapter
 import com.example.gallery.adapter.ViewPagerAdapter
 import com.example.gallery.databinding.FragmentViewPagerBinding
 import com.example.gallery.databinding.ViewDialogInfoBinding
@@ -31,6 +31,7 @@ import com.google.android.material.transition.MaterialFade
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.set
+import kotlin.math.abs
 
 class ViewPagerFrag : Fragment() {
     private lateinit var _binding: FragmentViewPagerBinding
@@ -69,6 +70,7 @@ class ViewPagerFrag : Fragment() {
         binding.tbViewPager.setNavigationOnClickListener {
             findNavController().navigateUp()
         }
+
         viewModel.loadItems()
         setUpViewpager()
         setUpViews()
@@ -153,9 +155,12 @@ class ViewPagerFrag : Fragment() {
     }
 
     private fun setUpSystemBars() {
-        WindowInsetsControllerCompat(requireActivity().window, binding.root).let { controller ->
-            controller.isAppearanceLightStatusBars = false
-            controller.isAppearanceLightNavigationBars = false
+        try {
+            WindowInsetsControllerCompat(requireActivity().window, binding.root).let { controller ->
+                controller.isAppearanceLightStatusBars = false
+                controller.isAppearanceLightNavigationBars = false
+            }
+        } catch (e: IllegalStateException) {
         }
     }
 
@@ -293,5 +298,4 @@ class ViewPagerFrag : Fragment() {
             })
         postponeEnterTransition()
     }
-
 }

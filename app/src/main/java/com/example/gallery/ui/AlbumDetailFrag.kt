@@ -175,8 +175,8 @@ class AlbumDetailFrag : Fragment() {
                 tracker.clearSelection()
                 Handler(Looper.getMainLooper()).postDelayed({
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                        activity?.window?.statusBarColor = SurfaceColors.getColorForElevation(
-                            requireContext(), binding.appBarLayout.elevation)
+                        activity?.window?.statusBarColor = resources.getColor(
+                            android.R.color.transparent, requireActivity().theme)
                     }
                 }, 400)
                 if (requireActivity().intent.getBooleanExtra(Intent.EXTRA_ALLOW_MULTIPLE,

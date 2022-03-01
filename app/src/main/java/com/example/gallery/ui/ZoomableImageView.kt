@@ -10,9 +10,12 @@ import android.view.MotionEvent
 import android.graphics.PointF
 import android.util.AttributeSet
 import android.util.Log
+import android.view.GestureDetector
 import android.view.ScaleGestureDetector.SimpleOnScaleGestureListener
 
 import androidx.appcompat.widget.AppCompatImageView
+import androidx.core.view.GestureDetectorCompat
+import androidx.navigation.fragment.findNavController
 import com.example.gallery.R
 import kotlin.math.abs
 
@@ -37,6 +40,7 @@ class ZoomableImageView @JvmOverloads constructor(
     private var oldMeasuredWidth = 0
     private var oldMeasuredHeight = 0
     private var mScaleDetector: ScaleGestureDetector? = null
+    private lateinit var mDetector: GestureDetectorCompat
 
     private var isZoomingDisabled = true
 
@@ -67,6 +71,7 @@ class ZoomableImageView @JvmOverloads constructor(
     private fun sharedConstructing() {
         super.setClickable(true)
         mScaleDetector = ScaleGestureDetector(context, ScaleListener())
+        mDetector = GestureDetectorCompat(context, SimpleGestureListener())
         mMatrix = Matrix()
         imageMatrix = mMatrix
         scaleType = ScaleType.MATRIX
@@ -74,6 +79,7 @@ class ZoomableImageView @JvmOverloads constructor(
         setOnTouchListener { _, event ->
 
             currentInstance.mScaleDetector!!.onTouchEvent(event)
+            currentInstance.mDetector.onTouchEvent(event)
 
             if (currentInstance.isZoomingDisabled) {
                 if (event.action == MotionEvent.ACTION_UP) {
@@ -282,5 +288,24 @@ class ZoomableImageView @JvmOverloads constructor(
         const val DRAG = 1
         const val ZOOM = 2
         const val CLICK = 3
+    }
+
+    private inner class SimpleGestureListener: GestureDetector.SimpleOnGestureListener() {
+        override fun onFling(
+            e1: MotionEvent?,
+            e2: MotionEvent?,
+            velocityX: Float,
+            velocityY: Float
+        ): Boolean {
+            if (e1 == null || e2 == null || currentInstance.saveScale != 1f) {
+                return super.onFling(e1, e2, velocityX, velocityY)
+            }
+            val diffY = e2.y - e1.y
+            if (abs(diffY) > 100 && abs(velocityY) > 100 && diffY > 0) {
+                gFrag?.findNavController()?.navigateUp()
+                return true
+            }
+            return super.onFling(e1, e2, velocityX, velocityY)
+        }
     }
 }
