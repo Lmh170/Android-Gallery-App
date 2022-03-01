@@ -119,9 +119,8 @@ class ViewPagerFrag : Fragment() {
         binding.cvShare.visibility = View.VISIBLE
         binding.ivGradTop.visibility = View.VISIBLE
         binding.ivGardBottom.visibility = View.VISIBLE
-        val windowInsetsController =
+         val windowInsetsController =
             ViewCompat.getWindowInsetsController(requireActivity().window.decorView) ?: return
-        // Hide both the status bar and the navigation bar
         windowInsetsController.show(WindowInsetsCompat.Type.systemBars())
     }
 
@@ -142,8 +141,9 @@ class ViewPagerFrag : Fragment() {
 
         val windowInsetsController =
                 ViewCompat.getWindowInsetsController(requireActivity().window.decorView) ?: return
-        windowInsetsController.systemBarsBehavior =
-                WindowInsetsControllerCompat.BEHAVIOR_SHOW_BARS_BY_TOUCH
+     //   windowInsetsController.systemBarsBehavior =
+            //    WindowInsetsControllerCompat.BEHAVIOR_SHOW_BARS_BY_TOUCH
+
         windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
     }
 

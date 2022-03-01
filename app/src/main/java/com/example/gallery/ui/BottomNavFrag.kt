@@ -45,7 +45,6 @@ class BottomNavFrag : Fragment() {
             val frag = childFragmentManager.findFragmentById(R.id.fcvBottomNav)
             if (frag is GridItemFrag && MainActivity.currentListPosition != Int.MIN_VALUE){
                 postponeEnterTransition()
-                prepareTransitions()
             }
             return binding.root
         }
@@ -211,6 +210,7 @@ class BottomNavFrag : Fragment() {
                 ) {
                     val frag: GridItemFrag = childFragmentManager
                         .findFragmentById(R.id.fcvBottomNav) as GridItemFrag
+
                     if ((frag.binding.rvItems.layoutManager as GridLayoutManager)
                             .findFirstCompletelyVisibleItemPosition() != 0) {
                         binding.appBarLayout.setExpanded(false, false)
@@ -218,11 +218,9 @@ class BottomNavFrag : Fragment() {
 
                     frag.binding.rvItems.isTransitionGroup = false
 
-                    // Locate the ViewHolder for the clicked position.
                     val selectedViewHolder = frag.binding.rvItems
                         .findViewHolderForLayoutPosition(MainActivity.currentListPosition) ?: return
 
-                    // Map the first shared element name to the child ImageView.
                     sharedElements[names[0]] =
                         (selectedViewHolder as GridItemAdapter.MediaItemHolder).binding.image
 
