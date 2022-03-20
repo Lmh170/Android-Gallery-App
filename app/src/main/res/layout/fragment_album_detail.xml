@@ -33,7 +33,7 @@
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvAlbums"
+        android:id="@+id/rvAlbumDetail"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layoutManager="GridLayoutManager"
@@ -46,7 +46,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="16dp"
-        android:text="Done"
+        android:text="@string/done"
         android:visibility="gone"
         app:icon="@drawable/ic_outline_done_24"
         app:layout_behavior="@string/fab_transformation_scrim_behavior" />

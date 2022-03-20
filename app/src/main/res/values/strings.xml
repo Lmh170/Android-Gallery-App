@@ -12,4 +12,5 @@
     <string name="bin">Bin</string>
     <string name="photos">Photos</string>
     <string name="albums">Albums</string>
+    <string name="done">Done</string>
 </resources>
