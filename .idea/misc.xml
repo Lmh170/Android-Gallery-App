@@ -15,6 +15,7 @@
         <entry key="app/src/main/res/layout/fragment_album_detail.xml" value="0.2046875" />
         <entry key="app/src/main/res/layout/fragment_bin.xml" value="0.34479166666666666" />
         <entry key="app/src/main/res/layout/fragment_bottom_nav.xml" value="0.2777777777777778" />
+        <entry key="app/src/main/res/layout/fragment_grid_item.xml" value="0.1828125" />
         <entry key="app/src/main/res/layout/fragment_video_player.xml" value="0.1" />
         <entry key="app/src/main/res/layout/fragment_view_pager.xml" value="0.25" />
         <entry key="app/src/main/res/layout/list_grid_media_item_holder.xml" value="0.22870370370370371" />
