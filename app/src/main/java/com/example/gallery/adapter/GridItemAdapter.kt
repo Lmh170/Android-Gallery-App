@@ -191,7 +191,6 @@ class GridItemAdapter(private val frag: Fragment, private val isAlbum: Boolean):
                         (getItem(layoutPosition) as ListItem.MediaItem).viewPagerPosition
                     }
                 }
-
                 val extras = FragmentNavigatorExtras(it to it.transitionName)
                 when (frag) {
                     is BottomNavFrag -> {

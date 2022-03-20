@@ -1,6 +1,9 @@
 package com.example.gallery.ui
 
 import android.Manifest
+import android.app.Application
+import android.app.RecoverableSecurityException
+import android.content.ContentValues
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -31,6 +34,15 @@ class MainActivity : AppCompatActivity() {
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            restoreRequest =
+                registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) {
+                    if (it.resultCode == RESULT_OK) {
+                        viewModel.loadBin()
+                    }
+                }
+        }
+
         val request =
             registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) {
                 if (it.resultCode == RESULT_OK) {
@@ -38,14 +50,7 @@ class MainActivity : AppCompatActivity() {
                     viewModel.loadItems()
                 }
             }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            restoreRequest =
-                registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) {
-                    if (it.resultCode == RESULT_OK) {
-                        viewModel.loadBin()
-                    }
-            }
-    }
+
         viewModel.permissionNeededForDelete.observe(this) { intentSender ->
             val intentSenderRequest = IntentSenderRequest.Builder(intentSender).build()
             request.launch(intentSenderRequest)

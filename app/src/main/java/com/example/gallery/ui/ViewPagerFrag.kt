@@ -6,12 +6,14 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.view.*
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import androidx.core.app.SharedElementCallback
-import androidx.core.view.GestureDetectorCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
@@ -21,7 +23,6 @@ import androidx.viewpager2.widget.MarginPageTransformer
 import androidx.viewpager2.widget.ViewPager2
 import com.example.gallery.ListItem
 import com.example.gallery.R
-import com.example.gallery.adapter.GridItemAdapter
 import com.example.gallery.adapter.ViewPagerAdapter
 import com.example.gallery.databinding.FragmentViewPagerBinding
 import com.example.gallery.databinding.ViewDialogInfoBinding
@@ -31,7 +32,6 @@ import com.google.android.material.transition.MaterialFade
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.set
-import kotlin.math.abs
 
 class ViewPagerFrag : Fragment() {
     private lateinit var _binding: FragmentViewPagerBinding
@@ -181,7 +181,6 @@ class ViewPagerFrag : Fragment() {
             startActivity(Intent.createChooser(editIntent, "Edit with"))
         }
         binding.cvInfo.setOnClickListener {
-
             val currentItem = getCurrentItem() ?: return@setOnClickListener
             val info = viewModel.getImageInfo(currentItem.uri)
             val inflater = requireActivity()
@@ -283,13 +282,9 @@ class ViewPagerFrag : Fragment() {
                     names: List<String>,
                     sharedElements: MutableMap<String, View>
                 ) {
-                    // Locate the image view at the primary fragment (the ImageFragment that is currently
-                    // visible). To locate the fragment, call instantiateItem with the selection position.
-                    // At this stage, the method will simply return the fragment at the position and will
-                    // not create a new one.
-
                     val selectedViewHolder =
-                        (binding.viewPager.getChildAt(0) as RecyclerView?)?.findViewHolderForLayoutPosition(binding.viewPager.currentItem)
+                        (binding.viewPager.getChildAt(0) as RecyclerView?)
+                            ?.findViewHolderForLayoutPosition(binding.viewPager.currentItem)
                             as ViewPagerAdapter.ViewHolderPager? ?: return
 
                     // Map the first shared element name to the child ImageView.

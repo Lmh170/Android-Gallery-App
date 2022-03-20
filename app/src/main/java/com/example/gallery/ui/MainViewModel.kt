@@ -10,6 +10,7 @@ import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
 import androidx.annotation.RequiresApi
+import androidx.core.database.getStringOrNull
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -34,9 +35,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val _bin = MutableLiveData<List<ListItem.MediaItem>>()
     val bin: LiveData<List<ListItem.MediaItem>> get() = _bin
 
-    private var pendingDeleteImage: ListItem.MediaItem? = null
-    private var pendingDeleteImages: List<ListItem.MediaItem>? = null
-    private val _permissionNeededForDelete = MutableLiveData<IntentSender>()
+    var pendingDeleteImage: ListItem.MediaItem? = null
+    var pendingDeleteImages: List<ListItem.MediaItem>? = null
+    val _permissionNeededForDelete = MutableLiveData<IntentSender>()
     val permissionNeededForDelete: LiveData<IntentSender> = _permissionNeededForDelete
 
     fun loadItems() {
@@ -318,7 +319,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                         listOf(image.uri), true)
                     pendingDeleteImage = null // item will be deleted with request
                     _permissionNeededForDelete.postValue(pendingIntent.intentSender)
-                } else {
+               }  else {
                     getApplication<Application>().contentResolver.delete(
                         image.uri,
                         "${MediaStore.Files.FileColumns._ID} = ?",
@@ -326,16 +327,19 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     )
                     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) loadItems()
                 }
-            } catch (e: SecurityException) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    pendingDeleteImage = image
-                    val recoverableSecurityException = e as? RecoverableSecurityException
-                        ?: throw e
-                    val intentSender = recoverableSecurityException.userAction.actionIntent
-                        .intentSender
-                    _permissionNeededForDelete.postValue(intentSender)
-                } else {
-                    throw e
+            } catch (e: Exception) {
+                when {
+                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q -> {
+                        pendingDeleteImage = image
+                        val recoverableSecurityException = e as? RecoverableSecurityException
+                            ?: throw e
+                        val intentSender = recoverableSecurityException.userAction.actionIntent
+                            .intentSender
+                        _permissionNeededForDelete.postValue(intentSender)
+                    }
+                    else -> {
+                        throw e
+                    }
                 }
             }
         }
@@ -346,14 +350,14 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             try {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                     val uris = mutableListOf<Uri>()
-                    for (image in items) {
-                        uris.add(image.uri)
+                    for (item in items) {
+                        uris.add(item.uri)
                     }
                     val pendingIntent = MediaStore.createTrashRequest(getApplication<Application>()
                         .contentResolver,
                         uris, true)
-                    pendingDeleteImages = null // item will be deleted with request
                     _permissionNeededForDelete.postValue(pendingIntent.intentSender)
+                    pendingDeleteImages = null // item will be deleted with request
                 } else {
                     for (item in items) {
                         val uri = if (item.type == MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE) {

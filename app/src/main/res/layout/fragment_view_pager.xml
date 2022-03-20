@@ -69,8 +69,7 @@
             android:text="@string/share"
             android:textColor="@android:color/white"
             app:drawableTint="@android:color/white"
-            app:drawableTopCompat="@drawable/ic_outline_share_24"
-            android:fitsSystemWindows="true"/>
+            app:drawableTopCompat="@drawable/ic_outline_share_24" />
 
     </androidx.cardview.widget.CardView>
 
