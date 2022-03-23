@@ -44,12 +44,14 @@ class BottomNavFrag : Fragment() {
     var actionMode: ActionMode? = null
     private lateinit var tracker: SelectionTracker<Long>
 
+    companion object {
+        const val RV_ALBUMS_VISIBILITY = "rv_albums_visibility"
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        if (::_binding.isInitialized) return binding.root
-
         viewModel.recyclerViewItems.observe(viewLifecycleOwner) { items ->
             val position = (binding.rvItems.layoutManager as GridLayoutManager)
                 .findFirstCompletelyVisibleItemPosition()
@@ -64,6 +66,7 @@ class BottomNavFrag : Fragment() {
                 if (position == 0) binding.rvAlbums.scrollToPosition(0)
             }
         }
+        if (::_binding.isInitialized) return binding.root
 
         _binding = FragmentBottomNavBinding.inflate(inflater, container, false)
 
@@ -90,6 +93,12 @@ class BottomNavFrag : Fragment() {
         setUpRecyclerViews()
         setUpNavigationView()
         prepareTransitions()
+
+        if (savedInstanceState != null) {
+            binding.rvAlbums.isVisible = savedInstanceState.getBoolean(RV_ALBUMS_VISIBILITY)
+            binding.rvItems.isVisible = !savedInstanceState.getBoolean(RV_ALBUMS_VISIBILITY)
+            tracker.onRestoreInstanceState(savedInstanceState)
+        }
         return binding.root
     }
 
@@ -101,6 +110,13 @@ class BottomNavFrag : Fragment() {
             (binding.rvItems.adapter as GridItemAdapter).enterTransitionStarted.set(false)
             scrollToPosition()
         }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        if (!::_binding.isInitialized) return
+        outState.putBoolean(RV_ALBUMS_VISIBILITY, binding.rvAlbums.isVisible)
+        tracker.onSaveInstanceState(outState)
     }
 
     private fun setUpRecyclerViews() {
@@ -247,11 +263,13 @@ class BottomNavFrag : Fragment() {
             binding.appBarLayout.statusBarForeground = ColorDrawable(SurfaceColors.SURFACE_2.getColor(
                 requireContext()))
         }
-
+        (binding.bnvMain as NavigationBarView).isItemActiveIndicatorEnabled
         (binding.bnvMain as NavigationBarView).setOnItemSelectedListener {
             when (it.itemId) {
                 R.id.miPhotos -> {
-                    TransitionManager.beginDelayedTransition(binding.root, MaterialFadeThrough())
+                    TransitionManager.beginDelayedTransition(binding.root, MaterialFadeThrough().apply {
+                      excludeTarget(binding.bnvMain, true)
+                    })
 
                     binding.rvItems.isTransitionGroup = true
                     binding.rvAlbums.isVisible = false
@@ -261,7 +279,9 @@ class BottomNavFrag : Fragment() {
                     true
                 }
                 R.id.miAlbums -> {
-                    TransitionManager.beginDelayedTransition(binding.root, MaterialFadeThrough())
+                    TransitionManager.beginDelayedTransition(binding.root, MaterialFadeThrough().apply {
+                        excludeTarget(binding.bnvMain, true)
+                    })
 
                     binding.rvItems.isTransitionGroup = true
                     actionMode?.finish()

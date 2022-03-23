@@ -2,6 +2,7 @@ package com.example.gallery.adapter
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -14,13 +15,14 @@ import com.example.gallery.R
 import com.example.gallery.databinding.AlbumHolderBinding
 import com.example.gallery.ui.BottomNavFrag
 import com.example.gallery.ui.MainActivity
+import com.google.android.material.navigation.NavigationBarView
 import com.google.android.material.transition.MaterialSharedAxis
 
 class GridAlbumAdapter(private val frag: BottomNavFrag): ListAdapter<Album,
         GridAlbumAdapter.AlbumHolder>(Album.DiffCallback) {
 
     inner class AlbumHolder(private val binding: AlbumHolderBinding):
-        RecyclerView.ViewHolder(binding.root){
+        RecyclerView.ViewHolder(binding.root) {
         fun onBind() {
             GlideApp.with(binding.ivThumbnailAlbum)
                 .load(getItem(layoutPosition).mediaItems[0].uri)
@@ -33,19 +35,19 @@ class GridAlbumAdapter(private val frag: BottomNavFrag): ListAdapter<Album,
             binding.ivThumbnailAlbum.transitionName = "album_$layoutPosition"
 
             binding.ivThumbnailAlbum.setOnClickListener {
-                frag.exitTransition = MaterialSharedAxis(MaterialSharedAxis.Z, true)
-                frag.enterTransition = MaterialSharedAxis(MaterialSharedAxis.Z, true)
-
-                MainActivity.currentListPosition = 0
-                MainActivity.currentAlbumName = getItem(layoutPosition).name
-                frag.setSharedAxisTransition()
-                frag.findNavController().navigate(
-                    R.id.action_bottomNavFrag_to_albumDetailFrag,
-                    null,
-                    null,
-                    null)
+                if ((frag.binding.bnvMain as NavigationBarView).selectedItemId == R.id.miAlbums ) {
+                    MainActivity.currentListPosition = 0
+                    MainActivity.currentAlbumName = getItem(layoutPosition).name
+                    frag.setSharedAxisTransition()
+                    frag.findNavController().navigate(
+                        R.id.action_bottomNavFrag_to_albumDetailFrag,
+                        null,
+                        null,
+                        null)
+                }
             }
         }
+
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AlbumHolder {

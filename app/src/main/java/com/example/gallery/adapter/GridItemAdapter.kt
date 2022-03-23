@@ -109,14 +109,13 @@ class GridItemAdapter(private val frag: Fragment, private val isAlbum: Boolean):
             }
 
         fun onBind() {
-            val wasActivated = binding.image.isActivated
             binding.image.isActivated = tracker?.isSelected(itemId) == true
-            if (binding.image.isActivated && !wasActivated) {
+            if (binding.image.isActivated) {
                 binding.image.apply {
                     shapeAppearanceModel = ShapeAppearanceModel().withCornerSize(70f)
                     animate().scaleX(0.75f).scaleY(0.75f).duration = 100
                 }
-            } else if (!binding.image.isActivated && wasActivated) {
+            } else if (!binding.image.isActivated) {
                 binding.image.apply {
                     shapeAppearanceModel = ShapeAppearanceModel().withCornerSize(0f)
                     animate().scaleX(1f).scaleY(1f).duration = 100
