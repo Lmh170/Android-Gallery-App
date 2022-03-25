@@ -43,6 +43,66 @@ class BottomNavFrag : Fragment() {
     private val viewModel: MainViewModel by activityViewModels()
     var actionMode: ActionMode? = null
     private lateinit var tracker: SelectionTracker<Long>
+    private val callback = object : ActionMode.Callback {
+        override fun onCreateActionMode(mode: ActionMode?, menu: Menu?): Boolean {
+            activity?.menuInflater?.inflate(R.menu.contextual_action_bar, menu)
+            return true
+        }
+
+        override fun onPrepareActionMode(mode: ActionMode?, menu: Menu?): Boolean =
+            false
+
+        override fun onActionItemClicked(mode: ActionMode?, item: MenuItem?): Boolean {
+            return when (item?.itemId) {
+                R.id.miShare -> {
+                    val items = mutableListOf<ListItem.MediaItem>()
+                    for (id in tracker.selection) {
+                        val selectedItem = viewModel.recyclerViewItems.value?.find {
+                            it.id == id
+                        } ?: return false
+                        items.add(selectedItem as ListItem.MediaItem)
+                    }
+                    ViewPagerFrag.share(items, requireActivity())
+                    tracker.clearSelection()
+                    actionMode?.finish()
+                    true
+                }
+                R.id.miDelete -> {
+                    // Handle delete icon press
+                    val items = mutableListOf<ListItem.MediaItem>()
+                    for (id in tracker.selection) {
+                        val selectedItem = viewModel.recyclerViewItems.value?.find {
+                            it.id == id
+                        } ?: return false
+                        items.add(selectedItem as ListItem.MediaItem)
+                    }
+                    ViewPagerFrag.delete(items, requireContext(), viewModel)
+                    actionMode?.finish()
+                    true
+                }
+                R.id.home -> {
+                    println("yes yes yes")
+                    true
+                }
+                R.id.action_mode_close_button -> {
+                    println("yes yes yes")
+                    true
+                }
+                else -> false
+            }
+        }
+
+        override fun onDestroyActionMode(mode: ActionMode?) {
+            tracker.clearSelection()
+            Handler(Looper.getMainLooper()).postDelayed({
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    activity?.window?.statusBarColor = resources.getColor(android.R.color.transparent,
+                        requireActivity().theme)
+                }
+            }, 400)
+            actionMode = null
+        }
+    }
 
     companion object {
         const val RV_ALBUMS_VISIBILITY = "rv_albums_visibility"
@@ -94,11 +154,6 @@ class BottomNavFrag : Fragment() {
         setUpNavigationView()
         prepareTransitions()
 
-        if (savedInstanceState != null) {
-            binding.rvAlbums.isVisible = savedInstanceState.getBoolean(RV_ALBUMS_VISIBILITY)
-            binding.rvItems.isVisible = !savedInstanceState.getBoolean(RV_ALBUMS_VISIBILITY)
-            tracker.onRestoreInstanceState(savedInstanceState)
-        }
         return binding.root
     }
 
@@ -106,17 +161,33 @@ class BottomNavFrag : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         if (binding.rvItems.isVisible && MainActivity.currentListPosition != Int.MIN_VALUE){
             postponeEnterTransition()
-            println("enter transition postponed")
-            (binding.rvItems.adapter as GridItemAdapter).enterTransitionStarted.set(false)
             scrollToPosition()
         }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
+        if (::_binding.isInitialized){
+            outState.putBoolean(RV_ALBUMS_VISIBILITY, binding.rvAlbums.isVisible)
+    //        tracker.onSaveInstanceState(outState)
+        }
         super.onSaveInstanceState(outState)
-        if (!::_binding.isInitialized) return
-        outState.putBoolean(RV_ALBUMS_VISIBILITY, binding.rvAlbums.isVisible)
-        tracker.onSaveInstanceState(outState)
+    }
+
+    override fun onViewStateRestored(savedInstanceState: Bundle?) {
+        super.onViewStateRestored(savedInstanceState)
+        if (savedInstanceState != null) {
+        //    tracker.onRestoreInstanceState(savedInstanceState)
+            binding.rvAlbums.isVisible = savedInstanceState.getBoolean(RV_ALBUMS_VISIBILITY)
+            binding.rvItems.isVisible = !savedInstanceState.getBoolean(RV_ALBUMS_VISIBILITY)
+            if (tracker.hasSelection()) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    activity?.window?.statusBarColor =  SurfaceColors.getColorForElevation(
+                        requireContext(), binding.appBarLayout.elevation)
+                }
+                actionMode = binding.tbMain.startActionMode(callback)
+                actionMode?.title = tracker.selection.size().toString()
+            }
+        }
     }
 
     private fun setUpRecyclerViews() {
@@ -154,58 +225,7 @@ class BottomNavFrag : Fragment() {
 
         }).build()
         (binding.rvItems.adapter as GridItemAdapter).tracker = tracker
-        val callback = object : ActionMode.Callback {
-            override fun onCreateActionMode(mode: ActionMode?, menu: Menu?): Boolean {
-                activity?.menuInflater?.inflate(R.menu.contextual_action_bar, menu)
-                return true
-            }
 
-            override fun onPrepareActionMode(mode: ActionMode?, menu: Menu?): Boolean =
-                false
-
-            override fun onActionItemClicked(mode: ActionMode?, item: MenuItem?): Boolean {
-                return when (item?.itemId) {
-                    R.id.miShare -> {
-                        val items = mutableListOf<ListItem.MediaItem>()
-                        for (id in tracker.selection) {
-                            val selectedItem = viewModel.recyclerViewItems.value?.find {
-                                it.id == id
-                            } ?: return false
-                            items.add(selectedItem as ListItem.MediaItem)
-                        }
-                        ViewPagerFrag.share(items, requireActivity())
-                        tracker.clearSelection()
-                        actionMode?.finish()
-                        true
-                    }
-                    R.id.miDelete -> {
-                        // Handle delete icon press
-                        val items = mutableListOf<ListItem.MediaItem>()
-                        for (id in tracker.selection) {
-                            val selectedItem = viewModel.recyclerViewItems.value?.find {
-                                it.id == id
-                            } ?: return false
-                            items.add(selectedItem as ListItem.MediaItem)
-                        }
-                        ViewPagerFrag.delete(items, requireContext(), viewModel)
-                        actionMode?.finish()
-                        true
-                    }
-                    else -> false
-                }
-            }
-
-            override fun onDestroyActionMode(mode: ActionMode?) {
-                tracker.clearSelection()
-                Handler(Looper.getMainLooper()).postDelayed({
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                        activity?.window?.statusBarColor = resources.getColor(android.R.color.transparent,
-                            requireActivity().theme)
-                    }
-                }, 400)
-                actionMode = null
-            }
-        }
         tracker.addObserver(object: SelectionTracker.SelectionObserver<Long>() {
             override fun onSelectionChanged() {
                 super.onSelectionChanged()

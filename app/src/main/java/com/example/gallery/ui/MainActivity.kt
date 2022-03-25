@@ -107,12 +107,9 @@ class MainActivity : AppCompatActivity() {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         when (requestCode) {
             EXTERNAL_STORAGE_REQUEST -> {
-                // If request is cancelled, the result arrays are empty.
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     viewModel.loadItems()
                 } else {
-                    // If we weren't granted the permission, check to see if we should show
-                    // rationale for the permission.
                     val showRationale = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                         ActivityCompat.shouldShowRequestPermissionRationale(
                             this,

@@ -121,9 +121,9 @@ class ViewPagerFrag : Fragment() {
         binding.cvShare.visibility = View.VISIBLE
         binding.ivGradTop.visibility = View.VISIBLE
         binding.ivGardBottom.visibility = View.VISIBLE
-         val windowInsetsController =
-            ViewCompat.getWindowInsetsController(requireActivity().window.decorView) ?: return
-        windowInsetsController.show(WindowInsetsCompat.Type.systemBars())
+
+        ViewCompat.getWindowInsetsController(requireActivity().window.decorView)
+        ?.show(WindowInsetsCompat.Type.systemBars())
     }
 
     fun hideSystemUI() {
@@ -141,12 +141,11 @@ class ViewPagerFrag : Fragment() {
         binding.ivGradTop.visibility = View.GONE
         binding.ivGardBottom.visibility = View.GONE
 
-        val windowInsetsController =
-                ViewCompat.getWindowInsetsController(requireActivity().window.decorView) ?: return
      //   windowInsetsController.systemBarsBehavior =
             //    WindowInsetsControllerCompat.BEHAVIOR_SHOW_BARS_BY_TOUCH
 
-        windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
+        ViewCompat.getWindowInsetsController(requireActivity().window.decorView)
+            ?.hide(WindowInsetsCompat.Type.systemBars())
     }
 
     fun toggleSystemUI() {
@@ -287,7 +286,6 @@ class ViewPagerFrag : Fragment() {
                             ?.findViewHolderForLayoutPosition(binding.viewPager.currentItem)
                             as ViewPagerAdapter.ViewHolderPager? ?: return
 
-                    // Map the first shared element name to the child ImageView.
                     sharedElements[names[0]] = selectedViewHolder.binding.pagerImage
                 }
             })

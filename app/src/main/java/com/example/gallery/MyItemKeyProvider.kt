@@ -9,8 +9,6 @@ import com.example.gallery.ui.MainViewModel
 
 // an adapted version of StableIdKeyProvider as it cannot handle changing datasets
 class MyItemKeyProvider(private val viewModel: MainViewModel, private val isAlbum: Boolean = false): ItemKeyProvider<Long>(SCOPE_CACHED) {
-    private val mPositionToKey = SparseArray<Long>()
-    private val mKeyToPosition = LongSparseArray<Int>()
 
     override fun getKey(position: Int): Long? {
         return if (isAlbum) {
