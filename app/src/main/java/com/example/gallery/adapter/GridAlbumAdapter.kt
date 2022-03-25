@@ -1,5 +1,6 @@
 package com.example.gallery.adapter
 
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.view.isVisible
@@ -35,7 +36,10 @@ class GridAlbumAdapter(private val frag: BottomNavFrag): ListAdapter<Album,
             binding.ivThumbnailAlbum.transitionName = "album_$layoutPosition"
 
             binding.ivThumbnailAlbum.setOnClickListener {
-                if ((frag.binding.bnvMain as NavigationBarView).selectedItemId == R.id.miAlbums ) {
+                if ((frag.binding.bnvMain as NavigationBarView).selectedItemId == R.id.miAlbums
+                    || frag.requireActivity().intent.action == Intent.ACTION_PICK || frag.requireActivity()
+                        .intent.action ==
+                    Intent.ACTION_GET_CONTENT) {
                     MainActivity.currentListPosition = 0
                     MainActivity.currentAlbumName = getItem(layoutPosition).name
                     frag.setSharedAxisTransition()

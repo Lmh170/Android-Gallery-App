@@ -218,8 +218,6 @@ class AlbumDetailFrag : Fragment() {
                 val viewAtPosition =
                     binding.rvAlbumDetail.layoutManager!!.findViewByPosition(MainActivity.currentListPosition)
 
-                // Scroll to position if the view for the current position is null (not currently part of
-                // layout manager children), or it's not completely visible.
                 if (viewAtPosition == null || !binding.rvAlbumDetail.layoutManager!!
                         .isViewPartiallyVisible(viewAtPosition, true, true)
                 ) {
@@ -251,7 +249,6 @@ class AlbumDetailFrag : Fragment() {
 //                    (exitTransition as Hold).excludeChildren((selectedViewHolder as GridAdapter.MediaItemHolder).binding.image, true)
 
                     // Map the first shared element name to the child ImageView.
-
                     sharedElements[names[0]] =
                         (selectedViewHolder as GridItemAdapter.MediaItemHolder).binding.image
 
