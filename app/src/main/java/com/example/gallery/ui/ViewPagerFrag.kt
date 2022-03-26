@@ -10,10 +10,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.app.SharedElementCallback
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.WindowInsetsControllerCompat
-import androidx.core.view.updatePadding
+import androidx.core.view.*
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
@@ -160,10 +157,33 @@ class ViewPagerFrag : Fragment() {
                 controller.isAppearanceLightNavigationBars = false
             }
         } catch (e: IllegalStateException) {
+
         }
     }
 
     private fun setUpViews() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+            ViewCompat.setOnApplyWindowInsetsListener(requireActivity().window.decorView) { _, windowInsets ->
+                val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+                binding.tbViewPager.updateLayoutParams<ViewGroup.MarginLayoutParams>{
+                    topMargin = insets.top
+                }
+                binding.cvShare.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                    bottomMargin = insets.bottom
+                }
+                binding.cvEdit.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                    bottomMargin = insets.bottom
+                }
+                binding.cvInfo.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                    bottomMargin = insets.bottom
+                }
+                binding.cvDelete.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                    bottomMargin = insets.bottom 
+                }
+                return@setOnApplyWindowInsetsListener windowInsets
+            }
+        }
+
         binding.cvShare.setOnClickListener {
             val currentItem = getCurrentItem() ?: return@setOnClickListener
             share(currentItem, requireActivity())

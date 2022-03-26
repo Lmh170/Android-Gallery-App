@@ -1,9 +1,6 @@
 package com.example.gallery.ui
 
 import android.Manifest
-import android.app.Application
-import android.app.RecoverableSecurityException
-import android.content.ContentValues
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -123,7 +120,9 @@ class MainActivity : AppCompatActivity() {
                     }
 
                     if (showRationale) {
-                        Snackbar.make(binding.root, "App requires access to storage to access your Photos", Snackbar.LENGTH_INDEFINITE)
+                        Snackbar.make(binding.root,
+                            "App requires access to storage to access your Photos",
+                            Snackbar.LENGTH_INDEFINITE)
                             .setAction("Grant Permission") {
                                 requestPermission()
                             }.show()
@@ -131,7 +130,6 @@ class MainActivity : AppCompatActivity() {
                         goToSettings()
                     }
                 }
-                return
             }
         }
     }
@@ -163,7 +161,6 @@ class MainActivity : AppCompatActivity() {
                     Manifest.permission.WRITE_EXTERNAL_STORAGE
                 )
             }
-
             ActivityCompat.requestPermissions(this, permissions, EXTERNAL_STORAGE_REQUEST)
         }
     }
