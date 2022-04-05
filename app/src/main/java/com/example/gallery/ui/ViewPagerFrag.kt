@@ -9,6 +9,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.core.app.SharedElementCallback
 import androidx.core.view.*
 import androidx.fragment.app.Fragment
@@ -23,12 +24,15 @@ import com.example.gallery.R
 import com.example.gallery.adapter.ViewPagerAdapter
 import com.example.gallery.databinding.FragmentViewPagerBinding
 import com.example.gallery.databinding.ViewDialogInfoBinding
+import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.transition.MaterialContainerTransform
 import com.google.android.material.transition.MaterialFade
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.set
+
 
 class ViewPagerFrag : Fragment() {
     private lateinit var _binding: FragmentViewPagerBinding
@@ -213,7 +217,8 @@ class ViewPagerFrag : Fragment() {
             binding.tvPath.text = info[2]
             binding.tvSize.text = String.format(resources.getString(R.string.item_size), info[1])
 
-            MaterialAlertDialogBuilder(requireContext(), R.style.Theme_MaterialAlertDialog_Centered)
+            MaterialAlertDialogBuilder(
+                requireContext(), R.style.ThemeOverlay_Material3_MaterialAlertDialog_Centered)
                 .setTitle(resources.getString(R.string.info))
                 .setView(binding.root)
                 .setIcon(R.drawable.ic_outline_info_24)
@@ -230,7 +235,7 @@ class ViewPagerFrag : Fragment() {
 
     companion object {
         fun delete(image: ListItem.MediaItem, context: Context, viewModel: MainViewModel) {
-            MaterialAlertDialogBuilder(context, R.style.Theme_MaterialAlertDialog_Centered)
+            MaterialAlertDialogBuilder(context, R.style.ThemeOverlay_Material3_MaterialAlertDialog_Centered)
                 .setTitle("Permanently delete?")
                 .setMessage("This item will be permanently deleted.")
                 .setIcon(R.drawable.ic_outline_delete_24)
@@ -241,7 +246,7 @@ class ViewPagerFrag : Fragment() {
                 .show()
         }
         fun delete(images: List<ListItem.MediaItem>, context: Context, viewModel: MainViewModel) {
-            MaterialAlertDialogBuilder(context, R.style.Theme_MaterialAlertDialog_Centered)
+            MaterialAlertDialogBuilder(context, R.style.ThemeOverlay_Material3_MaterialAlertDialog_Centered)
                 .setTitle("Permanently delete?")
                 .setMessage("This items will be permanently deleted.")
                 .setIcon(R.drawable.ic_outline_delete_24)

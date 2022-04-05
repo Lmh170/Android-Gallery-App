@@ -8,13 +8,4 @@
         <item name="actionModeCloseDrawable">@drawable/ic_baseline_close_24</item>
         <item name="android:windowLayoutInDisplayCutoutMode" tools:targetApi="o_mr1">shortEdges</item>
     </style>
-
-    <style name="Theme.MaterialAlertDialog.Centered" parent="ThemeOverlay.Material3.MaterialAlertDialog.Centered" >
-        <item name="buttonBarPositiveButtonStyle">@style/Theme.ButtonBarPositiveButtonStyle</item>
-    </style>
-
-    <style name="Theme.ButtonBarPositiveButtonStyle" parent="ThemeOverlay.Material3.Button.TextButton">
-        <item name="android:layout_marginLeft">@dimen/m3_btn_dialog_btn_spacing</item>
-        <item name="android:layout_marginStart">@dimen/m3_btn_dialog_btn_spacing</item>
-    </style>
 </resources>

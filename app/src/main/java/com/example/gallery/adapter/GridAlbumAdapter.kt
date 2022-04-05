@@ -3,12 +3,9 @@ package com.example.gallery.adapter
 import android.content.Intent
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.core.view.isVisible
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.load.DecodeFormat
-import com.bumptech.glide.request.RequestOptions
 import com.bumptech.glide.signature.MediaStoreSignature
 import com.example.gallery.Album
 import com.example.gallery.GlideApp
@@ -24,10 +21,11 @@ class GridAlbumAdapter(private val frag: BottomNavFrag): ListAdapter<Album,
 
     inner class AlbumHolder(private val binding: AlbumHolderBinding):
         RecyclerView.ViewHolder(binding.root) {
+
         fun onBind() {
             GlideApp.with(binding.ivThumbnailAlbum)
                 .load(getItem(layoutPosition).mediaItems[0].uri)
-                .apply(RequestOptions().format(DecodeFormat.PREFER_RGB_565)) // better performance
+           //     .apply(RequestOptions().format(DecodeFormat.PREFER_RGB_565)) // better performance
                 .signature(MediaStoreSignature(null, getItem(layoutPosition)
                     .mediaItems[0].dateModified, 0))
                 .into(binding.ivThumbnailAlbum)

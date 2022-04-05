@@ -1,7 +1,5 @@
 package com.example.gallery
 
-import android.util.SparseArray
-import androidx.collection.LongSparseArray
 import androidx.recyclerview.selection.ItemKeyProvider
 import androidx.recyclerview.widget.RecyclerView
 import com.example.gallery.ui.MainActivity

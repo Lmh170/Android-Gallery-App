@@ -129,7 +129,7 @@ class GridItemAdapter(private val frag: Fragment, private val isAlbum: Boolean):
 
             GlideApp.with(binding.image)
                 .load((getItem(layoutPosition) as ListItem.MediaItem).uri)
-                .apply(RequestOptions().format(DecodeFormat.PREFER_RGB_565)) // better performance
+              //  .apply(RequestOptions().format(DecodeFormat.PREFER_RGB_565)) // better performance
                 .signature(MediaStoreSignature(null,
                     (getItem(layoutPosition) as ListItem.MediaItem).dateModified, 0))
                 .listener(object : RequestListener<Drawable?> {
@@ -225,7 +225,7 @@ class GridItemAdapter(private val frag: Fragment, private val isAlbum: Boolean):
 
     inner class HeaderViewHolder (private val binding: ListGridHeaderBinding): RecyclerView.ViewHolder(binding.root) {
         fun onBind() {
-            binding.tvDate.text = SimpleDateFormat.getDateInstance(SimpleDateFormat.LONG).format(
+            binding.tvDate.text = SimpleDateFormat.getDateInstance(SimpleDateFormat.FULL).format(
                 Date(itemId)
             )
         }

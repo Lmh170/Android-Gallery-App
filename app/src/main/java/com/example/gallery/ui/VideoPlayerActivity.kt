@@ -2,12 +2,14 @@ package com.example.gallery.ui
 
 import android.os.Build
 import android.os.Bundle
+import android.os.PersistableBundle
 import android.view.View
-import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.*
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.transition.TransitionManager
-import com.example.gallery.R
 import com.example.gallery.databinding.ActivityVideoPlayerBinding
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
@@ -20,7 +22,11 @@ class VideoPlayerActivity : AppCompatActivity() {
     private var player: ExoPlayer? = null
     private var currentWindow = 0
     private var playbackPosition = 0L
-    private var isUiHidden = false
+
+    companion object {
+        const val KEY_PLAYER_POSITION = "current_position"
+        const val KEY_PLAYER_WINDOW = "current_window"
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,32 +47,29 @@ class VideoPlayerActivity : AppCompatActivity() {
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
-        ViewCompat.setOnApplyWindowInsetsListener(window.decorView) { _, windowInsets ->
-            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
-            binding.exoPlayer.updatePadding(bottom = insets.bottom)
-            windowInsets
-        }
-
         binding.exoPlayer.apply {
             setShowNextButton(false)
             setShowPreviousButton(false)
+
+            if (savedInstanceState != null) {
+                playbackPosition = savedInstanceState.getLong(KEY_PLAYER_POSITION)
+                currentWindow = savedInstanceState.getInt(KEY_PLAYER_WINDOW)
+            }
             setControllerVisibilityListener {
                 if (binding.exoPlayer.isControllerFullyVisible) {
                     showSystemUi()
                 } else {
                     hideSystemUi()
                 }
-                println("notified ${binding.exoPlayer.isControllerFullyVisible}")
             }
         }
     }
 
-    private fun toggleSystemUi() =
-        if (isUiHidden) {
-            showSystemUi()
-        } else {
-            hideSystemUi()
-        }
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putLong(KEY_PLAYER_POSITION, playbackPosition)
+        outState.putInt(KEY_PLAYER_WINDOW, currentWindow)
+    }
 
     private fun hideSystemUi() {
         TransitionManager.beginDelayedTransition(binding.root, MaterialFade().apply {
@@ -74,7 +77,6 @@ class VideoPlayerActivity : AppCompatActivity() {
         })
         binding.tbVideo.visibility = View.GONE
         WindowInsetsControllerCompat(window, window.decorView).hide(WindowInsetsCompat.Type.systemBars())
-        isUiHidden = true
     }
 
     private fun showSystemUi() {
@@ -83,7 +85,6 @@ class VideoPlayerActivity : AppCompatActivity() {
         })
         binding.tbVideo.visibility = View.VISIBLE
         WindowInsetsControllerCompat(window, window.decorView).show(WindowInsetsCompat.Type.systemBars())
-        isUiHidden = false
     }
 
     override fun onStart() {
@@ -131,7 +132,6 @@ class VideoPlayerActivity : AppCompatActivity() {
         player?.run {
             playbackPosition = this.currentPosition
             currentWindow = this.currentMediaItemIndex
-            playWhenReady = this.playWhenReady
             release()
         }
         player = null
