@@ -43,7 +43,7 @@ class ZoomableImageView @JvmOverloads constructor(
         sharedConstructing()
     }
 
-    private val currentInstance : ZoomableImageView
+    private val currentInstance: ZoomableImageView
         get() {
             return if (gFrag != null) {
                 gFrag!!.binding.viewPager.getChildAt(0).findViewById(R.id.pagerImage)

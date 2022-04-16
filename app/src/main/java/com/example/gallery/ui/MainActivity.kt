@@ -120,9 +120,11 @@ class MainActivity : AppCompatActivity() {
                     }
 
                     if (showRationale) {
-                        Snackbar.make(binding.root,
+                        Snackbar.make(
+                            binding.root,
                             "App requires access to storage to access your Photos",
-                            Snackbar.LENGTH_INDEFINITE)
+                            Snackbar.LENGTH_INDEFINITE
+                        )
                             .setAction("Grant Permission") {
                                 requestPermission()
                             }.show()
@@ -135,7 +137,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun goToSettings() {
-        Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:$packageName")).apply {
+        Intent(
+            Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+            Uri.parse("package:$packageName")
+        ).apply {
             addCategory(Intent.CATEGORY_DEFAULT)
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }.also { intent ->

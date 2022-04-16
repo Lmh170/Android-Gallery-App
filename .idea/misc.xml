@@ -3,6 +3,7 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="../../../../../layout/custom_preview.xml" value="0.21927083333333333" />
         <entry key="../../.gradle/caches/transforms-3/04a7555b95a25f15df85d085c394a2b2/transformed/material-1.6.0-alpha01/res/layout/design_bottom_navigation_item.xml" value="0.3697916666666667" />
         <entry key="../../.gradle/caches/transforms-3/e6f15d5f7f985029a00f0551a9ab9dba/transformed/jetified-exoplayer-ui-2.17.1/res/layout/exo_styled_player_control_ffwd_button.xml" value="0.3697916666666667" />
         <entry key="../../.gradle/caches/transforms-3/e6f15d5f7f985029a00f0551a9ab9dba/transformed/jetified-exoplayer-ui-2.17.1/res/layout/exo_styled_player_control_view.xml" value="0.33" />
@@ -12,6 +13,7 @@
         <entry key="app/src/main/res/drawable/ic_baseline_arrow_back_24.xml" value="0.212" />
         <entry key="app/src/main/res/drawable/ic_baseline_close_24.xml" value="0.19947916666666668" />
         <entry key="app/src/main/res/drawable/ic_baseline_play_circle_filled_24.xml" value="0.2755" />
+        <entry key="app/src/main/res/drawable/ic_outline_photo_24.xml" value="0.2975" />
         <entry key="app/src/main/res/layout-land/fragment_bottom_nav.xml" value="0.1" />
         <entry key="app/src/main/res/layout/activity_image_viewer.xml" value="0.34479166666666666" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.16354166666666667" />

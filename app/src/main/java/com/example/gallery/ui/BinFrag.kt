@@ -40,8 +40,8 @@ class BinFrag : Fragment() {
             setHasFixedSize(true)
         }
 
-        enterTransition = MaterialSharedAxis(MaterialSharedAxis.Z,true)
-        returnTransition = MaterialSharedAxis(MaterialSharedAxis.Z,false)
+        enterTransition = MaterialSharedAxis(MaterialSharedAxis.Z, true)
+        returnTransition = MaterialSharedAxis(MaterialSharedAxis.Z, false)
 
         binding.tbBin.setNavigationOnClickListener {
             viewModel.loadItems()

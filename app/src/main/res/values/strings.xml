@@ -13,4 +13,13 @@
     <string name="photos">Photos</string>
     <string name="albums">Albums</string>
     <string name="done">Done</string>
+    <string name="date">Date</string>
+    <string name="play">play</string>
+    <string name="vr">VR</string>
+    <string name="shuffle">shuffle</string>
+    <string name="repeat">repeat</string>
+    <string name="subtitle">subtitle</string>
+    <string name="show_overflow">show overflow</string>
+    <string name="hide_overflow">hide overflow</string>
+    <string name="pause_play">pause / play</string>
 </resources>

@@ -10,7 +10,6 @@ import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
 import androidx.annotation.RequiresApi
-import androidx.core.database.getStringOrNull
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -89,7 +88,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private fun extractItems(items: List<ListItem>): List<ListItem.MediaItem> {
         val viewPagerImages = mutableListOf<ListItem.MediaItem>()
-        for (item in items ) {
+        for (item in items) {
             if (item is ListItem.MediaItem) viewPagerImages.add(item)
         }
         return viewPagerImages
@@ -103,11 +102,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
         withContext(Dispatchers.IO) {
             val projection = arrayOf(
-                    MediaStore.Files.FileColumns.BUCKET_DISPLAY_NAME,
-                    MediaStore.Files.FileColumns._ID,
-                    MediaStore.Files.FileColumns.MEDIA_TYPE,
-                    MediaStore.Files.FileColumns.DATE_ADDED,
-                    MediaStore.Files.FileColumns.DATE_MODIFIED
+                MediaStore.Files.FileColumns.BUCKET_DISPLAY_NAME,
+                MediaStore.Files.FileColumns._ID,
+                MediaStore.Files.FileColumns.MEDIA_TYPE,
+                MediaStore.Files.FileColumns.DATE_ADDED,
+                MediaStore.Files.FileColumns.DATE_MODIFIED
             )
 
             val selection = (MediaStore.Files.FileColumns.MEDIA_TYPE + "="
@@ -127,7 +126,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 null,
                 sortOrder
             )?.use { cursor ->
-                var lastDate : Calendar? = null
+                var lastDate: Calendar? = null
                 while (cursor.moveToNext()) {
                     val album = cursor.getString(0)
                     val type = cursor.getInt(2)
@@ -140,17 +139,20 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
                     val uri = if (type == MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE) {
                         ContentUris.withAppendedId(
-                            MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id)
+                            MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id
+                        )
                     } else {
                         ContentUris.withAppendedId(
-                            MediaStore.Video.Media.EXTERNAL_CONTENT_URI, id)
+                            MediaStore.Video.Media.EXTERNAL_CONTENT_URI, id
+                        )
                     }
                     val selectedDate = Calendar.getInstance()
                     selectedDate.timeInMillis = dateAdded
                     if (lastDate == null ||
                         lastDate.get(Calendar.DAY_OF_MONTH) > selectedDate.get(Calendar.DAY_OF_MONTH) ||
-                            lastDate.get(Calendar.MONTH) > selectedDate.get(Calendar.MONTH) ||
-                            lastDate.get(Calendar.YEAR) > selectedDate.get(Calendar.YEAR))  {
+                        lastDate.get(Calendar.MONTH) > selectedDate.get(Calendar.MONTH) ||
+                        lastDate.get(Calendar.YEAR) > selectedDate.get(Calendar.YEAR)
+                    ) {
                         selectedDate.set(Calendar.HOUR, 0)
                         selectedDate.set(Calendar.MINUTE, 0)
                         selectedDate.set(Calendar.SECOND, 0)
@@ -160,7 +162,15 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     }
                     viewPagerPosition += 1
                     listPosition += 1
-                    images += ListItem.MediaItem(id, uri, album, type, dateModified, viewPagerPosition, listPosition)
+                    images += ListItem.MediaItem(
+                        id,
+                        uri,
+                        album,
+                        type,
+                        dateModified,
+                        viewPagerPosition,
+                        listPosition
+                    )
                 }
             }
         }
@@ -182,7 +192,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 MediaStore.Files.FileColumns.DATE_MODIFIED
             )
 
-            val selection = if (mimeType != null){
+            val selection = if (mimeType != null) {
                 MediaStore.Files.FileColumns.MIME_TYPE + "=" + mimeType
             } else {
                 null
@@ -197,7 +207,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 null,
                 sortOrder
             )?.use { cursor ->
-                var lastDate : Calendar? = null
+                var lastDate: Calendar? = null
                 while (cursor.moveToNext()) {
                     val album = cursor.getString(0)
                     val id = cursor.getLong(1)
@@ -209,10 +219,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
                     val uri = if (source == MediaStore.Images.Media.EXTERNAL_CONTENT_URI) {
                         ContentUris.withAppendedId(
-                            MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id)
+                            MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id
+                        )
                     } else {
                         ContentUris.withAppendedId(
-                            MediaStore.Video.Media.EXTERNAL_CONTENT_URI, id)
+                            MediaStore.Video.Media.EXTERNAL_CONTENT_URI, id
+                        )
                     }
                     val type = if (source == MediaStore.Images.Media.EXTERNAL_CONTENT_URI) {
                         MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE
@@ -225,7 +237,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     if (lastDate == null ||
                         lastDate.get(Calendar.DAY_OF_MONTH) > selectedDate.get(Calendar.DAY_OF_MONTH) ||
                         lastDate.get(Calendar.MONTH) > selectedDate.get(Calendar.MONTH) ||
-                        lastDate.get(Calendar.YEAR) > selectedDate.get(Calendar.YEAR))  {
+                        lastDate.get(Calendar.YEAR) > selectedDate.get(Calendar.YEAR)
+                    ) {
                         selectedDate.set(Calendar.HOUR, 0)
                         selectedDate.set(Calendar.MINUTE, 0)
                         selectedDate.set(Calendar.SECOND, 0)
@@ -235,8 +248,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     }
                     viewPagerPosition += 1
                     listPosition += 1
-                    images += ListItem.MediaItem(id, uri, album, type, dateModified,
-                        viewPagerPosition, listPosition)
+                    images += ListItem.MediaItem(
+                        id, uri, album, type, dateModified,
+                        viewPagerPosition, listPosition
+                    )
                 }
             }
         }
@@ -247,7 +262,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         val albums = mutableListOf<Album>()
         mediaItems ?: return albums
 
-        withContext(Dispatchers.Main){
+        withContext(Dispatchers.Main) {
             albums += (Album("null", mutableListOf()))
 
             for (item in mediaItems) {
@@ -257,7 +272,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                         break
                     } else if (i == albums.size - 1) {
                         albums += Album(item.album, mutableListOf())
-                        albums[i+1].mediaItems += item
+                        albums[i + 1].mediaItems += item
                     }
                 }
             }
@@ -269,21 +284,23 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun getImageInfo(source: Uri): List<String> {
         val info = mutableListOf<String>()
 
-        @Suppress("DEPRECATION") val projection = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            arrayOf(
-                MediaStore.Files.FileColumns.DATE_ADDED,
-                MediaStore.MediaColumns.SIZE,
-                MediaStore.Files.FileColumns.RELATIVE_PATH,
-                MediaStore.Files.FileColumns.DISPLAY_NAME
-            )
-        } else {
-            arrayOf(
-                MediaStore.Files.FileColumns.DATE_ADDED,
-                MediaStore.Files.FileColumns.SIZE,
-                MediaStore.Files.FileColumns.DATA,
-                MediaStore.Files.FileColumns.DISPLAY_NAME
-            )
-        }
+        @Suppress("DEPRECATION")
+        val projection =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                arrayOf(
+                    MediaStore.Files.FileColumns.DATE_ADDED,
+                    MediaStore.MediaColumns.SIZE,
+                    MediaStore.Files.FileColumns.RELATIVE_PATH,
+                    MediaStore.Files.FileColumns.DISPLAY_NAME
+                )
+            } else {
+                arrayOf(
+                    MediaStore.Files.FileColumns.DATE_ADDED,
+                    MediaStore.Files.FileColumns.SIZE,
+                    MediaStore.Files.FileColumns.DATA,
+                    MediaStore.Files.FileColumns.DISPLAY_NAME
+                )
+            }
 
         getApplication<Application>().contentResolver.query(
             source,
@@ -316,12 +333,14 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         withContext(Dispatchers.IO) {
             try {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                    val pendingIntent = MediaStore.createTrashRequest(getApplication<Application>()
-                        .contentResolver,
-                        listOf(image.uri), true)
+                    val pendingIntent = MediaStore.createTrashRequest(
+                        getApplication<Application>()
+                            .contentResolver,
+                        listOf(image.uri), true
+                    )
                     pendingDeleteImage = null // item will be deleted with request
                     _permissionNeededForDelete.postValue(pendingIntent.intentSender)
-               }  else {
+                } else {
                     getApplication<Application>().contentResolver.delete(
                         image.uri,
                         "${MediaStore.Files.FileColumns._ID} = ?",
@@ -355,19 +374,23 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     for (item in items) {
                         uris.add(item.uri)
                     }
-                    val pendingIntent = MediaStore.createTrashRequest(getApplication<Application>()
-                        .contentResolver,
-                        uris, true)
+                    val pendingIntent = MediaStore.createTrashRequest(
+                        getApplication<Application>()
+                            .contentResolver,
+                        uris, true
+                    )
                     _permissionNeededForDelete.postValue(pendingIntent.intentSender)
                     pendingDeleteImages = null // item will be deleted with request
                 } else {
                     for (item in items) {
                         val uri = if (item.type == MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE) {
                             ContentUris.withAppendedId(
-                                MediaStore.Images.Media.EXTERNAL_CONTENT_URI, item.id)
+                                MediaStore.Images.Media.EXTERNAL_CONTENT_URI, item.id
+                            )
                         } else {
                             ContentUris.withAppendedId(
-                                MediaStore.Video.Media.EXTERNAL_CONTENT_URI, item.id)
+                                MediaStore.Video.Media.EXTERNAL_CONTENT_URI, item.id
+                            )
                         }
                         getApplication<Application>().contentResolver.delete(
                             uri,
@@ -417,13 +440,17 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
                     val uri = if (type == MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE) {
                         ContentUris.withAppendedId(
-                            MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id)
+                            MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id
+                        )
                     } else {
                         ContentUris.withAppendedId(
-                            MediaStore.Video.Media.EXTERNAL_CONTENT_URI, id)
+                            MediaStore.Video.Media.EXTERNAL_CONTENT_URI, id
+                        )
                     }
-                    images += ListItem.MediaItem(id, uri, "", type, 0L,
-                        0, 0)
+                    images += ListItem.MediaItem(
+                        id, uri, "", type, 0L,
+                        0, 0
+                    )
                 }
             }
         }
