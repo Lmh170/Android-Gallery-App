@@ -55,9 +55,9 @@ dependencies {
     implementation ("androidx.lifecycle:lifecycle-viewmodel-ktx:2.4.1")
 
     // Navigation
-    implementation ("androidx.navigation:navigation-fragment-ktx:2.4.1")
-    implementation ("androidx.navigation:navigation-ui-ktx:2.4.1")
-    androidTestImplementation ("androidx.navigation:navigation-testing:2.4.1")
+    implementation ("androidx.navigation:navigation-fragment-ktx:2.4.2")
+    implementation ("androidx.navigation:navigation-ui-ktx:2.4.2")
+    androidTestImplementation ("androidx.navigation:navigation-testing:2.4.2")
 
     // Glide
     implementation ("com.github.bumptech.glide:glide:4.13.1")
