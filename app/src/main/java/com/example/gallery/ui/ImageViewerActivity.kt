@@ -12,7 +12,7 @@ import com.example.gallery.ListItem
 import com.example.gallery.databinding.ActivityImageViewerBinding
 import com.google.android.material.transition.MaterialFade
 
-class ImageViewerActivity : AppCompatActivity() {
+class ImageViewerActivity: AppCompatActivity() {
     lateinit var binding: ActivityImageViewerBinding
     private var isSystemUiVisible = true
 
@@ -29,7 +29,7 @@ class ImageViewerActivity : AppCompatActivity() {
 
         ViewCompat.setOnApplyWindowInsetsListener(window.decorView) { _, windowInsets ->
             val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
-            binding.tbViewPager.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+            binding.tbViewPager.updateLayoutParams<ViewGroup.MarginLayoutParams>{
                 topMargin = insets.top
             }
             binding.cvShare.updateLayoutParams<ViewGroup.MarginLayoutParams> {
@@ -55,12 +55,8 @@ class ImageViewerActivity : AppCompatActivity() {
             startActivity(Intent.createChooser(editIntent, "Edit with"))
         }
         binding.cvShare.setOnClickListener {
-            ViewPagerFrag.share(
-                ListItem.MediaItem(
-                    0L, intent.data!!, "", 0,
-                    0L, 0, 0
-                ), this
-            )
+            ViewPagerFrag.share(ListItem.MediaItem(0L, intent.data!!, "", 0,
+                0L, 0, 0), this)
         }
     }
 

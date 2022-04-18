@@ -2,7 +2,7 @@ package com.example.gallery
 
 import androidx.recyclerview.widget.DiffUtil
 
-data class Album(var name: String, var mediaItems: MutableList<ListItem.MediaItem>) {
+data class Album (var name: String, var mediaItems: MutableList<ListItem.MediaItem>){
 
     companion object {
         val DiffCallback = object : DiffUtil.ItemCallback<Album>() {

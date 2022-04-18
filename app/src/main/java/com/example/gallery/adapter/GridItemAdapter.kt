@@ -1,3 +1,18 @@
+/*
+ * Copyright 2018 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.example.gallery.adapter
 
 import android.app.Activity
@@ -19,9 +34,11 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.bumptech.glide.load.DataSource
+import com.bumptech.glide.load.DecodeFormat
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
+import com.bumptech.glide.request.RequestOptions
 import com.bumptech.glide.request.target.Target
 import com.bumptech.glide.signature.MediaStoreSignature
 import com.example.gallery.GlideApp
@@ -38,14 +55,10 @@ import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
 
-class GridItemAdapter(
-    private val frag: Fragment, private val isAlbum: Boolean
-) : ListAdapter<ListItem, ViewHolder>(ListItem.ListItemDiffCallback()) {
-
+class GridItemAdapter(private val frag: Fragment, private val isAlbum: Boolean):
+    ListAdapter<ListItem, ViewHolder>(ListItem.ListItemDiffCallback()) {
     val enterTransitionStarted: AtomicBoolean = AtomicBoolean()
     var tracker: SelectionTracker<Long>? = null
-
-    private val layoutInflater: LayoutInflater = LayoutInflater.from(frag.context)
 
     companion object {
         const val ITEM_VIEW_TYPE_HEADER = 8123
@@ -58,19 +71,12 @@ class GridItemAdapter(
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return when (viewType) {
             ITEM_VIEW_TYPE_HEADER -> HeaderViewHolder(
-                ListGridHeaderBinding.inflate(
-                    layoutInflater,
-                    parent, false
-                )
-            )
+                    ListGridHeaderBinding.inflate(LayoutInflater.from(parent.context),
+                        parent, false))
 
             else -> MediaItemHolder(
-                ListGridMediaItemHolderBinding.inflate(
-                    layoutInflater,
-                    parent, false
-                ),
-                viewType
-            )
+                ListGridMediaItemHolderBinding.inflate(LayoutInflater.from(parent.context),
+                    parent, false), viewType)
         }
     }
 
@@ -91,9 +97,9 @@ class GridItemAdapter(
         }
     }
 
-    inner class MediaItemHolder(val binding: ListGridMediaItemHolderBinding, val type: Int) :
+    inner class MediaItemHolder(val binding: ListGridMediaItemHolderBinding, val type: Int):
         RecyclerView.ViewHolder(binding.root) {
-        fun getItemDetails(): ItemDetailsLookup.ItemDetails<Long> =
+        fun getItemDetails() : ItemDetailsLookup.ItemDetails<Long> =
             object : ItemDetailsLookup.ItemDetails<Long>() {
                 override fun getPosition(): Int =
                     layoutPosition
@@ -116,20 +122,16 @@ class GridItemAdapter(
                 }
             }
             if ((getItem(layoutPosition) as ListItem.MediaItem).type ==
-                MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO
-            ) {
-                binding.ivPlayMediaItem.visibility = View.VISIBLE
+                MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO) {
+                    binding.ivPlayMediaItem.visibility = View.VISIBLE
             }
             binding.image.transitionName = itemId.toString()
 
             GlideApp.with(binding.image)
                 .load((getItem(layoutPosition) as ListItem.MediaItem).uri)
-                .signature(
-                    MediaStoreSignature(
-                        null,
-                        (getItem(layoutPosition) as ListItem.MediaItem).dateModified, 0
-                    )
-                )
+              //  .apply(RequestOptions().format(DecodeFormat.PREFER_RGB_565)) // better performance
+                .signature(MediaStoreSignature(null,
+                    (getItem(layoutPosition) as ListItem.MediaItem).dateModified, 0))
                 .listener(object : RequestListener<Drawable?> {
                     override fun onLoadFailed(
                         e: GlideException?, model: Any,
@@ -167,26 +169,22 @@ class GridItemAdapter(
 
             binding.image.setOnClickListener {
                 if (frag.requireActivity().intent.action == Intent.ACTION_PICK ||
-                    frag.requireActivity().intent.action == Intent.ACTION_GET_CONTENT
-                ) {
-                    if (!frag.requireActivity().intent.getBooleanExtra(
-                            Intent.EXTRA_ALLOW_MULTIPLE,
-                            false
-                        )
-                    ) {
-                        val intent = Intent()
-                        intent.data = (getItem(layoutPosition) as ListItem.MediaItem).uri
-                        frag.requireActivity().setResult(Activity.RESULT_OK, intent)
-                        frag.requireActivity().finish()
-                        return@setOnClickListener
-                    } else {
-                        tracker?.select(getItemId(layoutPosition))
-                        return@setOnClickListener
-                    }
+                    frag.requireActivity().intent.action == Intent.ACTION_GET_CONTENT) {
+                        if (!frag.requireActivity().intent.getBooleanExtra(Intent.EXTRA_ALLOW_MULTIPLE,
+                                false)) {
+                            val intent = Intent()
+                            intent.data = (getItem(layoutPosition) as ListItem.MediaItem).uri
+                            frag.requireActivity().setResult(Activity.RESULT_OK, intent)
+                            frag.requireActivity().finish()
+                            return@setOnClickListener
+                        } else {
+                            tracker?.select(getItemId(layoutPosition))
+                            return@setOnClickListener
+                        }
                 }
-                if (frag !is BinFrag) {
+                if (frag !is BinFrag){
                     MainActivity.currentListPosition = layoutPosition
-                    MainActivity.currentViewPagerPosition = if (isAlbum) {
+                    MainActivity.currentViewPagerPosition = if (isAlbum){
                         layoutPosition
                     } else {
                         (getItem(layoutPosition) as ListItem.MediaItem).viewPagerPosition
@@ -201,8 +199,7 @@ class GridItemAdapter(
                             R.id.action_bottomNavFrag_to_viewPagerFrag,
                             null,
                             null,
-                            extras
-                        )
+                            extras)
                     }
                     is AlbumDetailFrag -> {
                         val args = Bundle()
@@ -211,20 +208,14 @@ class GridItemAdapter(
                             R.id.action_albumDetailFrag_to_viewPagerFrag,
                             args,
                             null,
-                            extras
-                        )
+                            extras)
                     }
                     is BinFrag -> {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                            val senderRequest = MediaStore.createTrashRequest(
-                                frag.requireActivity().application.contentResolver,
-                                listOf((getItem(layoutPosition) as ListItem.MediaItem).uri), false
-                            ).intentSender
-                            val intentSenderRequest =
-                                IntentSenderRequest.Builder(senderRequest).build()
-                            (frag.requireActivity() as MainActivity).restoreRequest.launch(
-                                intentSenderRequest
-                            )
+                            val senderRequest = MediaStore.createTrashRequest(frag.requireActivity().application.contentResolver,
+                                listOf((getItem(layoutPosition) as ListItem.MediaItem).uri), false).intentSender
+                            val intentSenderRequest = IntentSenderRequest.Builder(senderRequest).build()
+                            (frag.requireActivity() as MainActivity).restoreRequest.launch(intentSenderRequest)
                         }
                     }
                 }
@@ -232,15 +223,14 @@ class GridItemAdapter(
         }
     }
 
-    inner class HeaderViewHolder(private val binding: ListGridHeaderBinding) :
-        RecyclerView.ViewHolder(binding.root) {
+    inner class HeaderViewHolder (private val binding: ListGridHeaderBinding): RecyclerView.ViewHolder(binding.root) {
         fun onBind() {
             binding.tvDate.text = SimpleDateFormat.getDateInstance(SimpleDateFormat.FULL).format(
                 Date(itemId)
             )
         }
 
-        fun getItemDetails(): ItemDetailsLookup.ItemDetails<Long> =
+        fun getItemDetails() : ItemDetailsLookup.ItemDetails<Long> =
             object : ItemDetailsLookup.ItemDetails<Long>() {
                 override fun getPosition(): Int =
                     layoutPosition

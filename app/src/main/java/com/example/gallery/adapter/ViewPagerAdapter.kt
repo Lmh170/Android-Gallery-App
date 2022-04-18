@@ -2,6 +2,7 @@ package com.example.gallery.adapter
 
 import android.content.Intent
 import android.graphics.drawable.Drawable
+import android.os.Bundle
 import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.View
@@ -21,17 +22,14 @@ import com.example.gallery.ui.VideoPlayerActivity
 import com.example.gallery.ui.ViewPagerFrag
 import java.util.concurrent.atomic.AtomicBoolean
 
-class ViewPagerAdapter(val frag: ViewPagerFrag) : ListAdapter<ListItem.MediaItem,
+class ViewPagerAdapter(val frag: ViewPagerFrag): ListAdapter<ListItem.MediaItem,
         ViewPagerAdapter.ViewHolderPager>(ListItem.MediaItem.DiffCallback) {
     val enterTransitionStarted: AtomicBoolean = AtomicBoolean()
-    private val layoutInflater = LayoutInflater.from(frag.context)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolderPager {
-        return ViewHolderPager(
-            ViewPagerItemHolderBinding.inflate(
-                layoutInflater,
-                parent, false
-            )
+        return  ViewHolderPager(
+            ViewPagerItemHolderBinding.inflate(LayoutInflater.from(parent.context),
+                parent, false)
         )
     }
 
@@ -39,12 +37,11 @@ class ViewPagerAdapter(val frag: ViewPagerFrag) : ListAdapter<ListItem.MediaItem
         holderPager.onBind()
     }
 
-    inner class ViewHolderPager(val binding: ViewPagerItemHolderBinding) :
+    inner class ViewHolderPager(val binding: ViewPagerItemHolderBinding):
         RecyclerView.ViewHolder(binding.root) {
         fun onBind() {
             if ((getItem(layoutPosition) as ListItem.MediaItem).type ==
-                MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO
-            ) {
+                MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO) {
                 binding.ivPlayButton.visibility = View.VISIBLE
                 binding.ivPlayButton.setOnClickListener {
                     val intent = Intent(frag.context, VideoPlayerActivity::class.java).apply {
@@ -60,45 +57,40 @@ class ViewPagerAdapter(val frag: ViewPagerFrag) : ListAdapter<ListItem.MediaItem
 
             GlideApp.with(binding.pagerImage)
                 .load(getItem(layoutPosition).uri)
-                .signature(
-                    MediaStoreSignature(
-                        null, getItem(layoutPosition)
-                            .dateModified, 0
-                    )
-                )
+                .signature(MediaStoreSignature(null, getItem(layoutPosition)
+                    .dateModified, 0))
                 .listener(object : RequestListener<Drawable> {
-                    override fun onLoadFailed(
-                        e: GlideException?,
-                        model: Any?,
-                        target: Target<Drawable>?,
-                        isFirstResource: Boolean
-                    ): Boolean {
-                        if (MainActivity.currentViewPagerPosition != layoutPosition) {
-                            return true
-                        }
-                        if (enterTransitionStarted.getAndSet(true)) {
-                            return true
-                        }
-                        frag.startPostponedEnterTransition()
+                override fun onLoadFailed(
+                    e: GlideException?,
+                    model: Any?,
+                    target: Target<Drawable>?,
+                    isFirstResource: Boolean
+                ): Boolean {
+                    if (MainActivity.currentViewPagerPosition != layoutPosition) {
                         return true
                     }
-
-                    override fun onResourceReady(
-                        resource: Drawable?,
-                        model: Any?,
-                        target: Target<Drawable>?,
-                        dataSource: DataSource?,
-                        isFirstResource: Boolean
-                    ): Boolean {
-                        if (MainActivity.currentViewPagerPosition != layoutPosition) {
-                            return false
-                        }
-                        if (enterTransitionStarted.getAndSet(true)) {
-                            return false
-                        }
-                        frag.startPostponedEnterTransition()
+                    if (enterTransitionStarted.getAndSet(true)) {
+                        return true
+                    }
+                    frag.startPostponedEnterTransition()
+                    return true
+                }
+                override fun onResourceReady(
+                    resource: Drawable?,
+                    model: Any?,
+                    target: Target<Drawable>?,
+                    dataSource: DataSource?,
+                    isFirstResource: Boolean
+                ): Boolean {
+                    if (MainActivity.currentViewPagerPosition != layoutPosition) {
                         return false
                     }
+                    if (enterTransitionStarted.getAndSet(true)) {
+                        return false
+                    }
+                    frag.startPostponedEnterTransition()
+                    return false
+                }
                 }).into(binding.pagerImage)
             binding.pagerImage.setOnClickListener { frag.toggleSystemUI() }
             binding.root.setOnClickListener { frag.toggleSystemUI() }

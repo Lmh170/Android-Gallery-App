@@ -7,10 +7,8 @@ sealed class ListItem {
 
     abstract val id: Long
 
-    data class MediaItem(
-        override val id: Long, val uri: Uri, val album: String, val type: Int,
-        val dateModified: Long, val viewPagerPosition: Int, val listPosition: Int
-    ) : ListItem() {
+    data class MediaItem (override val id: Long, val uri: Uri, val album: String, val type: Int,
+                          val dateModified: Long, val viewPagerPosition: Int, val listPosition: Int): ListItem() {
 
         companion object {
             val DiffCallback = object : DiffUtil.ItemCallback<MediaItem>() {
@@ -24,9 +22,9 @@ sealed class ListItem {
 
     }
 
-    data class Header(override val id: Long) : ListItem()
+    data class Header(override val id: Long): ListItem()
 
-    class ListItemDiffCallback : DiffUtil.ItemCallback<ListItem>() {
+    class ListItemDiffCallback: DiffUtil.ItemCallback<ListItem>() {
         override fun areItemsTheSame(oldItem: ListItem, newItem: ListItem): Boolean =
             oldItem.id == newItem.id
 

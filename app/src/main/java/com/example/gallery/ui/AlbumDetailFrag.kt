@@ -59,10 +59,9 @@ class AlbumDetailFrag : Fragment() {
         }
 
         if (requireActivity().intent.action == Intent.ACTION_PICK || requireActivity().intent.action ==
-            Intent.ACTION_GET_CONTENT &&
+                Intent.ACTION_GET_CONTENT &&
             requireActivity().intent.getBooleanExtra(Intent.EXTRA_ALLOW_MULTIPLE, false) ||
-            requireActivity().intent.action == Intent.ACTION_MAIN
-        ) {
+                requireActivity().intent.action == Intent.ACTION_MAIN) {
             setUpRecyclerViewSelection()
         }
 
@@ -106,11 +105,8 @@ class AlbumDetailFrag : Fragment() {
 
         val callback = object : ActionMode.Callback {
             override fun onCreateActionMode(mode: ActionMode?, menu: Menu?): Boolean {
-                if (requireActivity().intent.getBooleanExtra(
-                        Intent.EXTRA_ALLOW_MULTIPLE,
-                        false
-                    )
-                ) {
+                if (requireActivity().intent.getBooleanExtra(Intent.EXTRA_ALLOW_MULTIPLE,
+                        false)) {
                     binding.fabDone.show()
                     binding.fabDone.setOnClickListener {
                         val intent = Intent()
@@ -122,10 +118,8 @@ class AlbumDetailFrag : Fragment() {
                                 it.id == key
                             }?.uri?.let { it1 -> items.add(it1) }
                         }
-                        intent.clipData = ClipData.newUri(
-                            requireActivity().contentResolver,
-                            "uris", items[0]
-                        )
+                        intent.clipData = ClipData.newUri(requireActivity().contentResolver,
+                            "uris", items[0])
                         for (i in 1 until items.size) {
                             intent.clipData?.addItem(ClipData.Item(items[i]))
                         }
@@ -137,8 +131,7 @@ class AlbumDetailFrag : Fragment() {
                 activity?.menuInflater?.inflate(R.menu.contextual_action_bar, menu)
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     activity?.window?.statusBarColor = SurfaceColors.getColorForElevation(
-                        requireContext(), binding.appBarLayout.elevation
-                    )
+                        requireContext(), binding.appBarLayout.elevation)
                 }
                 return true
             }
@@ -154,8 +147,7 @@ class AlbumDetailFrag : Fragment() {
                         for (id in tracker.selection) {
                             val selectedItem = (binding.rvAlbumDetail.adapter as GridItemAdapter)
                                 .currentList.find {
-                                    it.id == id
-                                } as ListItem.MediaItem? ?: return false
+                                it.id == id } as ListItem.MediaItem? ?: return false
                             items.add(selectedItem)
                         }
                         ViewPagerFrag.share(items, requireActivity())
@@ -168,8 +160,7 @@ class AlbumDetailFrag : Fragment() {
                         for (id in tracker.selection) {
                             val selectedItem = (binding.rvAlbumDetail.adapter as GridItemAdapter)
                                 .currentList.find {
-                                    it.id == id
-                                } as ListItem.MediaItem? ?: return false
+                                it.id == id} as ListItem.MediaItem? ?: return false
                             items.add(selectedItem)
                         }
                         ViewPagerFrag.delete(items, requireContext(), viewModel)
@@ -185,22 +176,18 @@ class AlbumDetailFrag : Fragment() {
                 Handler(Looper.getMainLooper()).postDelayed({
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                         activity?.window?.statusBarColor = resources.getColor(
-                            android.R.color.transparent, requireActivity().theme
-                        )
+                            android.R.color.transparent, requireActivity().theme)
                     }
                 }, 400)
-                if (requireActivity().intent.getBooleanExtra(
-                        Intent.EXTRA_ALLOW_MULTIPLE,
-                        false
-                    )
-                ) {
+                if (requireActivity().intent.getBooleanExtra(Intent.EXTRA_ALLOW_MULTIPLE,
+                        false)) {
                     binding.fabDone.hide()
                 }
                 actionMode = null
             }
         }
 
-        tracker.addObserver(object : SelectionTracker.SelectionObserver<Long>() {
+        tracker.addObserver(object: SelectionTracker.SelectionObserver<Long>() {
             override fun onSelectionChanged() {
                 super.onSelectionChanged()
                 actionMode?.title = tracker.selection.size().toString()
@@ -246,8 +233,8 @@ class AlbumDetailFrag : Fragment() {
     }
 
     private fun prepareTransitions() {
-        enterTransition = MaterialSharedAxis(MaterialSharedAxis.Z, true)
-        returnTransition = MaterialSharedAxis(MaterialSharedAxis.Z, false)
+        enterTransition = MaterialSharedAxis(MaterialSharedAxis.Z,true)
+        returnTransition = MaterialSharedAxis(MaterialSharedAxis.Z,false)
         exitTransition = Hold()
         setExitSharedElementCallback(
             object : SharedElementCallback() {
@@ -271,11 +258,9 @@ class AlbumDetailFrag : Fragment() {
     }
 
     private fun setUpSystemBars() {
-        val nightModeFlags: Int =
-            resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
+        val nightModeFlags: Int = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
         if (nightModeFlags == Configuration.UI_MODE_NIGHT_NO ||
-            nightModeFlags == Configuration.UI_MODE_NIGHT_UNDEFINED
-        ) {
+            nightModeFlags == Configuration.UI_MODE_NIGHT_UNDEFINED) {
             WindowInsetsControllerCompat(requireActivity().window, binding.root).let { controller ->
                 controller.isAppearanceLightStatusBars = true
                 controller.isAppearanceLightNavigationBars = true

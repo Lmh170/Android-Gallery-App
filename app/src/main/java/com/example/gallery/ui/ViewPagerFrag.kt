@@ -9,11 +9,9 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.core.app.SharedElementCallback
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.WindowInsetsControllerCompat
-import androidx.core.view.updateLayoutParams
+import androidx.core.view.*
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
@@ -26,6 +24,8 @@ import com.example.gallery.R
 import com.example.gallery.adapter.ViewPagerAdapter
 import com.example.gallery.databinding.FragmentViewPagerBinding
 import com.example.gallery.databinding.ViewDialogInfoBinding
+import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.transition.MaterialContainerTransform
 import com.google.android.material.transition.MaterialFade
@@ -60,10 +60,10 @@ class ViewPagerFrag : Fragment() {
             }
         }
         prepareSharedElementTransition()
-        if (::_binding.isInitialized) {
+        if (::_binding.isInitialized){
             return binding.root
         }
-
+        
         _binding = FragmentViewPagerBinding.inflate(inflater, container, false)
 
         shortAnimationDuration = resources.getInteger(android.R.integer.config_shortAnimTime)
@@ -85,8 +85,7 @@ class ViewPagerFrag : Fragment() {
             this.adapter = adapter
             if (requireArguments().getBoolean("isAlbum")) {
                 adapter.submitList(viewModel.albums.value?.find {
-                    it.name == MainActivity.currentAlbumName
-                }?.mediaItems)
+                    it.name == MainActivity.currentAlbumName }?.mediaItems)
             } else {
                 adapter.submitList(viewModel.viewPagerImages.value)
             }
@@ -100,8 +99,7 @@ class ViewPagerFrag : Fragment() {
                     if (requireArguments().getBoolean("isAlbum")) {
                         MainActivity.currentListPosition = position
                     } else {
-                        MainActivity.currentListPosition =
-                            viewModel.viewPagerImages.value?.get(position)!!.listPosition
+                        MainActivity.currentListPosition = viewModel.viewPagerImages.value?.get(position)!!.listPosition
                     }
                 }
             })
@@ -126,7 +124,7 @@ class ViewPagerFrag : Fragment() {
         binding.ivGardBottom.visibility = View.VISIBLE
 
         ViewCompat.getWindowInsetsController(requireActivity().window.decorView)
-            ?.show(WindowInsetsCompat.Type.systemBars())
+        ?.show(WindowInsetsCompat.Type.systemBars())
     }
 
     fun hideSystemUI() {
@@ -144,8 +142,8 @@ class ViewPagerFrag : Fragment() {
         binding.ivGradTop.visibility = View.GONE
         binding.ivGardBottom.visibility = View.GONE
 
-        //   windowInsetsController.systemBarsBehavior =
-        //    WindowInsetsControllerCompat.BEHAVIOR_SHOW_BARS_BY_TOUCH
+     //   windowInsetsController.systemBarsBehavior =
+            //    WindowInsetsControllerCompat.BEHAVIOR_SHOW_BARS_BY_TOUCH
 
         ViewCompat.getWindowInsetsController(requireActivity().window.decorView)
             ?.hide(WindowInsetsCompat.Type.systemBars())
@@ -171,7 +169,7 @@ class ViewPagerFrag : Fragment() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
             ViewCompat.setOnApplyWindowInsetsListener(requireActivity().window.decorView) { _, windowInsets ->
                 val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
-                binding.tbViewPager.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                binding.tbViewPager.updateLayoutParams<ViewGroup.MarginLayoutParams>{
                     topMargin = insets.top
                 }
                 binding.cvShare.updateLayoutParams<ViewGroup.MarginLayoutParams> {
@@ -184,7 +182,7 @@ class ViewPagerFrag : Fragment() {
                     bottomMargin = insets.bottom
                 }
                 binding.cvDelete.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                    bottomMargin = insets.bottom
+                    bottomMargin = insets.bottom 
                 }
                 return@setOnApplyWindowInsetsListener windowInsets
             }
@@ -195,7 +193,7 @@ class ViewPagerFrag : Fragment() {
             share(currentItem, requireActivity())
         }
         binding.cvDelete.setOnClickListener {
-            getCurrentItem()?.let { delete(it, requireContext(), viewModel) }
+            getCurrentItem()?.let {delete(it, requireContext(), viewModel) }
         }
         binding.cvEdit.setOnClickListener {
             val currentItem = getCurrentItem() ?: return@setOnClickListener
@@ -211,12 +209,8 @@ class ViewPagerFrag : Fragment() {
             val inflater = requireActivity()
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
             val binding = ViewDialogInfoBinding.inflate(inflater)
-            binding.tvDateAdded.text = SimpleDateFormat.getDateInstance().format(
-                Date(
-                    info[0]
-                        .toLong()
-                )
-            )
+            binding.tvDateAdded.text = SimpleDateFormat.getDateInstance().format(Date(info[0]
+                .toLong()))
             binding.tvName.text = info[3]
             binding.tvTimeAdded.text = SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT)
                 .format(Date(info[0].toLong()))
@@ -224,8 +218,7 @@ class ViewPagerFrag : Fragment() {
             binding.tvSize.text = String.format(resources.getString(R.string.item_size), info[1])
 
             MaterialAlertDialogBuilder(
-                requireContext(), R.style.ThemeOverlay_Material3_MaterialAlertDialog_Centered
-            )
+                requireContext(), R.style.ThemeOverlay_Material3_MaterialAlertDialog_Centered)
                 .setTitle(resources.getString(R.string.info))
                 .setView(binding.root)
                 .setIcon(R.drawable.ic_outline_info_24)
@@ -242,10 +235,7 @@ class ViewPagerFrag : Fragment() {
 
     companion object {
         fun delete(image: ListItem.MediaItem, context: Context, viewModel: MainViewModel) {
-            MaterialAlertDialogBuilder(
-                context,
-                R.style.ThemeOverlay_Material3_MaterialAlertDialog_Centered
-            )
+            MaterialAlertDialogBuilder(context, R.style.ThemeOverlay_Material3_MaterialAlertDialog_Centered)
                 .setTitle("Permanently delete?")
                 .setMessage("This item will be permanently deleted.")
                 .setIcon(R.drawable.ic_outline_delete_24)
@@ -255,12 +245,8 @@ class ViewPagerFrag : Fragment() {
                 }
                 .show()
         }
-
         fun delete(images: List<ListItem.MediaItem>, context: Context, viewModel: MainViewModel) {
-            MaterialAlertDialogBuilder(
-                context,
-                R.style.ThemeOverlay_Material3_MaterialAlertDialog_Centered
-            )
+            MaterialAlertDialogBuilder(context, R.style.ThemeOverlay_Material3_MaterialAlertDialog_Centered)
                 .setTitle("Permanently delete?")
                 .setMessage("This items will be permanently deleted.")
                 .setIcon(R.drawable.ic_outline_delete_24)
@@ -270,7 +256,6 @@ class ViewPagerFrag : Fragment() {
                 }
                 .show()
         }
-
         fun share(item: ListItem.MediaItem, activity: Activity) {
             val share = Intent(Intent.ACTION_SEND)
             share.data = item.uri
@@ -279,11 +264,10 @@ class ViewPagerFrag : Fragment() {
             share.flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
             activity.startActivity(Intent.createChooser(share, "Share with"))
         }
-
         fun share(items: List<ListItem.MediaItem>, activity: Activity) {
             val share = Intent(Intent.ACTION_SEND_MULTIPLE)
             val uris = ArrayList<Uri>()
-            for (item in items) {
+            for (item in items){
                 uris.add(item.uri)
             }
             share.type = "*/*"
@@ -293,7 +277,7 @@ class ViewPagerFrag : Fragment() {
         }
     }
 
-    private fun getCurrentItem(): ListItem.MediaItem? {
+    private fun getCurrentItem(): ListItem.MediaItem?  {
         return try {
             (binding.viewPager.adapter as ViewPagerAdapter).currentList[binding.viewPager.currentItem]
         } catch (e: IndexOutOfBoundsException) {
@@ -325,7 +309,7 @@ class ViewPagerFrag : Fragment() {
                     val selectedViewHolder =
                         (binding.viewPager.getChildAt(0) as RecyclerView?)
                             ?.findViewHolderForLayoutPosition(binding.viewPager.currentItem)
-                                as ViewPagerAdapter.ViewHolderPager? ?: return
+                            as ViewPagerAdapter.ViewHolderPager? ?: return
 
                     sharedElements[names[0]] = selectedViewHolder.binding.pagerImage
                 }

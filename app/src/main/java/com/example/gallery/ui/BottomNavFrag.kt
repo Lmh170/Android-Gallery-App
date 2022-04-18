@@ -96,10 +96,8 @@ class BottomNavFrag : Fragment() {
             tracker.clearSelection()
             Handler(Looper.getMainLooper()).postDelayed({
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    activity?.window?.statusBarColor = resources.getColor(
-                        android.R.color.transparent,
-                        requireActivity().theme
-                    )
+                    activity?.window?.statusBarColor = resources.getColor(android.R.color.transparent,
+                        requireActivity().theme)
                 }
             }, 400)
             actionMode = null
@@ -134,15 +132,14 @@ class BottomNavFrag : Fragment() {
 
         if (requireActivity().intent.action == Intent.ACTION_PICK || requireActivity()
                 .intent.action ==
-            Intent.ACTION_GET_CONTENT
-        ) {
-            setUpToolbarForIntent()
+                Intent.ACTION_GET_CONTENT) {
+          setUpToolbarForIntent()
         } else {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 binding.tbMain.inflateMenu(R.menu.action_bar_home)
             }
             binding.tbMain.setOnMenuItemClickListener {
-                when (it.itemId) {
+                when(it.itemId) {
                     R.id.miTrash -> {
                         setSharedAxisTransition()
                         MainActivity.currentListPosition = Int.MIN_VALUE
@@ -162,16 +159,16 @@ class BottomNavFrag : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        if (binding.rvItems.isVisible && MainActivity.currentListPosition != Int.MIN_VALUE) {
+        if (binding.rvItems.isVisible && MainActivity.currentListPosition != Int.MIN_VALUE){
             postponeEnterTransition()
             scrollToPosition()
         }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        if (::_binding.isInitialized) {
+        if (::_binding.isInitialized){
             outState.putBoolean(RV_ALBUMS_VISIBILITY, binding.rvAlbums.isVisible)
-            //        tracker.onSaveInstanceState(outState)
+    //        tracker.onSaveInstanceState(outState)
         }
         super.onSaveInstanceState(outState)
     }
@@ -179,14 +176,13 @@ class BottomNavFrag : Fragment() {
     override fun onViewStateRestored(savedInstanceState: Bundle?) {
         super.onViewStateRestored(savedInstanceState)
         if (savedInstanceState != null) {
-            //    tracker.onRestoreInstanceState(savedInstanceState)
+        //    tracker.onRestoreInstanceState(savedInstanceState)
             binding.rvAlbums.isVisible = savedInstanceState.getBoolean(RV_ALBUMS_VISIBILITY)
             binding.rvItems.isVisible = !savedInstanceState.getBoolean(RV_ALBUMS_VISIBILITY)
             if (tracker.hasSelection()) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    activity?.window?.statusBarColor = SurfaceColors.getColorForElevation(
-                        requireContext(), binding.appBarLayout.elevation
-                    )
+                    activity?.window?.statusBarColor =  SurfaceColors.getColorForElevation(
+                        requireContext(), binding.appBarLayout.elevation)
                 }
                 actionMode = binding.tbMain.startActionMode(callback)
                 actionMode?.title = tracker.selection.size().toString()
@@ -230,15 +226,14 @@ class BottomNavFrag : Fragment() {
         }).build()
         (binding.rvItems.adapter as GridItemAdapter).tracker = tracker
 
-        tracker.addObserver(object : SelectionTracker.SelectionObserver<Long>() {
+        tracker.addObserver(object: SelectionTracker.SelectionObserver<Long>() {
             override fun onSelectionChanged() {
                 super.onSelectionChanged()
                 actionMode?.title = tracker.selection.size().toString()
                 if (actionMode == null) {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                        activity?.window?.statusBarColor = SurfaceColors.getColorForElevation(
-                            requireContext(), binding.appBarLayout.elevation
-                        )
+                        activity?.window?.statusBarColor =  SurfaceColors.getColorForElevation(
+                            requireContext(), binding.appBarLayout.elevation)
                     }
                     actionMode = binding.tbMain.startActionMode(callback)
                 }
@@ -251,17 +246,14 @@ class BottomNavFrag : Fragment() {
         binding.rvAlbums.apply {
             this.adapter = GridAlbumAdapter(this@BottomNavFrag)
             setHasFixedSize(true)
-            layoutManager =
-                GridLayoutManager(context, resources.getInteger(R.integer.spanCount).div(2))
+            layoutManager = GridLayoutManager(context, resources.getInteger(R.integer.spanCount).div(2))
         }
     }
 
     private fun setUpSystemBars() {
-        val nightModeFlags: Int =
-            resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
+        val nightModeFlags: Int = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
         if (nightModeFlags == Configuration.UI_MODE_NIGHT_NO ||
-            nightModeFlags == Configuration.UI_MODE_NIGHT_UNDEFINED
-        ) {
+            nightModeFlags == Configuration.UI_MODE_NIGHT_UNDEFINED) {
             WindowInsetsControllerCompat(requireActivity().window, binding.root).let { controller ->
                 controller.isAppearanceLightStatusBars = true
                 controller.isAppearanceLightNavigationBars = true
@@ -288,21 +280,16 @@ class BottomNavFrag : Fragment() {
                 binding.rvItems.updatePadding(left = binding.bnvMain.width)
                 binding.rvAlbums.updatePadding(left = binding.bnvMain.width)
             }
-            binding.appBarLayout.statusBarForeground = ColorDrawable(
-                SurfaceColors.SURFACE_2.getColor(
-                    requireContext()
-                )
-            )
+            binding.appBarLayout.statusBarForeground = ColorDrawable(SurfaceColors.SURFACE_2.getColor(
+                requireContext()))
         }
         (binding.bnvMain as NavigationBarView).isItemActiveIndicatorEnabled
         (binding.bnvMain as NavigationBarView).setOnItemSelectedListener {
             when (it.itemId) {
                 R.id.miPhotos -> {
-                    TransitionManager.beginDelayedTransition(
-                        binding.root,
-                        MaterialFadeThrough().apply {
-                            excludeTarget(binding.bnvMain, true)
-                        })
+                    TransitionManager.beginDelayedTransition(binding.root, MaterialFadeThrough().apply {
+                      excludeTarget(binding.bnvMain, true)
+                    })
 
                     binding.rvItems.isTransitionGroup = true
                     binding.rvAlbums.isVisible = false
@@ -312,11 +299,9 @@ class BottomNavFrag : Fragment() {
                     true
                 }
                 R.id.miAlbums -> {
-                    TransitionManager.beginDelayedTransition(
-                        binding.root,
-                        MaterialFadeThrough().apply {
-                            excludeTarget(binding.bnvMain, true)
-                        })
+                    TransitionManager.beginDelayedTransition(binding.root, MaterialFadeThrough().apply {
+                        excludeTarget(binding.bnvMain, true)
+                    })
 
                     binding.rvItems.isTransitionGroup = true
                     actionMode?.finish()
@@ -346,21 +331,14 @@ class BottomNavFrag : Fragment() {
         binding.tbMain.isTitleCentered = false
         binding.tbMain.setNavigationIcon(R.drawable.ic_baseline_arrow_back_24)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            binding.tbMain.setNavigationIconTint(
-                resources.getColor(
-                    android.R.color.black,
-                    activity?.theme
-                )
-            )
+            binding.tbMain.setNavigationIconTint(resources.getColor(android.R.color.black,
+                activity?.theme))
         } else {
             @Suppress("DEPRECATION")
             binding.tbMain.setNavigationIconTint(resources.getColor(android.R.color.black))
         }
-        if (!requireActivity().intent.getBooleanExtra(
-                Intent.EXTRA_ALLOW_MULTIPLE,
-                false
-            )
-        ) {
+        if (!requireActivity().intent.getBooleanExtra(Intent.EXTRA_ALLOW_MULTIPLE,
+                false)) {
             binding.tbMain.title = getString(R.string.select_single_item)
         } else {
             binding.tbMain.title = getString(R.string.select_multiple_items)
@@ -379,9 +357,9 @@ class BottomNavFrag : Fragment() {
         setUpSystemBars()
     }
 
-    fun setSharedAxisTransition() {
-        exitTransition = MaterialSharedAxis(MaterialSharedAxis.Z, true)
-        reenterTransition = MaterialSharedAxis(MaterialSharedAxis.Z, false)
+    fun setSharedAxisTransition () {
+        exitTransition = MaterialSharedAxis(MaterialSharedAxis.Z,true)
+        reenterTransition = MaterialSharedAxis(MaterialSharedAxis.Z,false)
     }
 
     fun setHoldTransition() {
@@ -398,8 +376,7 @@ class BottomNavFrag : Fragment() {
                 ) {
 
                     if ((binding.rvItems.layoutManager as GridLayoutManager)
-                            .findFirstCompletelyVisibleItemPosition() != 0
-                    ) {
+                            .findFirstCompletelyVisibleItemPosition() != 0) {
                         binding.appBarLayout.setExpanded(false, false)
                     }
 

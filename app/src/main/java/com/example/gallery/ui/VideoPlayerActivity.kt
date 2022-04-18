@@ -2,8 +2,10 @@ package com.example.gallery.ui
 
 import android.os.Build
 import android.os.Bundle
+import android.os.PersistableBundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
@@ -74,10 +76,7 @@ class VideoPlayerActivity : AppCompatActivity() {
             duration = 180L
         })
         binding.tbVideo.visibility = View.GONE
-        WindowInsetsControllerCompat(
-            window,
-            window.decorView
-        ).hide(WindowInsetsCompat.Type.systemBars())
+        WindowInsetsControllerCompat(window, window.decorView).hide(WindowInsetsCompat.Type.systemBars())
     }
 
     private fun showSystemUi() {
@@ -85,10 +84,7 @@ class VideoPlayerActivity : AppCompatActivity() {
             duration = 250L
         })
         binding.tbVideo.visibility = View.VISIBLE
-        WindowInsetsControllerCompat(
-            window,
-            window.decorView
-        ).show(WindowInsetsCompat.Type.systemBars())
+        WindowInsetsControllerCompat(window, window.decorView).show(WindowInsetsCompat.Type.systemBars())
     }
 
     override fun onStart() {
