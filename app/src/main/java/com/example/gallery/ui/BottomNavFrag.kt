@@ -1,8 +1,10 @@
 package com.example.gallery.ui
 
 import android.content.res.Configuration
+import android.os.Build
 import android.os.Bundle
 import android.view.*
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.core.app.SharedElementCallback
 import androidx.core.view.*
@@ -39,11 +41,11 @@ class BottomNavFrag : Fragment() {
         }
 
         binding.bnvMain.setOnItemReselectedListener {
-            val fragment = childFragmentManager.findFragmentById(R.id.fcvBottomNav)
-            if (fragment is GridItemFrag) {
-                fragment.binding.rvItems.smoothScrollToPosition(0)
-            } else if (fragment is GridAlbumFrag) {
-                fragment.binding.rvAlbum.smoothScrollToPosition(0)
+            val frag = childFragmentManager.findFragmentById(R.id.fcvBottomNav)
+            if (frag is GridItemFrag) {
+                frag.binding.rvItems.smoothScrollToPosition(0)
+            } else if (frag is GridAlbumFrag) {
+                frag.binding.rvAlbum.smoothScrollToPosition(0)
             }
         }
         binding.bnvMain.setOnItemSelectedListener {
