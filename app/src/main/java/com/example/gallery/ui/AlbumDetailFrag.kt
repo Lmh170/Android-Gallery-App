@@ -197,17 +197,26 @@ class AlbumDetailFrag : Fragment() {
             ) {
                 binding.rvAlbums.removeOnLayoutChangeListener(this)
 
-                val viewAtPosition =
+                val viewAtPosition = if (MainActivity.viewPagerScrollDirectionDownwards) {
+                    binding.rvAlbums.layoutManager!!.findViewByPosition(MainActivity.currentListPosition + GridItemFrag.spanCount)
+                } else {
                     binding.rvAlbums.layoutManager!!.findViewByPosition(MainActivity.currentListPosition)
-
+                }
                 // Scroll to position if the view for the current position is null (not currently part of
                 // layout manager children), or it's not completely visible.
-                if (viewAtPosition == null || !binding.rvAlbums.layoutManager!!
+                if (viewAtPosition == null || binding.rvAlbums.layoutManager!!
                         .isViewPartiallyVisible(viewAtPosition, true, true)
                 ) {
-                    binding.rvAlbums.post {
-                        binding.rvAlbums.layoutManager!!.scrollToPosition(MainActivity.currentListPosition)
-                        startPostponedEnterTransition()
+                    if (MainActivity.viewPagerScrollDirectionDownwards) {
+                        binding.root.post {
+                            binding.rvAlbums.layoutManager!!.scrollToPosition(MainActivity.currentListPosition + GridItemFrag.spanCount)
+                            startPostponedEnterTransition()
+                        }
+                    } else {
+                        binding.root.post {
+                            binding.rvAlbums.layoutManager!!.scrollToPosition(MainActivity.currentListPosition + GridItemFrag.spanCount)
+                            startPostponedEnterTransition()
+                        }
                     }
                 } else {
                     startPostponedEnterTransition()

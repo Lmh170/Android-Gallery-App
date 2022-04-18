@@ -3,6 +3,8 @@ package com.example.gallery.ui
 import android.animation.Animator
 import android.content.Context
 import android.content.Intent
+import android.content.res.Configuration
+import android.media.ExifInterface
 import android.os.Build
 import android.os.Bundle
 import androidx.fragment.app.Fragment
@@ -51,6 +53,7 @@ class ViewPagerFrag : Fragment() {
         setUpViewpager()
         prepareSharedElementTransition()
         setUpViews()
+        MainActivity.viewPagerScrollDirectionDownwards = false
         return binding.root
     }
 
@@ -86,6 +89,7 @@ class ViewPagerFrag : Fragment() {
                     } else {
                         MainActivity.currentListPosition = viewModel.viewPagerImages.value?.get(position)!!.listPosition
                     }
+                    MainActivity.viewPagerScrollDirectionDownwards = firstCurrentItem < binding.viewPager.currentItem
                 }
             })
             setPageTransformer(MarginPageTransformer(50))
@@ -293,6 +297,14 @@ class ViewPagerFrag : Fragment() {
         }
     }
 
+    fun getLocation(e: ExifInterface): String {
+        val latValue: String = e.getAttribute(ExifInterface.TAG_GPS_LATITUDE).toString()
+        val latRef: String? = e.getAttribute(ExifInterface.TAG_GPS_LATITUDE_REF)
+        val lngValue: String? = e.getAttribute(ExifInterface.TAG_GPS_LONGITUDE)
+        val lngRef: String? = e.getAttribute(ExifInterface.TAG_GPS_LONGITUDE_REF)
+        return "$latValue $latRef, $lngValue $lngRef"
+    }
+
     private fun getCurrentItem():ListItem.MediaItem?  {
         return if (requireArguments().getBoolean("isAlbum")) {
             viewModel.albums.value?.find { it.name == MainActivity.currentAlbumName }?.mediaItems?.value?.get(binding.viewPager.currentItem)
@@ -300,6 +312,35 @@ class ViewPagerFrag : Fragment() {
             viewModel.viewPagerImages.value?.get(binding.viewPager.currentItem)
         }
     }
+
+    private fun setSystemBarsAppearance() {
+        val nightModeFlags: Int = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            if (nightModeFlags == Configuration.UI_MODE_NIGHT_NO ||
+                nightModeFlags == Configuration.UI_MODE_NIGHT_UNDEFINED){
+                activity?.window?.insetsController?.setSystemBarsAppearance(WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS.inv(), WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS)
+                activity?.window?.insetsController?.setSystemBarsAppearance(WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS.inv(), WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS)
+                // WindowCompat and WindowInsetsControllerCompap
+                // WindowInsetsControllerCompat
+                WindowInsetsControllerCompat(requireActivity().window, requireView()).let { controller ->
+                    controller.hide(WindowInsetsCompat.Type.systemBars())
+                    controller.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+                    controller.isAppearanceLightNavigationBars = true
+                    controller.isAppearanceLightNavigationBars = true
+                }
+            }
+        } else {
+            if (nightModeFlags == Configuration.UI_MODE_NIGHT_NO ||
+                nightModeFlags == Configuration.UI_MODE_NIGHT_UNDEFINED){
+                activity?.window?.decorView?.systemUiVisibility = (View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR.inv() or View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR.inv())
+               // activity?.window?.decorView?.systemUiVisibility =
+
+
+            }
+        }
+    }
+
+
 
     override fun startPostponedEnterTransition() {
         super.startPostponedEnterTransition()
