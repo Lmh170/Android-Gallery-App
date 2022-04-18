@@ -4,29 +4,20 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="../../.gradle/caches/transforms-3/04a7555b95a25f15df85d085c394a2b2/transformed/material-1.6.0-alpha01/res/layout/design_bottom_navigation_item.xml" value="0.3697916666666667" />
-        <entry key="../../.gradle/caches/transforms-3/e6f15d5f7f985029a00f0551a9ab9dba/transformed/jetified-exoplayer-ui-2.17.1/res/layout/exo_styled_player_control_ffwd_button.xml" value="0.3697916666666667" />
-        <entry key="../../.gradle/caches/transforms-3/e6f15d5f7f985029a00f0551a9ab9dba/transformed/jetified-exoplayer-ui-2.17.1/res/layout/exo_styled_player_control_view.xml" value="0.33" />
-        <entry key="app/src/main/res/drawable/exo_styled_controls_fastforward.xml" value="0.267" />
-        <entry key="app/src/main/res/drawable/exo_styled_controls_pause.xml" value="0.267" />
-        <entry key="app/src/main/res/drawable/exo_styled_controls_rewind.xml" value="0.267" />
         <entry key="app/src/main/res/drawable/ic_baseline_arrow_back_24.xml" value="0.212" />
         <entry key="app/src/main/res/drawable/ic_baseline_close_24.xml" value="0.19947916666666668" />
         <entry key="app/src/main/res/drawable/ic_baseline_play_circle_filled_24.xml" value="0.2755" />
-        <entry key="app/src/main/res/layout-land/fragment_bottom_nav.xml" value="0.1" />
+        <entry key="app/src/main/res/layout-land/fragment_bottom_nav.xml" value="0.21458333333333332" />
         <entry key="app/src/main/res/layout/activity_image_viewer.xml" value="0.34479166666666666" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.16354166666666667" />
         <entry key="app/src/main/res/layout/activity_video_player.xml" value="0.17395833333333333" />
-        <entry key="app/src/main/res/layout/bottomsheet_content.xml" value="0.3961864406779661" />
-        <entry key="app/src/main/res/layout/custom_styled_player_control_view.xml" value="0.33" />
         <entry key="app/src/main/res/layout/ex_player_control_view.xml" value="0.33" />
         <entry key="app/src/main/res/layout/fragment_album_detail.xml" value="0.2046875" />
         <entry key="app/src/main/res/layout/fragment_bin.xml" value="0.34479166666666666" />
         <entry key="app/src/main/res/layout/fragment_bottom_nav.xml" value="0.2777777777777778" />
-        <entry key="app/src/main/res/layout/fragment_grid_album.xml" value="0.1828125" />
-        <entry key="app/src/main/res/layout/fragment_grid_item.xml" value="0.1828125" />
         <entry key="app/src/main/res/layout/fragment_video_player.xml" value="0.1" />
         <entry key="app/src/main/res/layout/fragment_view_pager.xml" value="0.25" />
-        <entry key="app/src/main/res/layout/list_grid_header.xml" value="0.3697916666666667" />
+        <entry key="app/src/main/res/layout/list_grid_header.xml" value="0.190625" />
         <entry key="app/src/main/res/layout/list_grid_media_item_holder.xml" value="0.22870370370370371" />
         <entry key="app/src/main/res/layout/view_dialog_info.xml" value="0.5980629539951574" />
         <entry key="app/src/main/res/layout/view_pager_item_holder.xml" value="0.33796296296296297" />
