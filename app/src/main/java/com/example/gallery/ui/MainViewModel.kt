@@ -167,6 +167,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         return images
     }
 
+
     @SuppressLint("InlinedApi")
     private suspend fun queryImages(source: Uri, mimeType: String?): List<ListItem> {
         val images = mutableListOf<ListItem>()
@@ -205,6 +206,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
                     // convert seconds to milliseconds
                     if (dateAdded < 1000000000000L) dateAdded *= 1000
+
                     val uri = if (source == MediaStore.Images.Media.EXTERNAL_CONTENT_URI) {
                         ContentUris.withAppendedId(
                             MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id)

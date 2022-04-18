@@ -9,11 +9,9 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.core.app.SharedElementCallback
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.WindowInsetsControllerCompat
-import androidx.core.view.updatePadding
+import androidx.core.view.*
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
@@ -26,12 +24,15 @@ import com.example.gallery.R
 import com.example.gallery.adapter.ViewPagerAdapter
 import com.example.gallery.databinding.FragmentViewPagerBinding
 import com.example.gallery.databinding.ViewDialogInfoBinding
+import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.transition.MaterialContainerTransform
 import com.google.android.material.transition.MaterialFade
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.set
+
 
 class ViewPagerFrag : Fragment() {
     private lateinit var _binding: FragmentViewPagerBinding
@@ -121,9 +122,9 @@ class ViewPagerFrag : Fragment() {
         binding.cvShare.visibility = View.VISIBLE
         binding.ivGradTop.visibility = View.VISIBLE
         binding.ivGardBottom.visibility = View.VISIBLE
-         val windowInsetsController =
-            ViewCompat.getWindowInsetsController(requireActivity().window.decorView) ?: return
-        windowInsetsController.show(WindowInsetsCompat.Type.systemBars())
+
+        ViewCompat.getWindowInsetsController(requireActivity().window.decorView)
+        ?.show(WindowInsetsCompat.Type.systemBars())
     }
 
     fun hideSystemUI() {
@@ -141,12 +142,11 @@ class ViewPagerFrag : Fragment() {
         binding.ivGradTop.visibility = View.GONE
         binding.ivGardBottom.visibility = View.GONE
 
-        val windowInsetsController =
-                ViewCompat.getWindowInsetsController(requireActivity().window.decorView) ?: return
      //   windowInsetsController.systemBarsBehavior =
             //    WindowInsetsControllerCompat.BEHAVIOR_SHOW_BARS_BY_TOUCH
 
-        windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
+        ViewCompat.getWindowInsetsController(requireActivity().window.decorView)
+            ?.hide(WindowInsetsCompat.Type.systemBars())
     }
 
     fun toggleSystemUI() {
@@ -161,10 +161,33 @@ class ViewPagerFrag : Fragment() {
                 controller.isAppearanceLightNavigationBars = false
             }
         } catch (e: IllegalStateException) {
+
         }
     }
 
     private fun setUpViews() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+            ViewCompat.setOnApplyWindowInsetsListener(requireActivity().window.decorView) { _, windowInsets ->
+                val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+                binding.tbViewPager.updateLayoutParams<ViewGroup.MarginLayoutParams>{
+                    topMargin = insets.top
+                }
+                binding.cvShare.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                    bottomMargin = insets.bottom
+                }
+                binding.cvEdit.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                    bottomMargin = insets.bottom
+                }
+                binding.cvInfo.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                    bottomMargin = insets.bottom
+                }
+                binding.cvDelete.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                    bottomMargin = insets.bottom 
+                }
+                return@setOnApplyWindowInsetsListener windowInsets
+            }
+        }
+
         binding.cvShare.setOnClickListener {
             val currentItem = getCurrentItem() ?: return@setOnClickListener
             share(currentItem, requireActivity())
@@ -194,7 +217,8 @@ class ViewPagerFrag : Fragment() {
             binding.tvPath.text = info[2]
             binding.tvSize.text = String.format(resources.getString(R.string.item_size), info[1])
 
-            MaterialAlertDialogBuilder(requireContext(), R.style.Theme_MaterialAlertDialog_Centered)
+            MaterialAlertDialogBuilder(
+                requireContext(), R.style.ThemeOverlay_Material3_MaterialAlertDialog_Centered)
                 .setTitle(resources.getString(R.string.info))
                 .setView(binding.root)
                 .setIcon(R.drawable.ic_outline_info_24)
@@ -211,7 +235,7 @@ class ViewPagerFrag : Fragment() {
 
     companion object {
         fun delete(image: ListItem.MediaItem, context: Context, viewModel: MainViewModel) {
-            MaterialAlertDialogBuilder(context, R.style.Theme_MaterialAlertDialog_Centered)
+            MaterialAlertDialogBuilder(context, R.style.ThemeOverlay_Material3_MaterialAlertDialog_Centered)
                 .setTitle("Permanently delete?")
                 .setMessage("This item will be permanently deleted.")
                 .setIcon(R.drawable.ic_outline_delete_24)
@@ -222,7 +246,7 @@ class ViewPagerFrag : Fragment() {
                 .show()
         }
         fun delete(images: List<ListItem.MediaItem>, context: Context, viewModel: MainViewModel) {
-            MaterialAlertDialogBuilder(context, R.style.Theme_MaterialAlertDialog_Centered)
+            MaterialAlertDialogBuilder(context, R.style.ThemeOverlay_Material3_MaterialAlertDialog_Centered)
                 .setTitle("Permanently delete?")
                 .setMessage("This items will be permanently deleted.")
                 .setIcon(R.drawable.ic_outline_delete_24)
@@ -287,7 +311,6 @@ class ViewPagerFrag : Fragment() {
                             ?.findViewHolderForLayoutPosition(binding.viewPager.currentItem)
                             as ViewPagerAdapter.ViewHolderPager? ?: return
 
-                    // Map the first shared element name to the child ImageView.
                     sharedElements[names[0]] = selectedViewHolder.binding.pagerImage
                 }
             })

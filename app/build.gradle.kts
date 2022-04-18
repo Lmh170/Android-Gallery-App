@@ -55,14 +55,14 @@ dependencies {
     implementation ("androidx.lifecycle:lifecycle-viewmodel-ktx:2.4.1")
 
     // Navigation
-    implementation ("androidx.navigation:navigation-fragment-ktx:2.4.1")
-    implementation ("androidx.navigation:navigation-ui-ktx:2.4.1")
-    androidTestImplementation ("androidx.navigation:navigation-testing:2.4.1")
+    implementation ("androidx.navigation:navigation-fragment-ktx:2.4.2")
+    implementation ("androidx.navigation:navigation-ui-ktx:2.4.2")
+    androidTestImplementation ("androidx.navigation:navigation-testing:2.4.2")
 
     // Glide
     implementation ("com.github.bumptech.glide:glide:4.13.1")
     kapt ("com.github.bumptech.glide:compiler:4.13.1")
 
     // ExoPlayer
-    implementation ("com.google.android.exoplayer:exoplayer:2.17.0")
+    implementation ("com.google.android.exoplayer:exoplayer:2.17.1")
 }

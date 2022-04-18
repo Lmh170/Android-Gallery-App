@@ -8,7 +8,8 @@
     <com.google.android.exoplayer2.ui.StyledPlayerView
         android:id="@+id/exoPlayer"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        app:controller_layout_id="@layout/custom_styled_player_control_view"/>
 
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/tbVideo"

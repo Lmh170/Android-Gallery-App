@@ -42,10 +42,10 @@ class AlbumDetailFrag : Fragment() {
     ): View {
         viewModel.albums.observe(viewLifecycleOwner) { albums ->
             val items = albums.find { it.name == MainActivity.currentAlbumName }?.mediaItems
-            val position = (binding.rvAlbums.layoutManager as GridLayoutManager)
+            val position = (binding.rvAlbumDetail.layoutManager as GridLayoutManager)
                 .findFirstCompletelyVisibleItemPosition()
-            (binding.rvAlbums.adapter as GridItemAdapter).submitList(items as List<ListItem>?) {
-                if (position == 0) binding.rvAlbums.scrollToPosition(0)
+            (binding.rvAlbumDetail.adapter as GridItemAdapter).submitList(items as List<ListItem>?) {
+                if (position == 0) binding.rvAlbumDetail.scrollToPosition(0)
             }
         }
         if (::_binding.isInitialized) return binding.root
@@ -53,7 +53,7 @@ class AlbumDetailFrag : Fragment() {
         _binding = FragmentAlbumDetailBinding.inflate(inflater, container, false)
 
         val adapter = GridItemAdapter(this@AlbumDetailFrag, true)
-        binding.rvAlbums.apply {
+        binding.rvAlbumDetail.apply {
             this.adapter = adapter
             setHasFixedSize(true)
         }
@@ -85,23 +85,23 @@ class AlbumDetailFrag : Fragment() {
     private fun setUpRecyclerViewSelection() {
         val tracker = SelectionTracker.Builder(
             "GritItemFragSelectionId",
-            binding.rvAlbums,
+            binding.rvAlbumDetail,
             MyItemKeyProvider(viewModel, true),
-            MyItemDetailsLookup(binding.rvAlbums),
+            MyItemDetailsLookup(binding.rvAlbumDetail),
             StorageStrategy.createLongStorage()
         ).withSelectionPredicate(object : SelectionTracker.SelectionPredicate<Long>() {
             override fun canSetStateForKey(key: Long, nextState: Boolean): Boolean =
-                binding.rvAlbums.findViewHolderForItemId(key) != null
+                binding.rvAlbumDetail.findViewHolderForItemId(key) != null
 
             override fun canSelectMultiple(): Boolean =
                 true
 
             override fun canSetStateAtPosition(position: Int, nextState: Boolean): Boolean =
-                binding.rvAlbums.findViewHolderForLayoutPosition(position) != null
+                binding.rvAlbumDetail.findViewHolderForLayoutPosition(position) != null
 
         }).build()
 
-        (binding.rvAlbums.adapter as GridItemAdapter).tracker = tracker
+        (binding.rvAlbumDetail.adapter as GridItemAdapter).tracker = tracker
 
         val callback = object : ActionMode.Callback {
             override fun onCreateActionMode(mode: ActionMode?, menu: Menu?): Boolean {
@@ -145,7 +145,7 @@ class AlbumDetailFrag : Fragment() {
                     R.id.miShare -> {
                         val items = mutableListOf<ListItem.MediaItem>()
                         for (id in tracker.selection) {
-                            val selectedItem = (binding.rvAlbums.adapter as GridItemAdapter)
+                            val selectedItem = (binding.rvAlbumDetail.adapter as GridItemAdapter)
                                 .currentList.find {
                                 it.id == id } as ListItem.MediaItem? ?: return false
                             items.add(selectedItem)
@@ -158,7 +158,7 @@ class AlbumDetailFrag : Fragment() {
                     R.id.miDelete -> {
                         val items = mutableListOf<ListItem.MediaItem>()
                         for (id in tracker.selection) {
-                            val selectedItem = (binding.rvAlbums.adapter as GridItemAdapter)
+                            val selectedItem = (binding.rvAlbumDetail.adapter as GridItemAdapter)
                                 .currentList.find {
                                 it.id == id} as ListItem.MediaItem? ?: return false
                             items.add(selectedItem)
@@ -201,7 +201,7 @@ class AlbumDetailFrag : Fragment() {
     }
 
     private fun scrollToPosition() {
-        binding.rvAlbums.addOnLayoutChangeListener(object : View.OnLayoutChangeListener {
+        binding.rvAlbumDetail.addOnLayoutChangeListener(object : View.OnLayoutChangeListener {
             override fun onLayoutChange(
                 v: View,
                 left: Int,
@@ -213,18 +213,16 @@ class AlbumDetailFrag : Fragment() {
                 oldRight: Int,
                 oldBottom: Int
             ) {
-                binding.rvAlbums.removeOnLayoutChangeListener(this)
+                binding.rvAlbumDetail.removeOnLayoutChangeListener(this)
 
                 val viewAtPosition =
-                    binding.rvAlbums.layoutManager!!.findViewByPosition(MainActivity.currentListPosition)
+                    binding.rvAlbumDetail.layoutManager!!.findViewByPosition(MainActivity.currentListPosition)
 
-                // Scroll to position if the view for the current position is null (not currently part of
-                // layout manager children), or it's not completely visible.
-                if (viewAtPosition == null || !binding.rvAlbums.layoutManager!!
+                if (viewAtPosition == null || !binding.rvAlbumDetail.layoutManager!!
                         .isViewPartiallyVisible(viewAtPosition, true, true)
                 ) {
-                    binding.rvAlbums.post {
-                        binding.rvAlbums.layoutManager!!.scrollToPosition(MainActivity.currentListPosition)
+                    binding.rvAlbumDetail.post {
+                        binding.rvAlbumDetail.layoutManager!!.scrollToPosition(MainActivity.currentListPosition)
                         startPostponedEnterTransition()
                     }
                 } else {
@@ -246,12 +244,11 @@ class AlbumDetailFrag : Fragment() {
                 ) {
 
                     // Locate the ViewHolder for the clicked position.
-                    val selectedViewHolder = binding.rvAlbums
+                    val selectedViewHolder = binding.rvAlbumDetail
                         .findViewHolderForLayoutPosition(MainActivity.currentListPosition) ?: return
 //                    (exitTransition as Hold).excludeChildren((selectedViewHolder as GridAdapter.MediaItemHolder).binding.image, true)
 
                     // Map the first shared element name to the child ImageView.
-
                     sharedElements[names[0]] =
                         (selectedViewHolder as GridItemAdapter.MediaItemHolder).binding.image
 

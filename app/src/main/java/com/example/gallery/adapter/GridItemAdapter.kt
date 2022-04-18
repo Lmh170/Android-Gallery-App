@@ -109,14 +109,13 @@ class GridItemAdapter(private val frag: Fragment, private val isAlbum: Boolean):
             }
 
         fun onBind() {
-            val wasActivated = binding.image.isActivated
             binding.image.isActivated = tracker?.isSelected(itemId) == true
-            if (binding.image.isActivated && !wasActivated) {
+            if (binding.image.isActivated) {
                 binding.image.apply {
                     shapeAppearanceModel = ShapeAppearanceModel().withCornerSize(70f)
                     animate().scaleX(0.75f).scaleY(0.75f).duration = 100
                 }
-            } else if (!binding.image.isActivated && wasActivated) {
+            } else if (!binding.image.isActivated) {
                 binding.image.apply {
                     shapeAppearanceModel = ShapeAppearanceModel().withCornerSize(0f)
                     animate().scaleX(1f).scaleY(1f).duration = 100
@@ -130,7 +129,7 @@ class GridItemAdapter(private val frag: Fragment, private val isAlbum: Boolean):
 
             GlideApp.with(binding.image)
                 .load((getItem(layoutPosition) as ListItem.MediaItem).uri)
-                .apply(RequestOptions().format(DecodeFormat.PREFER_RGB_565)) // better performance
+              //  .apply(RequestOptions().format(DecodeFormat.PREFER_RGB_565)) // better performance
                 .signature(MediaStoreSignature(null,
                     (getItem(layoutPosition) as ListItem.MediaItem).dateModified, 0))
                 .listener(object : RequestListener<Drawable?> {
@@ -226,7 +225,7 @@ class GridItemAdapter(private val frag: Fragment, private val isAlbum: Boolean):
 
     inner class HeaderViewHolder (private val binding: ListGridHeaderBinding): RecyclerView.ViewHolder(binding.root) {
         fun onBind() {
-            binding.tvDate.text = SimpleDateFormat.getDateInstance(SimpleDateFormat.LONG).format(
+            binding.tvDate.text = SimpleDateFormat.getDateInstance(SimpleDateFormat.FULL).format(
                 Date(itemId)
             )
         }
