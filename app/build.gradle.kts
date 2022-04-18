@@ -9,7 +9,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.gallery"
-        minSdk = 21
+        minSdk = 29
         targetSdk = 32
         versionCode = 1
         versionName = versionCode.toString()
