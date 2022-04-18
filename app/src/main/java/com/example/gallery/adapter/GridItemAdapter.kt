@@ -16,12 +16,10 @@
 package com.example.gallery.adapter
 
 import android.graphics.drawable.Drawable
-import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.navigation.fragment.findNavController
@@ -54,7 +52,7 @@ import java.util.concurrent.atomic.AtomicBoolean
  */
 class GridItemAdapter(val frag: Fragment, val isAlbum: Boolean): ListAdapter<ListItem, ViewHolder>(ListItem.ListItemDiffCallback()) {
     val enterTransitionStarted: AtomicBoolean = AtomicBoolean()
-    lateinit var tracker: SelectionTracker<Uri>
+    lateinit var tracker: SelectionTracker<Long>
 
     companion object {
         const val ITEM_VIEW_TYPE_HEADER = 8123
@@ -84,7 +82,7 @@ class GridItemAdapter(val frag: Fragment, val isAlbum: Boolean): ListAdapter<Lis
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         if (holder is MediaItemHolder) {
-            holder.onBind(position)
+            holder.onBind()
         } else if (holder is HeaderViewHolder) {
             holder.onBind()
         }
@@ -101,17 +99,17 @@ class GridItemAdapter(val frag: Fragment, val isAlbum: Boolean): ListAdapter<Lis
 
     inner class MediaItemHolder(val binding: ListGridMediaItemHolderBinding, val type: Int): RecyclerView.ViewHolder(binding.root) {
 
-        fun getItemDetails() : ItemDetailsLookup.ItemDetails<Uri> =
-            object : ItemDetailsLookup.ItemDetails<Uri>() {
+        fun getItemDetails() : ItemDetailsLookup.ItemDetails<Long> =
+            object : ItemDetailsLookup.ItemDetails<Long>() {
                 override fun getPosition(): Int =
                     layoutPosition
 
-                override fun getSelectionKey(): Uri =
-                    (getItem(layoutPosition) as ListItem.MediaItem).uri
+                override fun getSelectionKey(): Long =
+                    itemId
             }
 
-        fun onBind(position: Int) {
-            binding.image.isActivated = tracker.isSelected((getItem(position) as ListItem.MediaItem).uri)
+        fun onBind() {
+            binding.image.isActivated = tracker.isSelected((getItem(position) as ListItem.MediaItem).id)
             if (binding.image.isActivated) {
                 binding.image.shapeAppearanceModel = ShapeAppearanceModel().withCornerSize(70f)
             } else {
@@ -120,15 +118,15 @@ class GridItemAdapter(val frag: Fragment, val isAlbum: Boolean): ListAdapter<Lis
 
             binding.image.transitionName = (getItem(layoutPosition) as ListItem.MediaItem).id.toString()
             Glide.with(frag.requireActivity()).
-            load((getItem(position) as ListItem.MediaItem).uri)
-                .signature(MediaStoreSignature("", (getItem(position)as ListItem.MediaItem).dateModified, 0))
+            load((getItem(layoutPosition) as ListItem.MediaItem).uri)
+                .signature(MediaStoreSignature("", (getItem(layoutPosition)as ListItem.MediaItem).dateModified, 0))
                 .thumbnail(0.2f)
                 .listener(object : RequestListener<Drawable?> {
                     override fun onLoadFailed(
                         e: GlideException?, model: Any,
                         target: Target<Drawable?>, isFirstResource: Boolean
                     ): Boolean {
-                        if (MainActivity.currentListPosition != position) {
+                        if (MainActivity.currentListPosition != layoutPosition) {
                             return true
                         }
                         if (enterTransitionStarted.getAndSet(true)) {
@@ -145,7 +143,7 @@ class GridItemAdapter(val frag: Fragment, val isAlbum: Boolean): ListAdapter<Lis
                         dataSource: DataSource,
                         isFirstResource: Boolean
                     ): Boolean {
-                        if (MainActivity.currentListPosition != position) {
+                        if (MainActivity.currentListPosition != layoutPosition) {
                             return false
                         }
                         if (enterTransitionStarted.getAndSet(true)) {
@@ -202,13 +200,16 @@ class GridItemAdapter(val frag: Fragment, val isAlbum: Boolean): ListAdapter<Lis
                 Date((getItem(layoutPosition) as ListItem.Header).date)
             )
         }
-        fun getItemDetails() : ItemDetailsLookup.ItemDetails<Uri> =
-            object : ItemDetailsLookup.ItemDetails<Uri>() {
+        fun getItemDetails() : ItemDetailsLookup.ItemDetails<Long> =
+            object : ItemDetailsLookup.ItemDetails<Long>() {
                 override fun getPosition(): Int =
                     layoutPosition
 
-                override fun getSelectionKey(): Uri =
-                    Uri.EMPTY
+                override fun getSelectionKey(): Long =
+                    itemId
             }
     }
+
+    override fun getItemId(position: Int): Long =
+        getItem(position).id
 }

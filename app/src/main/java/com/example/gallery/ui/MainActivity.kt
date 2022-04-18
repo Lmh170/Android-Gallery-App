@@ -18,6 +18,8 @@ import androidx.lifecycle.Observer
 import com.example.gallery.databinding.ActivityMainBinding
 import com.example.gallery.ui.MainViewModel
 
+private const val READ_EXTERNAL_STORAGE_REQUEST = 0x1045
+
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private val viewModel: MainViewModel by viewModels()
@@ -115,6 +117,5 @@ class MainActivity : AppCompatActivity() {
         var currentViewPagerPosition = 0
         @JvmStatic
         lateinit var currentAlbumName: String
-        private const val READ_EXTERNAL_STORAGE_REQUEST = 0x1045
     }
 }
