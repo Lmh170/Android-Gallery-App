@@ -18,8 +18,8 @@ class GridAlbumAdapter(private val frag: BottomNavFrag): ListAdapter<Album, Grid
     inner class AlbumHolder(private val binding: AlbumHolderBinding): RecyclerView.ViewHolder(binding.root){
         fun onBind() {
             GlideApp.with(frag.requireActivity())
-                .load(getItem(layoutPosition).mediaItems[0].uri)
-                .signature(MediaStoreSignature("", getItem(layoutPosition).mediaItems[0].dateModified, 0))
+                .load(getItem(layoutPosition).mediaItems.value?.get(0)?.uri)
+                .signature(MediaStoreSignature("", getItem(layoutPosition).mediaItems.value!![0].dateModified, 0))
                 .thumbnail(0.3f)
                 .into(binding.ivThumbnailAlbum)
             binding.tvAlbumName.text = getItem(layoutPosition).name

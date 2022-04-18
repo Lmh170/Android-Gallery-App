@@ -18,7 +18,6 @@ import com.example.gallery.databinding.FragmentAlbumDetailBinding
 import com.google.android.material.transition.Hold
 import com.google.android.material.transition.MaterialSharedAxis
 import android.view.ViewGroup
-import com.example.gallery.ListItem
 
 
 class AlbumDetailFrag : Fragment() {
@@ -120,10 +119,10 @@ class AlbumDetailFrag : Fragment() {
         })
 
         viewModel.albums.observe(viewLifecycleOwner, { albums->
-            val items = albums.find { it.name == MainActivity.currentAlbumName }?.mediaItems
+            val items = albums.find { it.name == MainActivity.currentAlbumName }?.mediaItems?.value
             val position = (binding.rvAlbums.layoutManager as GridLayoutManager)
                 .findFirstCompletelyVisibleItemPosition()
-            adapter.submitList(items as List<ListItem>) {
+            adapter.submitList(items) {
                 if (position == 0) binding.rvAlbums.scrollToPosition(0)
             }
         })
@@ -143,10 +142,10 @@ class AlbumDetailFrag : Fragment() {
         postponeEnterTransition()
         setUpSystemBars()
         viewModel.albums.observe(viewLifecycleOwner, { albums->
-            val items = albums.find { it.name == MainActivity.currentAlbumName }?.mediaItems
+            val items = albums.find { it.name == MainActivity.currentAlbumName }?.mediaItems?.value
             val position = (binding.rvAlbums.layoutManager as GridLayoutManager)
                 .findFirstCompletelyVisibleItemPosition()
-            (binding.rvAlbums.adapter as GridItemAdapter).submitList(items as List<ListItem>) {
+            (binding.rvAlbums.adapter as GridItemAdapter).submitList(items) {
                 if (position == 0) binding.rvAlbums.scrollToPosition(0)
             }
         })

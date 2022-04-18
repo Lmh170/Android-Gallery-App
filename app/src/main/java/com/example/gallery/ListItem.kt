@@ -7,8 +7,9 @@ sealed class ListItem {
 
     abstract val id: Long
 
-    data class MediaItem (override val id: Long, val uri: Uri, val album: String, val type: Int,
-                          val dateModified: Long, val viewPagerPosition: Int, val listPosition: Int): ListItem() {
+    data class MediaItem (val name: String, val size: Long, override val id: Long, val uri: Uri,
+                          val dateAdded: Long, val dateTaken: Long, val dateModified: Long, val album: String, val duration: Int, val type: Int,
+                          val listPosition: Int, val viewPagerPosition: Int, val path: String): ListItem() {
 
         companion object {
             val DiffCallback = object : DiffUtil.ItemCallback<MediaItem>() {
@@ -38,6 +39,7 @@ sealed class ListItem {
                 oldItem == newItem
             }
         }
+
     }
 }
 
