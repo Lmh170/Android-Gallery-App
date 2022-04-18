@@ -2,11 +2,11 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:id="@+id/item_photos"
+        android:id="@+id/miPhotos"
         android:icon="@drawable/ic_outline_photo_24"
-        android:title="Photos" />
+        android:title="@string/photos" />
     <item
-        android:id="@+id/item_albus"
+        android:id="@+id/miAlbums"
         android:icon="@drawable/ic_outline_auto_stories_24"
-        android:title="Albums" />
+        android:title="@string/albums" />
 </menu>

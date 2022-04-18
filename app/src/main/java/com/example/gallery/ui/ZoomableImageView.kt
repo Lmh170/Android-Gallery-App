@@ -2,16 +2,12 @@ package com.example.gallery.ui
 
 import android.content.Context
 import android.graphics.Matrix
-
-import android.view.ScaleGestureDetector
-
-import android.view.MotionEvent
-
 import android.graphics.PointF
 import android.util.AttributeSet
 import android.util.Log
+import android.view.MotionEvent
+import android.view.ScaleGestureDetector
 import android.view.ScaleGestureDetector.SimpleOnScaleGestureListener
-
 import androidx.appcompat.widget.AppCompatImageView
 import com.example.gallery.R
 import kotlin.math.abs
@@ -20,7 +16,7 @@ class ZoomableImageView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null
 ) : AppCompatImageView(context, attrs) {
 
-    lateinit var mMatrix : Matrix
+    lateinit var mMatrix: Matrix
 
     private var mode = NONE
 
@@ -30,18 +26,18 @@ class ZoomableImageView @JvmOverloads constructor(
     private var maxScale = 3f
     private var m: FloatArray = FloatArray(9)
     private var viewWidth = 0
-    var viewHeight = 0
+    private var viewHeight = 0
     private var saveScale = 1f
     private var origWidth = 0f
-    var origHeight = 0f
+    private var origHeight = 0f
     private var oldMeasuredWidth = 0
     private var oldMeasuredHeight = 0
     private var mScaleDetector: ScaleGestureDetector? = null
 
     private var isZoomingDisabled = true
 
-  //  lateinit var gActivity : InAppGallery
-    lateinit var gFrag: ViewPagerFrag
+    var gFrag: ViewPagerFrag? = null
+    var gActivity: ImageViewerActivity? = null
 
     init {
         sharedConstructing()
@@ -49,18 +45,12 @@ class ZoomableImageView @JvmOverloads constructor(
 
     private val currentInstance : ZoomableImageView
         get() {
-        //    return gActivity.gallerySlider.getChildAt(0)
-          //      .findViewById(R.id.slide_preview)
-            return gFrag.binding.viewPager.getChildAt(0).findViewById(R.id.pagerImage)
+            return if (gFrag != null) {
+                gFrag!!.binding.viewPager.getChildAt(0).findViewById(R.id.pagerImage)
+            } else {
+                gActivity!!.binding.pagerImage
+            }
         }
-
-   // fun setGalleryActivity(gActivity: InAppGallery) {
-    //   this.gActivity = gActivity
-    //}
-
-    fun setViewPagerFrag(frag: ViewPagerFrag) {
-        this.gFrag = frag
-    }
 
     fun enableZooming() {
         isZoomingDisabled = false
@@ -134,11 +124,9 @@ class ZoomableImageView @JvmOverloads constructor(
             mode = ZOOM
 
             if (isZoomingDisabled) {
-           //     gActivity.showActionBar()
-                gFrag.showSystemUI()
+                gFrag?.showSystemUI() ?: gActivity?.showSystemUI()
             } else {
-          //      gActivity.gallerySlider.isUserInputEnabled = false
-                gFrag.binding.viewPager.isUserInputEnabled = false
+                gFrag?.binding?.viewPager?.isUserInputEnabled = false
             }
 
             return true
@@ -183,8 +171,7 @@ class ZoomableImageView @JvmOverloads constructor(
         override fun onScaleEnd(detector: ScaleGestureDetector?) {
             super.onScaleEnd(detector)
             if (saveScale == 1f) {
-              //  gActivity.gallerySlider.isUserInputEnabled = true
-                gFrag.binding.viewPager.isUserInputEnabled = true
+                gFrag?.binding?.viewPager?.isUserInputEnabled = true
             }
         }
     }
@@ -197,13 +184,9 @@ class ZoomableImageView @JvmOverloads constructor(
 
         isInZoomMode = true
 
-    //    gActivity.let {
-      //      it.hideActionBar()
-        //    it.gallerySlider.isUserInputEnabled = false
-       // }
         gFrag.let {
-            it.hideSystemUI()
-            it.binding.viewPager.isUserInputEnabled = false
+            it?.hideSystemUI() ?: gActivity?.hideSystemUI()
+            it?.binding?.viewPager?.isUserInputEnabled = false
         }
     }
 
@@ -213,16 +196,7 @@ class ZoomableImageView @JvmOverloads constructor(
 
         isInZoomMode = false
 
-   //     gActivity.let {
- //           it.showActionBar()
-//            it.gallerySlider.isUserInputEnabled = true
-     //   }
-
-        gFrag.let {
-            it.showSystemUI()
-            it.binding.viewPager.isUserInputEnabled = true
-        }
-
+        gFrag?.showSystemUI() ?: gActivity?.showSystemUI()
     }
 
     fun fixTrans() {
@@ -268,7 +242,8 @@ class ZoomableImageView @JvmOverloads constructor(
         // Rescales image on rotation
         if (oldMeasuredHeight == viewWidth &&
             oldMeasuredHeight == viewHeight || viewWidth == 0 ||
-            viewHeight == 0) return
+            viewHeight == 0
+        ) return
 
         oldMeasuredHeight = viewHeight
         oldMeasuredWidth = viewWidth

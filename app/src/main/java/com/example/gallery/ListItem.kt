@@ -7,9 +7,8 @@ sealed class ListItem {
 
     abstract val id: Long
 
-    data class MediaItem (val name: String, val size: Long, override val id: Long, val uri: Uri,
-                          val dateAdded: Long, val dateTaken: Long, val dateModified: Long, val album: String, val duration: Int, val type: Int,
-                          val listPosition: Int, val viewPagerPosition: Int, val path: String): ListItem() {
+    data class MediaItem (override val id: Long, val uri: Uri, val album: String, val type: Int,
+                          val dateModified: Long, val viewPagerPosition: Int, val listPosition: Int): ListItem() {
 
         companion object {
             val DiffCallback = object : DiffUtil.ItemCallback<MediaItem>() {
@@ -23,23 +22,19 @@ sealed class ListItem {
 
     }
 
-    data class Header(val date: Long): ListItem() {
-        override val id = Long.MIN_VALUE
-    }
+    data class Header(override val id: Long): ListItem()
 
     class ListItemDiffCallback: DiffUtil.ItemCallback<ListItem>() {
-        override fun areItemsTheSame(oldItem: ListItem, newItem: ListItem): Boolean {
-            return oldItem.id == newItem.id
-        }
+        override fun areItemsTheSame(oldItem: ListItem, newItem: ListItem): Boolean =
+            oldItem.id == newItem.id
 
         override fun areContentsTheSame(oldItem: ListItem, newItem: ListItem): Boolean {
-            return if (oldItem is ListItem.MediaItem && newItem is ListItem.MediaItem) {
+            return if (oldItem is MediaItem && newItem is MediaItem) {
                 oldItem.uri == newItem.uri
             } else {
                 oldItem == newItem
             }
         }
-
     }
 }
 

@@ -1,0 +1,419 @@
+Index: app/src/main/java/com/example/gallery/ui/BottomNavFrag.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.gallery.ui\n\nimport android.content.res.Configuration\nimport android.os.Bundle\nimport android.view.*\nimport androidx.fragment.app.Fragment\nimport androidx.core.app.SharedElementCallback\nimport androidx.core.view.*\nimport androidx.fragment.app.commit\nimport androidx.fragment.app.replace\nimport com.example.gallery.R\nimport com.example.gallery.adapter.GridItemAdapter\nimport com.example.gallery.databinding.FragmentBottomNavBinding\nimport com.google.android.material.shape.MaterialShapeDrawable\nimport com.google.android.material.transition.Hold\nimport com.google.android.material.transition.MaterialSharedAxis\n\nclass BottomNavFrag : Fragment() {\n    private lateinit var _binding: FragmentBottomNavBinding\n    private val binding get() = _binding\n\n    override fun onCreateView(\n        inflater: LayoutInflater, container: ViewGroup?,\n        savedInstanceState: Bundle?\n    ): View {\n        if (!::_binding.isInitialized){\n            _binding = FragmentBottomNavBinding.inflate(inflater, container, false)\n        }\n        val frag = childFragmentManager.findFragmentById(R.id.fcvBottomNav)\n        if (frag is GridItemFrag){\n            postponeEnterTransition()\n            prepareTransitions()\n        }\n\n        binding.appBarLayout.statusBarForeground = MaterialShapeDrawable.createWithElevationOverlay(requireContext())\n\n        binding.fcvBottomNav.updateLayoutParams<ViewGroup.MarginLayoutParams> {\n            bottomMargin = binding.bnvMain.measuredHeight\n        }\n\n        binding.bnvMain.setOnItemReselectedListener {\n            val fragment = childFragmentManager.findFragmentById(R.id.fcvBottomNav)\n            if (fragment is GridItemFrag) {\n                fragment.binding.rvItems.smoothScrollToPosition(0)\n            } else if (fragment is GridAlbumFrag) {\n                fragment.binding.rvAlbum.smoothScrollToPosition(0)\n            }\n        }\n        binding.bnvMain.setOnItemSelectedListener {\n            when (it.itemId) {\n                R.id.item_photos -> {\n                    childFragmentManager.commit {\n                        replace<GridItemFrag>(R.id.fcvBottomNav)\n                        setReorderingAllowed(true)\n                        MainActivity.currentListPosition = 0\n                    }\n                    true\n                }\n                R.id.item_albus -> {\n                    if (frag is GridItemFrag && frag.actionMode != null) {\n                        frag.actionMode?.finish()\n                        frag.actionMode = null\n                        activity?.window?.statusBarColor = resources.getColor(R.color.material_dynamic_primary95, activity?.theme)\n                    }\n                    childFragmentManager.commit {\n                        replace<GridAlbumFrag>(R.id.fcvBottomNav)\n                        setReorderingAllowed(true)\n                    }\n                    true\n                }\n                else -> false\n            }\n        }\n        return binding.root\n    }\n\n    fun startActionMode(callback: ActionMode.Callback): ActionMode {\n        activity?.window?.statusBarColor = resources.getColor(R.color.material_dynamic_primary95, activity?.theme)\n        return binding.tbMain.startActionMode(callback)\n    }\n\n    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {\n        super.onViewCreated(view, savedInstanceState)\n        prepareTransitions()\n    }\n\n    private fun setUpSystemBars() {\n        val nightModeFlags: Int = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK\n        if (nightModeFlags == Configuration.UI_MODE_NIGHT_NO ||\n            nightModeFlags == Configuration.UI_MODE_NIGHT_UNDEFINED) {\n            WindowInsetsControllerCompat(requireActivity().window, binding.root).let { controller ->\n                controller.isAppearanceLightStatusBars = true\n                controller.isAppearanceLightNavigationBars = true\n            }\n        }\n\n    }\n\n    override fun onStart() {\n        super.onStart()\n        setUpSystemBars()\n    }\n\n    fun prepareTransitions() {\n\n    //     exitTransition = TransitionInflater.from(context)\n      //    .inflateTransition(R.transition.grid_exit_transition)\n        exitTransition = if (enteringFromAlbum) {\n            MaterialSharedAxis(MaterialSharedAxis.Z, false)\n        } else {\n            Hold()\n        }\n        //     reenterTransition = MaterialElevationScale(true)\n        //  exitTransition = Hold()\n        // A similar mapping is set at the ImagePagerFragment with a setEnterSharedElementCallback.\n        setExitSharedElementCallback(\n            object : SharedElementCallback() {\n                override fun onMapSharedElements(\n                    names: List<String>,\n                    sharedElements: MutableMap<String, View>\n                ) {\n                    val frag: GridItemFrag?\n                    try {\n                        frag = childFragmentManager.findFragmentById(R.id.fcvBottomNav) as GridItemFrag?\n                    } catch (e: ClassCastException) {\n                        return\n                    }\n                    if (frag != null) {\n                        ViewGroupCompat.setTransitionGroup(frag.binding.rvItems, false)\n                    }\n                    // Locate the ViewHolder for the clicked position.\n                    val selectedViewHolder = frag?.binding?.rvItems\n                        ?.findViewHolderForAdapterPosition(MainActivity.currentListPosition) ?: return\n\n//                    (exitTransition as Hold).excludeChildren((selectedViewHolder as GridAdapter.MediaItemHolder).binding.image, true)\n\n\n                    // Map the first shared element name to the child ImageView.\n                    sharedElements[names[0]] =\n                        (selectedViewHolder as GridItemAdapter.MediaItemHolder).binding.image\n\n                }\n            })\n    }\n\n    companion object {\n         var enteringFromAlbum = false\n    }\n\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/gallery/ui/BottomNavFrag.kt b/app/src/main/java/com/example/gallery/ui/BottomNavFrag.kt
+--- a/app/src/main/java/com/example/gallery/ui/BottomNavFrag.kt	
++++ b/app/src/main/java/com/example/gallery/ui/BottomNavFrag.kt	
+@@ -1,6 +1,7 @@
+ package com.example.gallery.ui
+ 
+ import android.content.res.Configuration
++import android.os.Build
+ import android.os.Bundle
+ import android.view.*
+ import androidx.fragment.app.Fragment
+@@ -9,6 +10,7 @@
+ import androidx.fragment.app.commit
+ import androidx.fragment.app.replace
+ import com.example.gallery.R
++import com.example.gallery.adapter.GridAlbumAdapter
+ import com.example.gallery.adapter.GridItemAdapter
+ import com.example.gallery.databinding.FragmentBottomNavBinding
+ import com.google.android.material.shape.MaterialShapeDrawable
+@@ -26,46 +28,55 @@
+         if (!::_binding.isInitialized){
+             _binding = FragmentBottomNavBinding.inflate(inflater, container, false)
+         }
+-        val frag = childFragmentManager.findFragmentById(R.id.fcvBottomNav)
+-        if (frag is GridItemFrag){
++        if (binding.rvItems.visibility == View.GONE){
+             postponeEnterTransition()
+             prepareTransitions()
+         }
+ 
+         binding.appBarLayout.statusBarForeground = MaterialShapeDrawable.createWithElevationOverlay(requireContext())
+-
+-        binding.fcvBottomNav.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+-            bottomMargin = binding.bnvMain.measuredHeight
++        binding.rvItems.apply {
++            updateLayoutParams<ViewGroup.MarginLayoutParams> {
++                bottomMargin = binding.bnvMain.measuredHeight
++            }
++        }
++        binding.rvAlbum.apply {
++            updateLayoutParams<ViewGroup.MarginLayoutParams> {
++                bottomMargin = binding.bnvMain.measuredHeight
++            }
++            adapter = GridAlbumAdapter(this@BottomNavFrag)
++            setHasFixedSize(true)
++
+         }
+ 
+         binding.bnvMain.setOnItemReselectedListener {
+-            val fragment = childFragmentManager.findFragmentById(R.id.fcvBottomNav)
+-            if (fragment is GridItemFrag) {
+-                fragment.binding.rvItems.smoothScrollToPosition(0)
+-            } else if (fragment is GridAlbumFrag) {
+-                fragment.binding.rvAlbum.smoothScrollToPosition(0)
++            if (it.itemId == R.id.item_photos) {
++                binding.rvItems.smoothScrollToPosition(0)
++            } else {
++                binding.rvAlbum.smoothScrollToPosition(0)
+             }
+         }
+         binding.bnvMain.setOnItemSelectedListener {
+             when (it.itemId) {
+                 R.id.item_photos -> {
+-                    childFragmentManager.commit {
+-                        replace<GridItemFrag>(R.id.fcvBottomNav)
+-                        setReorderingAllowed(true)
+-                        MainActivity.currentListPosition = 0
+-                    }
++                    binding.rvAlbum.visibility = View.GONE
++                    binding.rvItems.visibility = View.VISIBLE
+                     true
+                 }
+                 R.id.item_albus -> {
+-                    if (frag is GridItemFrag && frag.actionMode != null) {
++                    /*
++                    if (frag.actionMode != null) {
+                         frag.actionMode?.finish()
+                         frag.actionMode = null
+-                        activity?.window?.statusBarColor = resources.getColor(R.color.material_dynamic_primary95, activity?.theme)
+-                    }
+-                    childFragmentManager.commit {
+-                        replace<GridAlbumFrag>(R.id.fcvBottomNav)
+-                        setReorderingAllowed(true)
++                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
++                            activity?.window?.statusBarColor = resources.getColor(R.color.material_dynamic_primary95, activity?.theme)
++                        } else {
++                            activity?.window?.statusBarColor = resources.getColor(R.color.material_dynamic_primary95)
++                        }
+                     }
++
++                     */
++                    binding.rvItems.visibility = View.GONE
++                    binding.rvAlbum.visibility = View.VISIBLE
+                     true
+                 }
+                 else -> false
+@@ -75,7 +86,11 @@
+     }
+ 
+     fun startActionMode(callback: ActionMode.Callback): ActionMode {
+-        activity?.window?.statusBarColor = resources.getColor(R.color.material_dynamic_primary95, activity?.theme)
++        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
++            activity?.window?.statusBarColor = resources.getColor(R.color.material_dynamic_primary95, activity?.theme)
++        } else {
++            activity?.window?.statusBarColor = resources.getColor(R.color.material_dynamic_primary95)
++        }
+         return binding.tbMain.startActionMode(callback)
+     }
+ 
+@@ -93,7 +108,6 @@
+                 controller.isAppearanceLightNavigationBars = true
+             }
+         }
+-
+     }
+ 
+     override fun onStart() {
+@@ -119,28 +133,20 @@
+                     names: List<String>,
+                     sharedElements: MutableMap<String, View>
+                 ) {
+-                    val frag: GridItemFrag?
+-                    try {
+-                        frag = childFragmentManager.findFragmentById(R.id.fcvBottomNav) as GridItemFrag?
+-                    } catch (e: ClassCastException) {
+-                        return
+-                    }
+-                    if (frag != null) {
+-                        ViewGroupCompat.setTransitionGroup(frag.binding.rvItems, false)
+-                    }
++                    ViewGroupCompat.setTransitionGroup(binding.rvItems, false)
++
+                     // Locate the ViewHolder for the clicked position.
+-                    val selectedViewHolder = frag?.binding?.rvItems
+-                        ?.findViewHolderForAdapterPosition(MainActivity.currentListPosition) ?: return
++                    val selectedViewHolder = binding.rvItems
++                        .findViewHolderForAdapterPosition(MainActivity.currentListPosition) ?: return
+ 
+ //                    (exitTransition as Hold).excludeChildren((selectedViewHolder as GridAdapter.MediaItemHolder).binding.image, true)
+ 
+-
+                     // Map the first shared element name to the child ImageView.
+                     sharedElements[names[0]] =
+                         (selectedViewHolder as GridItemAdapter.MediaItemHolder).binding.image
+-
+                 }
+-            })
++            }
++        )
+     }
+ 
+     companion object {
+Index: app/src/main/java/com/example/gallery/ui/GridItemFrag.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.gallery.ui\n\nimport android.os.Bundle\nimport android.view.*\nimport androidx.fragment.app.Fragment\nimport androidx.core.view.ViewGroupCompat\nimport androidx.fragment.app.activityViewModels\nimport androidx.recyclerview.selection.SelectionTracker\nimport androidx.recyclerview.selection.StableIdKeyProvider\nimport androidx.recyclerview.selection.StorageStrategy\nimport androidx.recyclerview.widget.GridLayoutManager\nimport com.example.gallery.ListItem\nimport com.example.gallery.MyItemDetailsLookup\nimport com.example.gallery.adapter.GridItemAdapter\nimport com.example.gallery.databinding.FragmentGridItemBinding\nimport com.google.android.material.transition.MaterialFadeThrough\n\nclass GridItemFrag : Fragment() {\n    private lateinit var _binding: FragmentGridItemBinding\n    val binding get() = _binding\n    private val viewModel: MainViewModel by activityViewModels()\n    var actionMode: ActionMode? = null\n\n    override fun onCreateView(\n        inflater: LayoutInflater, container: ViewGroup?,\n        savedInstanceState: Bundle?\n    ): View {\n        if (!::_binding.isInitialized){\n            _binding = FragmentGridItemBinding.inflate(inflater, container, false)\n        }\n\n        viewModel.recyclerViewItems.observe(viewLifecycleOwner, { items ->\n            val position = (binding.rvItems.layoutManager as GridLayoutManager)\n                .findFirstCompletelyVisibleItemPosition()\n            (binding.root.adapter as GridItemAdapter).submitList(items){\n                if (position == 0) binding.rvItems.scrollToPosition(0)\n            }\n           }\n        )\n        val adapter = GridItemAdapter(requireParentFragment(), false)\n\n        binding.root.apply {\n            this.adapter = adapter\n            val manager = GridLayoutManager(context, spanCount)\n            manager.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {\n                override fun getSpanSize(position: Int): Int {\n                    return when (adapter.getItemViewType(position)) {\n                        GridItemAdapter.ITEM_VIEW_TYPE_HEADER -> spanCount\n                        else -> 1\n                    }\n                }\n            }\n            layoutManager = manager\n            setHasFixedSize(true)\n        }\n        val tracker = SelectionTracker.Builder(\n            \"GritItemFragSelectionId\",\n            binding.rvItems,\n            StableIdKeyProvider(binding.rvItems),\n            MyItemDetailsLookup(binding.rvItems),\n            StorageStrategy.createLongStorage()\n        ).withSelectionPredicate(object : SelectionTracker.SelectionPredicate<Long>() {\n            override fun canSetStateForKey(key: Long, nextState: Boolean): Boolean =\n                viewModel.recyclerViewItems.value?.contains(ListItem.Header(key)) == false\n\n            override fun canSelectMultiple(): Boolean =\n                true\n\n            override fun canSetStateAtPosition(position: Int, nextState: Boolean): Boolean =\n                true\n           //     position != viewModel.recyclerViewItems.value[position]\n//                viewModel.recyclerViewItems.value?.get(position) is ListItem.MediaItem\n        }).build()\n        adapter.tracker = tracker\n        scrollToPosition()\n        ViewGroupCompat.setTransitionGroup(binding.rvItems, true)\n\n        val callback = object : ActionMode.Callback {\n            override fun onCreateActionMode(mode: ActionMode?, menu: Menu?): Boolean {\n                // menuInflater.inflate(R.menu.contextual_action_bar, menu)\n                return true\n            }\n\n            override fun onPrepareActionMode(mode: ActionMode?, menu: Menu?): Boolean =\n                false\n\n            override fun onActionItemClicked(mode: ActionMode?, item: MenuItem?): Boolean {\n                /*\n                return when (item?.itemId) {\n                     R.id.share -> {\n                         // Handle share icon press\n                         true\n                     }\n                     R.id.delete -> {\n                         // Handle delete icon press\n                         true\n                     }\n                     R.id.more -> {\n                         // Handle more item (inside overflow menu) press\n                         true\n                     }\n                     else -> false\n                 }\n                 */\n                return false\n            }\n\n            override fun onDestroyActionMode(mode: ActionMode?) {\n                tracker.clearSelection()\n            }\n        }\n\n        tracker.addObserver(object: SelectionTracker.SelectionObserver<Long>() {\n            override fun onSelectionChanged() {\n                super.onSelectionChanged()\n                actionMode?.title = tracker.selection.size().toString()\n                if (actionMode == null) {\n                    actionMode = (parentFragment as BottomNavFrag).startActionMode(callback)\n                    //    val inflater = requireActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater\n                    //   val actionBinding = ActionModeToolbarBinding.inflate(inflater)\n                    //  actionMode?.customView = actionBinding.root\n                    //actionMode = activity?.startActionMode(callback)\n                } else if (tracker.selection.size() == 0) {\n                    actionMode?.finish()\n                    actionMode = null\n                    activity?.window?.statusBarColor = resources.getColor(android.R.color.transparent, activity?.theme)\n                }\n            }\n\n            override fun onSelectionCleared() {\n              //  actionMode?.finish()\n                actionMode = null\n                activity?.window?.statusBarColor = resources.getColor(android.R.color.transparent, activity?.theme)\n            }\n        })\n\n        exitTransition = MaterialFadeThrough()\n        enterTransition = MaterialFadeThrough()\n        return binding.root\n    }\n\n\n    private fun scrollToPosition() {\n        binding.root.addOnLayoutChangeListener(object : View.OnLayoutChangeListener {\n            override fun onLayoutChange(\n                v: View,\n                left: Int,\n                top: Int,\n                right: Int,\n                bottom: Int,\n                oldLeft: Int,\n                oldTop: Int,\n                oldRight: Int,\n                oldBottom: Int\n            ) {\n                binding.rvItems.removeOnLayoutChangeListener(this)\n\n                // val layoutManager = recyclerView.layoutManager\n                val viewAtPosition =\n                    binding.rvItems.layoutManager!!.findViewByPosition(MainActivity.currentListPosition)\n\n                // Scroll to position if the view for the current position is null (not currently part of\n                // layout manager children), or it's not completely visible.\n                if (viewAtPosition == null || !binding.rvItems.layoutManager!!\n                        .isViewPartiallyVisible(viewAtPosition, true, true)\n                ) {\n                    binding.rvItems.post { binding.rvItems.layoutManager!!.scrollToPosition(MainActivity.currentListPosition) }\n                }\n            }\n        })\n    }\n\n    companion object {\n        var spanCount = 4\n    }\n\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/gallery/ui/GridItemFrag.kt b/app/src/main/java/com/example/gallery/ui/GridItemFrag.kt
+--- a/app/src/main/java/com/example/gallery/ui/GridItemFrag.kt	
++++ b/app/src/main/java/com/example/gallery/ui/GridItemFrag.kt	
+@@ -1,5 +1,6 @@
+ package com.example.gallery.ui
+ 
++import android.os.Build
+ import android.os.Bundle
+ import android.view.*
+ import androidx.fragment.app.Fragment
+@@ -12,11 +13,12 @@
+ import com.example.gallery.ListItem
+ import com.example.gallery.MyItemDetailsLookup
+ import com.example.gallery.adapter.GridItemAdapter
++import com.example.gallery.databinding.FragmentBottomNavBinding
+ import com.example.gallery.databinding.FragmentGridItemBinding
+ import com.google.android.material.transition.MaterialFadeThrough
+ 
+ class GridItemFrag : Fragment() {
+-    private lateinit var _binding: FragmentGridItemBinding
++    private lateinit var _binding: FragmentBottomNavBinding
+     val binding get() = _binding
+     private val viewModel: MainViewModel by activityViewModels()
+     var actionMode: ActionMode? = null
+@@ -26,20 +28,20 @@
+         savedInstanceState: Bundle?
+     ): View {
+         if (!::_binding.isInitialized){
+-            _binding = FragmentGridItemBinding.inflate(inflater, container, false)
++            _binding = FragmentBottomNavBinding.inflate(inflater, container, false)
+         }
+ 
+-        viewModel.recyclerViewItems.observe(viewLifecycleOwner, { items ->
++        viewModel.recyclerViewItems.observe(viewLifecycleOwner
++        ) { items ->
+             val position = (binding.rvItems.layoutManager as GridLayoutManager)
+                 .findFirstCompletelyVisibleItemPosition()
+-            (binding.root.adapter as GridItemAdapter).submitList(items){
++            (binding.rvItems.adapter as GridItemAdapter).submitList(items) {
+                 if (position == 0) binding.rvItems.scrollToPosition(0)
+             }
+-           }
+-        )
++        }
+         val adapter = GridItemAdapter(requireParentFragment(), false)
+ 
+-        binding.root.apply {
++        binding.rvItems.apply {
+             this.adapter = adapter
+             val manager = GridLayoutManager(context, spanCount)
+             manager.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
+@@ -123,15 +125,19 @@
+                 } else if (tracker.selection.size() == 0) {
+                     actionMode?.finish()
+                     actionMode = null
+-                    activity?.window?.statusBarColor = resources.getColor(android.R.color.transparent, activity?.theme)
++                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
++                        activity?.window?.statusBarColor = resources.getColor(android.R.color.transparent, activity?.theme)
++                    }
+                 }
+             }
+-
++/*
+             override fun onSelectionCleared() {
+               //  actionMode?.finish()
+                 actionMode = null
+                 activity?.window?.statusBarColor = resources.getColor(android.R.color.transparent, activity?.theme)
+             }
++
++ */
+         })
+ 
+         exitTransition = MaterialFadeThrough()
+Index: app/src/main/java/com/example/gallery/ui/GridAlbumFrag.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.gallery.ui\n\nimport android.os.Bundle\nimport androidx.fragment.app.Fragment\nimport android.view.LayoutInflater\nimport android.view.View\nimport android.view.ViewGroup\nimport androidx.core.view.ViewGroupCompat\nimport androidx.fragment.app.activityViewModels\nimport androidx.recyclerview.widget.GridLayoutManager\nimport com.example.gallery.adapter.GridAlbumAdapter\nimport com.example.gallery.databinding.FragmentGridAlbumBinding\nimport com.google.android.material.transition.MaterialFadeThrough\n\nclass GridAlbumFrag : Fragment() {\n    private lateinit var _binding: FragmentGridAlbumBinding\n    val binding get() = _binding\n    private val viewModel: MainViewModel by activityViewModels()\n\n    override fun onCreateView(\n        inflater: LayoutInflater, container: ViewGroup?,\n        savedInstanceState: Bundle?\n    ): View {\n        if (::_binding.isInitialized) return binding.root\n\n        _binding = FragmentGridAlbumBinding.inflate(inflater, container, false)\n\n        val adapter = GridAlbumAdapter(requireParentFragment() as BottomNavFrag)\n        binding.rvAlbum.apply {\n            this.adapter = adapter\n            setHasFixedSize(true)\n        }\n        adapter.submitList(viewModel.albums.value)\n        viewModel.albums.observe(viewLifecycleOwner, { items ->\n            val position = (binding.rvAlbum.layoutManager as GridLayoutManager)\n                .findFirstCompletelyVisibleItemPosition()\n            adapter.submitList(items) {\n                if (position == 0) binding.rvAlbum.scrollToPosition(0)\n            }\n        })\n        ViewGroupCompat.setTransitionGroup(binding.rvAlbum, true)\n        enterTransition = MaterialFadeThrough()\n        exitTransition = MaterialFadeThrough()\n        //enterTransition = MaterialSharedAxis(MaterialSharedAxis.Z, false)\n        requireParentFragment().startPostponedEnterTransition()\n        return binding.root\n    }\n\n    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {\n        super.onViewCreated(view, savedInstanceState)\n        val position = (binding.rvAlbum.layoutManager as GridLayoutManager)\n            .findFirstCompletelyVisibleItemPosition()\n        (binding.rvAlbum.adapter as GridAlbumAdapter).submitList(viewModel.albums.value) {\n            if (position == 0) binding.rvAlbum.scrollToPosition(0)\n        }\n    }\n\n    companion object {\n        var spanCount = 2\n    }\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/gallery/ui/GridAlbumFrag.kt b/app/src/main/java/com/example/gallery/ui/GridAlbumFrag.kt
+--- a/app/src/main/java/com/example/gallery/ui/GridAlbumFrag.kt	
++++ b/app/src/main/java/com/example/gallery/ui/GridAlbumFrag.kt	
+@@ -9,11 +9,11 @@
+ import androidx.fragment.app.activityViewModels
+ import androidx.recyclerview.widget.GridLayoutManager
+ import com.example.gallery.adapter.GridAlbumAdapter
+-import com.example.gallery.databinding.FragmentGridAlbumBinding
++import com.example.gallery.databinding.FragmentBottomNavBinding
+ import com.google.android.material.transition.MaterialFadeThrough
+ 
+ class GridAlbumFrag : Fragment() {
+-    private lateinit var _binding: FragmentGridAlbumBinding
++    private lateinit var _binding: FragmentBottomNavBinding
+     val binding get() = _binding
+     private val viewModel: MainViewModel by activityViewModels()
+ 
+@@ -23,7 +23,7 @@
+     ): View {
+         if (::_binding.isInitialized) return binding.root
+ 
+-        _binding = FragmentGridAlbumBinding.inflate(inflater, container, false)
++        _binding = FragmentBottomNavBinding.inflate(inflater, container, false)
+ 
+         val adapter = GridAlbumAdapter(requireParentFragment() as BottomNavFrag)
+         binding.rvAlbum.apply {
+@@ -31,14 +31,16 @@
+             setHasFixedSize(true)
+         }
+         adapter.submitList(viewModel.albums.value)
+-        viewModel.albums.observe(viewLifecycleOwner, { items ->
++        viewModel.albums.observe(viewLifecycleOwner) { items ->
+             val position = (binding.rvAlbum.layoutManager as GridLayoutManager)
+                 .findFirstCompletelyVisibleItemPosition()
+             adapter.submitList(items) {
+                 if (position == 0) binding.rvAlbum.scrollToPosition(0)
+             }
+-        })
++        }
++
+         ViewGroupCompat.setTransitionGroup(binding.rvAlbum, true)
++
+         enterTransition = MaterialFadeThrough()
+         exitTransition = MaterialFadeThrough()
+         //enterTransition = MaterialSharedAxis(MaterialSharedAxis.Z, false)
+@@ -54,8 +56,4 @@
+             if (position == 0) binding.rvAlbum.scrollToPosition(0)
+         }
+     }
+-
+-    companion object {
+-        var spanCount = 2
+-    }
+ }
+\ No newline at end of file
+Index: app/src/main/res/layout/fragment_bottom_nav.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"utf-8\"?>\n\n<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android=\"http://schemas.android.com/apk/res/android\"\n    xmlns:tools=\"http://schemas.android.com/tools\"\n    android:layout_width=\"match_parent\"\n    android:layout_height=\"match_parent\"\n    xmlns:app=\"http://schemas.android.com/apk/res-auto\"\n    tools:context=\".ui.BottomNavFrag\"\n    android:background=\"?attr/colorSurface\">\n\n    <com.google.android.material.appbar.AppBarLayout\n        android:id=\"@+id/appBarLayout\"\n        android:layout_width=\"match_parent\"\n        android:layout_height=\"wrap_content\"\n        app:liftOnScroll=\"true\"\n        android:fitsSystemWindows=\"true\">\n        <com.google.android.material.appbar.MaterialToolbar\n            android:id=\"@+id/tbMain\"\n            android:layout_width=\"match_parent\"\n            android:layout_height=\"?attr/actionBarSize\"\n            app:layout_scrollFlags=\"scroll|enterAlways|snap\"\n            app:titleCentered=\"true\"\n            app:title=\"Gallery\" />\n    </com.google.android.material.appbar.AppBarLayout>\n\n    <androidx.fragment.app.FragmentContainerView\n        android:id=\"@+id/fcvBottomNav\"\n        android:name=\"com.example.gallery.ui.GridItemFrag\"\n        android:layout_width=\"match_parent\"\n        android:layout_height=\"match_parent\"\n        tools:layout=\"@layout/fragment_grid_item\"\n        app:layout_behavior=\"@string/appbar_scrolling_view_behavior\" />\n\n    <com.google.android.material.bottomnavigation.BottomNavigationView\n        android:id=\"@+id/bnvMain\"\n        android:layout_width=\"match_parent\"\n        android:layout_height=\"wrap_content\"\n        android:layout_gravity=\"bottom\"\n        app:menu=\"@menu/bnv_menu\" />\n    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/res/layout/fragment_bottom_nav.xml b/app/src/main/res/layout/fragment_bottom_nav.xml
+--- a/app/src/main/res/layout/fragment_bottom_nav.xml	
++++ b/app/src/main/res/layout/fragment_bottom_nav.xml	
+@@ -23,14 +23,24 @@
+             app:title="Gallery" />
+     </com.google.android.material.appbar.AppBarLayout>
+ 
+-    <androidx.fragment.app.FragmentContainerView
+-        android:id="@+id/fcvBottomNav"
+-        android:name="com.example.gallery.ui.GridItemFrag"
++    <androidx.recyclerview.widget.RecyclerView
++        android:id="@+id/rvItems"
+         android:layout_width="match_parent"
+         android:layout_height="match_parent"
+-        tools:layout="@layout/fragment_grid_item"
++        tools:context=".ui.GridItemFrag"
+         app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+ 
++    <androidx.recyclerview.widget.RecyclerView
++        android:id="@+id/rvAlbum"
++        android:layout_width="match_parent"
++        android:layout_height="match_parent"
++        android:visibility="gone"
++        app:layoutManager="GridLayoutManager"
++        app:layout_behavior="@string/appbar_scrolling_view_behavior"
++        app:spanCount="2"
++        tools:context=".ui.GridAlbumFrag"
++        android:transitionGroup="true"/>
++
+     <com.google.android.material.bottomnavigation.BottomNavigationView
+         android:id="@+id/bnvMain"
+         android:layout_width="match_parent"
+Index: app/src/main/res/layout/fragment_grid_album.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/res/layout/fragment_grid_album.xml b/app/src/main/res/layout/fragment_grid_album.xml
+deleted file mode 100644
+--- a/app/src/main/res/layout/fragment_grid_album.xml	
++++ /dev/null	
+@@ -1,10 +0,0 @@
+-<?xml version="1.0" encoding="utf-8"?>
+-<androidx.recyclerview.widget.RecyclerView xmlns:android="http://schemas.android.com/apk/res/android"
+-    xmlns:tools="http://schemas.android.com/tools"
+-    xmlns:app="http://schemas.android.com/apk/res-auto"
+-    android:id="@+id/rvAlbum"
+-    android:layout_width="match_parent"
+-    android:layout_height="match_parent"
+-    tools:context=".ui.GridAlbumFrag"
+-    app:layoutManager="GridLayoutManager"
+-    app:spanCount="2" />
+\ No newline at end of file
+Index: app/src/main/res/layout/fragment_grid_item.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/res/layout/fragment_grid_item.xml b/app/src/main/res/layout/fragment_grid_item.xml
+deleted file mode 100644
+--- a/app/src/main/res/layout/fragment_grid_item.xml	
++++ /dev/null	
+@@ -1,7 +0,0 @@
+-<?xml version="1.0" encoding="utf-8"?>
+-<androidx.recyclerview.widget.RecyclerView xmlns:android="http://schemas.android.com/apk/res/android"
+-    xmlns:tools="http://schemas.android.com/tools"
+-    android:id="@+id/rvItems"
+-    android:layout_width="match_parent"
+-    android:layout_height="match_parent"
+-    tools:context=".ui.GridItemFrag" />
+\ No newline at end of file
+Index: .idea/kotlinScripting.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/kotlinScripting.xml b/.idea/kotlinScripting.xml
+new file mode 100644
+--- /dev/null	
++++ b/.idea/kotlinScripting.xml	
+@@ -0,0 +1,29 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<project version="4">
++  <component name="KotlinScriptingSettings">
++    <scriptDefinition className="org.jetbrains.kotlin.scripting.resolve.KotlinScriptDefinitionFromAnnotatedTemplate" definitionName="KotlinInitScript">
++      <order>0</order>
++      <autoReloadConfigurations>true</autoReloadConfigurations>
++    </scriptDefinition>
++    <scriptDefinition className="org.jetbrains.kotlin.scripting.resolve.KotlinScriptDefinitionFromAnnotatedTemplate" definitionName="KotlinSettingsScript">
++      <order>1</order>
++      <autoReloadConfigurations>true</autoReloadConfigurations>
++    </scriptDefinition>
++    <scriptDefinition className="org.jetbrains.kotlin.scripting.resolve.KotlinScriptDefinitionFromAnnotatedTemplate" definitionName="KotlinBuildScript">
++      <order>2</order>
++      <autoReloadConfigurations>true</autoReloadConfigurations>
++    </scriptDefinition>
++    <scriptDefinition className="org.jetbrains.kotlin.mainKts.MainKtsScript" definitionName="MainKtsScript">
++      <order>3</order>
++      <autoReloadConfigurations>true</autoReloadConfigurations>
++    </scriptDefinition>
++    <scriptDefinition className="kotlin.script.templates.standard.ScriptTemplateWithBindings" definitionName="Script definition for extension scripts and IDE console">
++      <order>4</order>
++      <autoReloadConfigurations>true</autoReloadConfigurations>
++    </scriptDefinition>
++    <scriptDefinition className="org.jetbrains.kotlin.idea.core.script.StandardIdeScriptDefinition" definitionName="Kotlin Script">
++      <order>5</order>
++      <autoReloadConfigurations>true</autoReloadConfigurations>
++    </scriptDefinition>
++  </component>
++</project>
+\ No newline at end of file

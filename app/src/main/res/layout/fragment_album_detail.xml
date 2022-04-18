@@ -5,13 +5,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ui.AlbumDetailFrag"
-    android:background="?attr/colorSurface"
-    android:animateLayoutChanges="true">
+    android:background="?attr/colorSurface">
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:fitsSystemWindows="true">
 
         <com.google.android.material.appbar.CollapsingToolbarLayout
             android:id="@+id/collapsingToolbarLayout"
@@ -33,12 +33,21 @@
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvAlbums"
+        android:id="@+id/rvAlbumDetail"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layoutManager="GridLayoutManager"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        app:spanCount="4" />
+        app:spanCount="@integer/spanCount" />
 
-
+    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+        android:id="@+id/fabDone"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="16dp"
+        android:text="@string/done"
+        android:visibility="gone"
+        app:icon="@drawable/ic_outline_done_24"
+        app:layout_behavior="@string/fab_transformation_scrim_behavior" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

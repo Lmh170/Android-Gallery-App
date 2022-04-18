@@ -1,5 +1,25 @@
 <resources>
     <string name="app_name">Gallery</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="share">Share</string>
+    <string name="edit">Edit</string>
+    <string name="info">Info</string>
+    <string name="delete">Delete</string>
+    <string name="time_bar">Time Bar</string>
+    <string name="item_size">%1$s MB</string>
+    <string name="close">Close</string>
+    <string name="select_single_item">Select an item</string>
+    <string name="select_multiple_items">Select items</string>
+    <string name="bin">Bin</string>
+    <string name="photos">Photos</string>
+    <string name="albums">Albums</string>
+    <string name="done">Done</string>
+    <string name="date">Date</string>
+    <string name="play">Play</string>
+    <string name="vr">VR</string>
+    <string name="shuffle">Shuffle</string>
+    <string name="repeat">Repeat</string>
+    <string name="subtitle">Subtitle</string>
+    <string name="show_overflow">Show Overflow</string>
+    <string name="hide_overflow">Hide Overflow</string>
+    <string name="pause_play">Pause / Play</string>
 </resources>
