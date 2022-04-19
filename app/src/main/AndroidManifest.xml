@@ -5,8 +5,6 @@
     android:installLocation="auto">
 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
-        android:maxSdkVersion="28"/>
 
     <!-- Revoke ACCESS_NETWORK_STATE permission declared by ExoPlayer -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"
@@ -68,6 +66,17 @@
 
         </activity>
 
+        <!-- Todo: Add a ViewPager activity to support viewing multiple items:
+             <action android:name="com.android.camera.action.REVIEW"/>
+             <action android:name="android.provider.action.REVIEW"/>
+             <action android:name="android.provider.action.REVIEW_SECURE"/>
+        according to
+             https://developer.android.com/reference/android/content/Intent#ACTION_VIEW
+             https://developer.android.com/reference/android/provider/MediaStore#ACTION_REVIEW
+             https://developer.android.com/reference/android/provider/MediaStore#ACTION_REVIEW_SECURE
+             https://developer.android.com/about/versions/12/reference/common-intents-31
+        -->
+
         <activity android:name=".ui.VideoPlayerActivity" android:exported="true">
 
             <!-- Displays a video to the user specified in intent.data
@@ -75,8 +84,6 @@
             -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
-                <action android:name="com.android.camera.action.REVIEW"/>
-                <action android:name="android.provider.action.REVIEW" />
 
                 <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.APP_GALLERY" />
@@ -90,14 +97,9 @@
 
         <activity android:name=".ui.ImageViewerActivity" android:exported="true">
 
-            <!-- Displays an image to the user specified in intent.data
-            https://developer.android.com/reference/android/content/Intent#ACTION_VIEW
-            -->
+            <!-- Displays an image to the user specified in intent.data-->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
-                <action android:name="com.android.camera.action.REVIEW"/>
-                <action android:name="android.provider.action.REVIEW" />
-                <action android:name="android.provider.action.REVIEW_SECURE"/>
 
                 <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.APP_GALLERY" />
