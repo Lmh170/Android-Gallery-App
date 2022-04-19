@@ -57,7 +57,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun checkIntent() {
+        // Todo: Support Intent.ACTION_PICK, currently handled as Intent.ACTION_GET_CONTENT
         if (intent.action == Intent.ACTION_PICK || intent.action == Intent.ACTION_GET_CONTENT) {
+            println("mimetype = ${intent.type}")
             when {
                 intent.data != null -> {
                     viewModel.loadItems(intent.data!!)
@@ -146,23 +148,17 @@ class MainActivity : AppCompatActivity() {
 
     private fun requestPermission() {
         if (!haveStoragePermission()) {
-            val permissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            val permissions =
                 arrayOf(
                     Manifest.permission.READ_EXTERNAL_STORAGE
                 )
-            } else {
-                arrayOf(
-                    Manifest.permission.READ_EXTERNAL_STORAGE,
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE
-                )
-            }
             ActivityCompat.requestPermissions(this, permissions, EXTERNAL_STORAGE_REQUEST)
         }
     }
 
     companion object {
-        var currentListPosition = 0
-        var currentViewPagerPosition = 0
+        var currentListPosition: Int = 0
+        var currentViewPagerPosition: Int = 0
         lateinit var currentAlbumName: String
         private const val EXTERNAL_STORAGE_REQUEST = 0x1045
     }

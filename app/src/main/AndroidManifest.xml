@@ -53,6 +53,8 @@
             https://developer.android.com/reference/android/content/Intent#ACTION_PICK
             -->
             <intent-filter>
+                <!-- App does not support the PICK intent, this intent-filter is added for
+                 backward compatibility. Handle it as GET_CONTENT. -->
                 <action android:name="android.intent.action.PICK"/>
 
                 <category android:name="android.intent.category.DEFAULT"/>
