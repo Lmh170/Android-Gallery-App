@@ -144,9 +144,6 @@ class ViewPagerFrag : Fragment() {
         binding.ivGradTop.visibility = View.GONE
         binding.ivGardBottom.visibility = View.GONE
 
-        //   windowInsetsController.systemBarsBehavior =
-        //    WindowInsetsControllerCompat.BEHAVIOR_SHOW_BARS_BY_TOUCH
-
         ViewCompat.getWindowInsetsController(requireActivity().window.decorView)
             ?.hide(WindowInsetsCompat.Type.systemBars())
     }
@@ -240,6 +237,42 @@ class ViewPagerFrag : Fragment() {
             .show(WindowInsetsCompat.Type.systemBars())
     }
 
+    private fun getCurrentItem(): ListItem.MediaItem? {
+        return try {
+            (binding.viewPager.adapter as ViewPagerAdapter).currentList[binding.viewPager.currentItem]
+        } catch (e: IndexOutOfBoundsException) {
+            null
+        }
+    }
+
+    override fun startPostponedEnterTransition() {
+        super.startPostponedEnterTransition()
+        setUpSystemBars()
+    }
+
+    private fun prepareSharedElementTransition() {
+        sharedElementEnterTransition = MaterialContainerTransform().apply {
+            scrimColor =
+                resources.getColor(android.R.color.black, requireActivity().theme)
+        }
+
+        setEnterSharedElementCallback(
+            object : SharedElementCallback() {
+                override fun onMapSharedElements(
+                    names: List<String>,
+                    sharedElements: MutableMap<String, View>
+                ) {
+                    val selectedViewHolder =
+                        (binding.viewPager.getChildAt(0) as RecyclerView?)
+                            ?.findViewHolderForLayoutPosition(binding.viewPager.currentItem)
+                                as ViewPagerAdapter.ViewHolderPager? ?: return
+
+                    sharedElements[names[0]] = selectedViewHolder.binding.pagerImage
+                }
+            })
+        postponeEnterTransition()
+    }
+
     companion object {
         fun delete(image: ListItem.MediaItem, context: Context, viewModel: MainViewModel) {
             MaterialAlertDialogBuilder(
@@ -295,41 +328,5 @@ class ViewPagerFrag : Fragment() {
             share.flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
             activity.startActivity(Intent.createChooser(share, "Share with"))
         }
-    }
-
-    private fun getCurrentItem(): ListItem.MediaItem? {
-        return try {
-            (binding.viewPager.adapter as ViewPagerAdapter).currentList[binding.viewPager.currentItem]
-        } catch (e: IndexOutOfBoundsException) {
-            null
-        }
-    }
-
-    override fun startPostponedEnterTransition() {
-        super.startPostponedEnterTransition()
-        setUpSystemBars()
-    }
-
-    private fun prepareSharedElementTransition() {
-        sharedElementEnterTransition = MaterialContainerTransform().apply {
-            scrimColor =
-                resources.getColor(android.R.color.black, requireActivity().theme)
-        }
-
-        setEnterSharedElementCallback(
-            object : SharedElementCallback() {
-                override fun onMapSharedElements(
-                    names: List<String>,
-                    sharedElements: MutableMap<String, View>
-                ) {
-                    val selectedViewHolder =
-                        (binding.viewPager.getChildAt(0) as RecyclerView?)
-                            ?.findViewHolderForLayoutPosition(binding.viewPager.currentItem)
-                                as ViewPagerAdapter.ViewHolderPager? ?: return
-
-                    sharedElements[names[0]] = selectedViewHolder.binding.pagerImage
-                }
-            })
-        postponeEnterTransition()
     }
 }

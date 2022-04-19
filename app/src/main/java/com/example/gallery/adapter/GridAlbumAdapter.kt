@@ -18,44 +18,8 @@ import com.google.android.material.navigation.NavigationBarView
 class GridAlbumAdapter(private val frag: BottomNavFrag) : ListAdapter<Album,
         GridAlbumAdapter.AlbumHolder>(Album.DiffCallback) {
 
-    inner class AlbumHolder(private val binding: AlbumHolderBinding) :
-        RecyclerView.ViewHolder(binding.root) {
-
-        fun onBind() {
-            GlideApp.with(binding.ivThumbnailAlbum)
-                .load(getItem(layoutPosition).mediaItems[0].uri)
-                //     .apply(RequestOptions().format(DecodeFormat.PREFER_RGB_565)) // better performance
-                .signature(
-                    MediaStoreSignature(
-                        null, getItem(layoutPosition)
-                            .mediaItems[0].dateModified, 0
-                    )
-                )
-                .into(binding.ivThumbnailAlbum)
-
-            binding.tvAlbumName.text = getItem(layoutPosition).name
-            binding.ivThumbnailAlbum.transitionName = "album_$layoutPosition"
-
-            binding.ivThumbnailAlbum.setOnClickListener {
-                if ((frag.binding.bnvMain as NavigationBarView).selectedItemId == R.id.miAlbums
-                    || frag.requireActivity().intent.action == Intent.ACTION_PICK || frag.requireActivity()
-                        .intent.action ==
-                    Intent.ACTION_GET_CONTENT
-                ) {
-                    MainActivity.currentListPosition = 0
-                    MainActivity.currentAlbumName = getItem(layoutPosition).name
-                    frag.setSharedAxisTransition()
-                    frag.findNavController().navigate(
-                        R.id.action_bottomNavFrag_to_albumDetailFrag,
-                        null,
-                        null,
-                        null
-                    )
-                }
-            }
-        }
-
-    }
+    inner class AlbumHolder(val binding: AlbumHolderBinding) :
+        RecyclerView.ViewHolder(binding.root)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AlbumHolder {
         return AlbumHolder(
@@ -67,6 +31,37 @@ class GridAlbumAdapter(private val frag: BottomNavFrag) : ListAdapter<Album,
     }
 
     override fun onBindViewHolder(holder: AlbumHolder, position: Int) {
-        holder.onBind()
+
+        GlideApp.with(holder.binding.ivThumbnailAlbum)
+            .load(getItem(position).mediaItems[0].uri)
+            .signature(
+                MediaStoreSignature(
+                    null, getItem(position)
+                        .mediaItems[0].dateModified, 0
+                )
+            )
+            .into(holder.binding.ivThumbnailAlbum)
+
+        holder.binding.tvAlbumName.text = getItem(position).name
+        holder.binding.ivThumbnailAlbum.transitionName = "album_$position"
+
+        holder.binding.ivThumbnailAlbum.setOnClickListener {
+
+            if ((frag.binding.bnvMain as NavigationBarView).selectedItemId == R.id.miAlbums
+                || frag.requireActivity().intent.action == Intent.ACTION_PICK || frag.requireActivity()
+                    .intent.action ==
+                Intent.ACTION_GET_CONTENT
+            ) {
+                MainActivity.currentListPosition = 0
+                MainActivity.currentAlbumName = getItem(position).name
+                frag.setSharedAxisTransition()
+                frag.findNavController().navigate(
+                    R.id.action_bottomNavFrag_to_albumDetailFrag,
+                    null,
+                    null,
+                    null
+                )
+            }
+        }
     }
 }

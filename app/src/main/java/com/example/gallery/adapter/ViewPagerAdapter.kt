@@ -23,7 +23,8 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 class ViewPagerAdapter(val frag: ViewPagerFrag) : ListAdapter<ListItem.MediaItem,
         ViewPagerAdapter.ViewHolderPager>(ListItem.MediaItem.DiffCallback) {
-    val enterTransitionStarted: AtomicBoolean = AtomicBoolean()
+
+    private val enterTransitionStarted: AtomicBoolean = AtomicBoolean()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolderPager {
         return ViewHolderPager(

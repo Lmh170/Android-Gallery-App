@@ -59,7 +59,6 @@ class MainActivity : AppCompatActivity() {
     private fun checkIntent() {
         // Todo: Support Intent.ACTION_PICK, currently handled as Intent.ACTION_GET_CONTENT
         if (intent.action == Intent.ACTION_PICK || intent.action == Intent.ACTION_GET_CONTENT) {
-            println("mimetype = ${intent.type}")
             when {
                 intent.data != null -> {
                     viewModel.loadItems(intent.data!!)

@@ -45,11 +45,11 @@ import java.util.concurrent.atomic.AtomicBoolean
 class GridItemAdapter(private val frag: Fragment, private val isAlbum: Boolean) :
     ListAdapter<ListItem, ViewHolder>(ListItem.ListItemDiffCallback()) {
 
-    val enterTransitionStarted: AtomicBoolean = AtomicBoolean()
+    private val enterTransitionStarted: AtomicBoolean = AtomicBoolean()
     var tracker: SelectionTracker<Long>? = null
 
     companion object {
-        const val ITEM_VIEW_TYPE_HEADER = 8123
+        const val ITEM_VIEW_TYPE_HEADER: Int = 8123
     }
 
     init {
@@ -69,66 +69,49 @@ class GridItemAdapter(private val frag: Fragment, private val isAlbum: Boolean) 
                 ListGridMediaItemHolderBinding.inflate(
                     LayoutInflater.from(parent.context),
                     parent, false
-                ), viewType
+                ),
+                viewType
             )
         }
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         if (holder is MediaItemHolder) {
-            holder.onBind()
-        } else if (holder is HeaderViewHolder) {
-            holder.onBind()
-        }
-    }
 
+            holder.binding.image.isActivated = tracker?.isSelected(getItemId(position)) == true
 
-    override fun getItemViewType(position: Int): Int {
-        return when (getItem(position)) {
-            is ListItem.MediaItem -> (getItem(position) as ListItem.MediaItem).type
-            is ListItem.Header -> ITEM_VIEW_TYPE_HEADER
-            else -> throw IllegalStateException("Unknown ViewType")
-        }
-    }
+            if (holder.binding.image.isActivated) {
 
-    inner class MediaItemHolder(val binding: ListGridMediaItemHolderBinding, val type: Int) :
-        RecyclerView.ViewHolder(binding.root) {
-        fun getItemDetails(): ItemDetailsLookup.ItemDetails<Long> =
-            object : ItemDetailsLookup.ItemDetails<Long>() {
-                override fun getPosition(): Int =
-                    layoutPosition
-
-                override fun getSelectionKey(): Long =
-                    getItem(layoutPosition).id
-            }
-
-        fun onBind() {
-            binding.image.isActivated = tracker?.isSelected(itemId) == true
-            if (binding.image.isActivated) {
-                binding.image.apply {
+                holder.binding.image.apply {
                     shapeAppearanceModel = ShapeAppearanceModel().withCornerSize(70f)
                     animate().scaleX(0.75f).scaleY(0.75f).duration = 100
                 }
-            } else if (!binding.image.isActivated) {
-                binding.image.apply {
+
+            } else if (!holder.binding.image.isActivated) {
+
+                holder.binding.image.apply {
                     shapeAppearanceModel = ShapeAppearanceModel().withCornerSize(0f)
                     animate().scaleX(1f).scaleY(1f).duration = 100
                 }
+
             }
-            if ((getItem(layoutPosition) as ListItem.MediaItem).type ==
+
+            if ((getItem(position) as ListItem.MediaItem).type ==
                 MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO
             ) {
-                binding.ivPlayMediaItem.visibility = View.VISIBLE
-            }
-            binding.image.transitionName = itemId.toString()
 
-            GlideApp.with(binding.image)
-                .load((getItem(layoutPosition) as ListItem.MediaItem).uri)
-                //  .apply(RequestOptions().format(DecodeFormat.PREFER_RGB_565)) // better performance
+                holder.binding.ivPlayMediaItem.visibility = View.VISIBLE
+
+            }
+
+            holder.binding.image.transitionName = getItemId(position).toString()
+
+            GlideApp.with(holder.binding.image)
+                .load((getItem(position) as ListItem.MediaItem).uri)
                 .signature(
                     MediaStoreSignature(
                         null,
-                        (getItem(layoutPosition) as ListItem.MediaItem).dateModified, 0
+                        (getItem(position) as ListItem.MediaItem).dateModified, 0
                     )
                 )
                 .listener(object : RequestListener<Drawable?> {
@@ -136,7 +119,7 @@ class GridItemAdapter(private val frag: Fragment, private val isAlbum: Boolean) 
                         e: GlideException?, model: Any,
                         target: Target<Drawable?>, isFirstResource: Boolean
                     ): Boolean {
-                        if (MainActivity.currentListPosition != layoutPosition) {
+                        if (MainActivity.currentListPosition != holder.layoutPosition) {
                             return true
                         }
                         if (enterTransitionStarted.getAndSet(true)) {
@@ -153,7 +136,7 @@ class GridItemAdapter(private val frag: Fragment, private val isAlbum: Boolean) 
                         dataSource: DataSource,
                         isFirstResource: Boolean
                     ): Boolean {
-                        if (MainActivity.currentListPosition != layoutPosition) {
+                        if (MainActivity.currentListPosition != holder.layoutPosition) {
                             return false
                         }
                         if (enterTransitionStarted.getAndSet(true)) {
@@ -164,9 +147,10 @@ class GridItemAdapter(private val frag: Fragment, private val isAlbum: Boolean) 
                     }
                 })
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
-                .into(binding.image)
+                .into(holder.binding.image)
 
-            binding.image.setOnClickListener {
+            holder.binding.image.setOnClickListener {
+
                 if (frag.requireActivity().intent.action == Intent.ACTION_PICK ||
                     frag.requireActivity().intent.action == Intent.ACTION_GET_CONTENT
                 ) {
@@ -176,25 +160,29 @@ class GridItemAdapter(private val frag: Fragment, private val isAlbum: Boolean) 
                         )
                     ) {
                         val intent = Intent()
-                        intent.data = (getItem(layoutPosition) as ListItem.MediaItem).uri
+                        intent.data = (getItem(position) as ListItem.MediaItem).uri
                         frag.requireActivity().setResult(Activity.RESULT_OK, intent)
                         frag.requireActivity().finish()
                         return@setOnClickListener
                     } else {
-                        tracker?.select(getItemId(layoutPosition))
+                        tracker?.select(getItemId(position))
                         return@setOnClickListener
                     }
                 }
+
                 if (frag !is BinFrag) {
-                    MainActivity.currentListPosition = layoutPosition
+                    MainActivity.currentListPosition = position
                     MainActivity.currentViewPagerPosition = if (isAlbum) {
-                        layoutPosition
+                        position
                     } else {
-                        (getItem(layoutPosition) as ListItem.MediaItem).viewPagerPosition
+                        (getItem(position) as ListItem.MediaItem).viewPagerPosition
                     }
                 }
+
                 val extras = FragmentNavigatorExtras(it to it.transitionName)
+
                 when (frag) {
+
                     is BottomNavFrag -> {
                         frag.setHoldTransition()
                         frag.prepareTransitions()
@@ -205,6 +193,7 @@ class GridItemAdapter(private val frag: Fragment, private val isAlbum: Boolean) 
                             extras
                         )
                     }
+
                     is AlbumDetailFrag -> {
                         val args = Bundle()
                         args.putBoolean("isAlbum", true)
@@ -215,11 +204,12 @@ class GridItemAdapter(private val frag: Fragment, private val isAlbum: Boolean) 
                             extras
                         )
                     }
+
                     is BinFrag -> {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                             val senderRequest = MediaStore.createTrashRequest(
                                 frag.requireActivity().application.contentResolver,
-                                listOf((getItem(layoutPosition) as ListItem.MediaItem).uri), false
+                                listOf((getItem(position) as ListItem.MediaItem).uri), false
                             ).intentSender
                             val intentSenderRequest =
                                 IntentSenderRequest.Builder(senderRequest).build()
@@ -228,18 +218,41 @@ class GridItemAdapter(private val frag: Fragment, private val isAlbum: Boolean) 
                             )
                         }
                     }
+
                 }
             }
+        } else if (holder is HeaderViewHolder) {
+            holder.binding.tvDate.text =
+                SimpleDateFormat.getDateInstance(SimpleDateFormat.FULL).format(
+                    Date(getItemId(position))
+                )
         }
     }
 
-    inner class HeaderViewHolder(private val binding: ListGridHeaderBinding) :
-        RecyclerView.ViewHolder(binding.root) {
-        fun onBind() {
-            binding.tvDate.text = SimpleDateFormat.getDateInstance(SimpleDateFormat.FULL).format(
-                Date(itemId)
-            )
+
+    override fun getItemViewType(position: Int): Int {
+        return when (getItem(position)) {
+            is ListItem.MediaItem -> (getItem(position) as ListItem.MediaItem).type
+            is ListItem.Header -> ITEM_VIEW_TYPE_HEADER
+            else -> throw IllegalStateException("Unknown ViewType")
         }
+    }
+
+    inner class MediaItemHolder(val binding: ListGridMediaItemHolderBinding, val type: Int) :
+        RecyclerView.ViewHolder(binding.root) {
+
+        fun getItemDetails(): ItemDetailsLookup.ItemDetails<Long> =
+            object : ItemDetailsLookup.ItemDetails<Long>() {
+                override fun getPosition(): Int =
+                    layoutPosition
+
+                override fun getSelectionKey(): Long =
+                    getItem(layoutPosition).id
+            }
+    }
+
+    inner class HeaderViewHolder(val binding: ListGridHeaderBinding) :
+        RecyclerView.ViewHolder(binding.root) {
 
         fun getItemDetails(): ItemDetailsLookup.ItemDetails<Long> =
             object : ItemDetailsLookup.ItemDetails<Long>() {
