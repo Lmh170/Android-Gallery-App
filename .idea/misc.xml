@@ -3,6 +3,7 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="../../../../../layout/custom_preview.xml" value="0.21927083333333333" />
         <entry key="../../.gradle/caches/transforms-3/04a7555b95a25f15df85d085c394a2b2/transformed/material-1.6.0-alpha01/res/layout/design_bottom_navigation_item.xml" value="0.3697916666666667" />
         <entry key="app/src/main/res/drawable/ic_baseline_arrow_back_24.xml" value="0.212" />
         <entry key="app/src/main/res/drawable/ic_baseline_close_24.xml" value="0.19947916666666668" />
