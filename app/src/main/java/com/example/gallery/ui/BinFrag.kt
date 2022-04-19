@@ -44,7 +44,6 @@ class BinFrag : Fragment() {
         returnTransition = MaterialSharedAxis(MaterialSharedAxis.Z, false)
 
         binding.tbBin.setNavigationOnClickListener {
-            viewModel.loadItems()
             findNavController().navigateUp()
         }
         return binding.root

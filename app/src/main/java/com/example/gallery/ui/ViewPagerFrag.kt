@@ -2,6 +2,7 @@ package com.example.gallery.ui
 
 import android.app.Activity
 import android.content.Context
+import android.content.DialogInterface
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
@@ -54,7 +55,7 @@ class ViewPagerFrag : Fragment() {
                 }
             }
             else -> {
-                viewModel.viewPagerImages.observe(viewLifecycleOwner) { items ->
+                viewModel.viewPagerItems.observe(viewLifecycleOwner) { items ->
                     (binding.viewPager.adapter as ViewPagerAdapter).submitList(items)
                 }
             }
@@ -72,7 +73,6 @@ class ViewPagerFrag : Fragment() {
             findNavController().navigateUp()
         }
 
-        viewModel.loadItems()
         setUpViewpager()
         setUpViews()
         return binding.root
@@ -88,7 +88,7 @@ class ViewPagerFrag : Fragment() {
                     it.name == MainActivity.currentAlbumName
                 }?.mediaItems)
             } else {
-                adapter.submitList(viewModel.viewPagerImages.value)
+                adapter.submitList(viewModel.viewPagerItems.value)
             }
 
             firstCurrentItem = MainActivity.currentViewPagerPosition
@@ -101,7 +101,7 @@ class ViewPagerFrag : Fragment() {
                         MainActivity.currentListPosition = position
                     } else {
                         MainActivity.currentListPosition =
-                            viewModel.viewPagerImages.value?.get(position)!!.listPosition
+                            viewModel.viewPagerItems.value?.get(position)!!.listPosition
                     }
                 }
             })
@@ -249,7 +249,9 @@ class ViewPagerFrag : Fragment() {
                 .setTitle("Permanently delete?")
                 .setMessage("This item will be permanently deleted.")
                 .setIcon(R.drawable.ic_outline_delete_24)
-                .setNegativeButton("Cancel", null)
+                .setNegativeButton("Cancel") { dialog: DialogInterface, _: Int ->
+                    dialog.dismiss()
+                }
                 .setPositiveButton("Delete") { _, _ ->
                     viewModel.deleteImage(image)
                 }
@@ -264,7 +266,9 @@ class ViewPagerFrag : Fragment() {
                 .setTitle("Permanently delete?")
                 .setMessage("This items will be permanently deleted.")
                 .setIcon(R.drawable.ic_outline_delete_24)
-                .setNegativeButton("Cancel", null)
+                .setNegativeButton("Cancel") { dialog: DialogInterface, _: Int ->
+                    dialog.dismiss()
+                }
                 .setPositiveButton("Delete") { _, _ ->
                     viewModel.deleteImages(images)
                 }

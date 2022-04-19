@@ -40,7 +40,7 @@ class MainActivity : AppCompatActivity() {
                 }
         }
 
-        val request =
+        val deleteRequest =
             registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) {
                 if (it.resultCode == RESULT_OK) {
                     viewModel.deletePendingImage()
@@ -50,49 +50,46 @@ class MainActivity : AppCompatActivity() {
 
         viewModel.permissionNeededForDelete.observe(this) { intentSender ->
             val intentSenderRequest = IntentSenderRequest.Builder(intentSender).build()
-            request.launch(intentSenderRequest)
+            deleteRequest.launch(intentSenderRequest)
         }
+
+        checkIntent()
     }
 
-    override fun onStart() {
-        super.onStart()
-        if (haveStoragePermission()) {
-            if (intent.action == Intent.ACTION_PICK || intent.action == Intent.ACTION_GET_CONTENT) {
-                when {
-                    intent.data != null -> {
-                        viewModel.loadItems(intent.data!!)
-                    }
-                    intent.type?.contains("image", true) == true -> {
-                        val mimeType: String =
-                            intent?.type?.substring(intent.type!!.lastIndexOf("/") + 1)!!
-                        if (mimeType != "*" && intent?.type?.contains("/") == false) {
-                            viewModel.loadItems(
-                                MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                                mimeType
-                            )
-                        } else {
-                            viewModel.loadItems(MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
-                        }
-                    }
-                    intent.type?.contains("video", true) == true -> {
-                        val mimeType: String =
-                            intent?.type?.substring(intent.type!!.lastIndexOf("/") + 1)!!
-                        if (mimeType != "*" && intent?.type?.contains("/") == false) {
-                            viewModel.loadItems(
-                                MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
-                                mimeType
-                            )
-                        } else {
-                            viewModel.loadItems(MediaStore.Video.Media.EXTERNAL_CONTENT_URI)
-                        }
-                    }
-                    else -> viewModel.loadItems()
+    private fun checkIntent() {
+        if (intent.action == Intent.ACTION_PICK || intent.action == Intent.ACTION_GET_CONTENT) {
+            when {
+                intent.data != null -> {
+                    viewModel.loadItems(intent.data!!)
                 }
-            } else {
-                viewModel.loadItems()
+                intent.type?.contains("image", true) == true -> {
+                    val mimeType: String =
+                        intent?.type?.substring(intent.type!!.lastIndexOf("/") + 1)!!
+                    if (mimeType != "*" && intent?.type?.contains("/") == false) {
+                        viewModel.loadItems(
+                            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                            mimeType
+                        )
+                    } else {
+                        viewModel.loadItems(MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+                    }
+                }
+                intent.type?.contains("video", true) == true -> {
+                    val mimeType: String =
+                        intent?.type?.substring(intent.type!!.lastIndexOf("/") + 1)!!
+                    if (mimeType != "*" && intent?.type?.contains("/") == false) {
+                        viewModel.loadItems(
+                            MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
+                            mimeType
+                        )
+                    } else {
+                        viewModel.loadItems(MediaStore.Video.Media.EXTERNAL_CONTENT_URI)
+                    }
+                }
+                else -> viewModel.loadItems()
             }
         } else {
-            requestPermission()
+            viewModel.loadItems()
         }
     }
 
@@ -107,27 +104,20 @@ class MainActivity : AppCompatActivity() {
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     viewModel.loadItems()
                 } else {
-                    val showRationale = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                    val showRationale =
                         ActivityCompat.shouldShowRequestPermissionRationale(
                             this,
                             Manifest.permission.READ_EXTERNAL_STORAGE
                         )
-                    } else {
-                        ActivityCompat.shouldShowRequestPermissionRationale(
-                            this,
-                            Manifest.permission.WRITE_EXTERNAL_STORAGE
-                        )
-                    }
 
                     if (showRationale) {
                         Snackbar.make(
                             binding.root,
                             "App requires access to storage to access your Photos",
                             Snackbar.LENGTH_INDEFINITE
-                        )
-                            .setAction("Grant Permission") {
-                                requestPermission()
-                            }.show()
+                        ).setAction("Grant Permission") {
+                            requestPermission()
+                        }.show()
                     } else {
                         goToSettings()
                     }

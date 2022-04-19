@@ -5,7 +5,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.gallery.ui.MainActivity
 import com.example.gallery.ui.MainViewModel
 
-// an adapted version of StableIdKeyProvider as it cannot handle changing datasets
 class MyItemKeyProvider(
     private val viewModel: MainViewModel,
     private val isAlbum: Boolean = false

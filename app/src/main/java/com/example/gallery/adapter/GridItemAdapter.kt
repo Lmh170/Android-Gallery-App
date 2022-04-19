@@ -38,8 +38,13 @@ import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
 
+/**
+ * Based on:
+ * https://github.com/android/animation-samples/tree/main/GridToPager
+ */
 class GridItemAdapter(private val frag: Fragment, private val isAlbum: Boolean) :
     ListAdapter<ListItem, ViewHolder>(ListItem.ListItemDiffCallback()) {
+
     val enterTransitionStarted: AtomicBoolean = AtomicBoolean()
     var tracker: SelectionTracker<Long>? = null
 
