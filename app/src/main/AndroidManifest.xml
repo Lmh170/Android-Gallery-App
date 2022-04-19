@@ -7,6 +7,8 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         android:maxSdkVersion="28"/>
+
+    <!-- Revoke ACCESS_NETWORK_STATE permission declared by ExoPlayer -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"
         tools:node="remove" />
 
@@ -19,29 +21,58 @@
         android:theme="@style/Theme.Gallery"
         android:fullBackupOnly="true"
         android:name="com.example.gallery.MyApplication">
+
+
         <activity
             android:name="com.example.gallery.ui.MainActivity"
             android:exported="true">
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.APP_GALLERY" />
             </intent-filter>
+
+            <!-- Lets the user select an item from the gallery and returns it
+            https://developer.android.com/reference/android/content/Intent#ACTION_GET_CONTENT
+            https://developer.android.com/guide/topics/providers/content-provider-basics#MIMETypeReference
+            -->
             <intent-filter>
                 <action android:name="android.intent.action.GET_CONTENT" />
+
                 <category android:name="android.intent.category.OPENABLE" />
                 <category android:name="android.intent.category.DEFAULT" />
+
                 <data android:mimeType="image/*" />
                 <data android:mimeType="video/*" />
+                <data android:mimeType="vnd.android.cursor.dir/image"/>
+                <data android:mimeType="vnd.android.cursor.dir/video"/>
             </intent-filter>
+
+            <!-- Lets the user pick an item from supplied data and returns it
+            https://developer.android.com/reference/android/content/Intent#ACTION_PICK
+            -->
             <intent-filter>
                 <action android:name="android.intent.action.PICK"/>
+
                 <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.APP_GALLERY"/>
+
                 <data android:mimeType="image/*"/>
                 <data android:mimeType="video/*"/>
+                <data android:mimeType="vnd.android.cursor.dir/image"/>
+                <data android:mimeType="vnd.android.cursor.dir/video"/>
             </intent-filter>
+
         </activity>
+
         <activity android:name=".ui.VideoPlayerActivity" android:exported="true">
+
+            <!-- Displays a video to the user specified in intent.data
+            https://developer.android.com/reference/android/content/Intent#ACTION_VIEW
+            -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <action android:name="com.android.camera.action.REVIEW"/>
@@ -51,21 +82,33 @@
                 <category android:name="android.intent.category.APP_GALLERY" />
 
                 <data android:mimeType="video/*"/>
+                <data android:mimeType="vnd.android.cursor.dir/video"/>
                 <data android:scheme="content" />
             </intent-filter>
+
         </activity>
+
         <activity android:name=".ui.ImageViewerActivity" android:exported="true">
+
+            <!-- Displays an image to the user specified in intent.data
+            https://developer.android.com/reference/android/content/Intent#ACTION_VIEW
+            -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <action android:name="com.android.camera.action.REVIEW"/>
                 <action android:name="android.provider.action.REVIEW" />
+                <action android:name="android.provider.action.REVIEW_SECURE"/>
 
                 <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.APP_GALLERY" />
 
                 <data android:mimeType="image/*"/>
+                <data android:mimeType="vnd.android.cursor.dir/image"/>
                 <data android:scheme="content" />
             </intent-filter>
+
         </activity>
+
     </application>
+
 </manifest>
