@@ -284,22 +284,13 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun getImageInfo(source: Uri): List<String> {
         val info = mutableListOf<String>()
 
-        @Suppress("DEPRECATION") val projection =
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                arrayOf(
-                    MediaStore.Files.FileColumns.DATE_ADDED,
-                    MediaStore.MediaColumns.SIZE,
-                    MediaStore.Files.FileColumns.RELATIVE_PATH,
-                    MediaStore.Files.FileColumns.DISPLAY_NAME
-                )
-            } else {
-                arrayOf(
-                    MediaStore.Files.FileColumns.DATE_ADDED,
-                    MediaStore.Files.FileColumns.SIZE,
-                    MediaStore.Files.FileColumns.DATA,
-                    MediaStore.Files.FileColumns.DISPLAY_NAME
-                )
-            }
+        val projection =
+            arrayOf(
+                MediaStore.Files.FileColumns.DATE_ADDED,
+                MediaStore.MediaColumns.SIZE,
+                MediaStore.Files.FileColumns.RELATIVE_PATH,
+                MediaStore.Files.FileColumns.DISPLAY_NAME
+            )
 
         getApplication<Application>().contentResolver.query(
             source,
@@ -345,21 +336,15 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                         "${MediaStore.Files.FileColumns._ID} = ?",
                         arrayOf(image.id.toString())
                     )
-                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) loadItems()
                 }
             } catch (e: Exception) {
-                when {
-                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q -> {
-                        pendingDeleteImage = image
-                        val recoverableSecurityException = e as? RecoverableSecurityException
-                            ?: throw e
-                        val intentSender = recoverableSecurityException.userAction.actionIntent
-                            .intentSender
-                        _permissionNeededForDelete.postValue(intentSender)
-                    }
-                    else -> {
-                        throw e
-                    }
+                run {
+                    pendingDeleteImage = image
+                    val recoverableSecurityException = e as? RecoverableSecurityException
+                        ?: throw e
+                    val intentSender = recoverableSecurityException.userAction.actionIntent
+                        .intentSender
+                    _permissionNeededForDelete.postValue(intentSender)
                 }
             }
         }
@@ -397,19 +382,14 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                             arrayOf(item.id.toString())
                         )
                     }
-                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) loadItems()
                 }
             } catch (e: SecurityException) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    pendingDeleteImages = items
-                    val recoverableSecurityException = e as? RecoverableSecurityException
-                        ?: throw e
-                    val intentSender = recoverableSecurityException.userAction.actionIntent
-                        .intentSender
-                    _permissionNeededForDelete.postValue(intentSender)
-                } else {
-                    throw e
-                }
+                pendingDeleteImages = items
+                val recoverableSecurityException = e as? RecoverableSecurityException
+                    ?: throw e
+                val intentSender = recoverableSecurityException.userAction.actionIntent
+                    .intentSender
+                _permissionNeededForDelete.postValue(intentSender)
             }
         }
     }

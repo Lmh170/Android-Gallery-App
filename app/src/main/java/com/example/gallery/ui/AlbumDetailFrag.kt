@@ -135,11 +135,9 @@ class AlbumDetailFrag : Fragment() {
                     return true
                 }
                 activity?.menuInflater?.inflate(R.menu.contextual_action_bar, menu)
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    activity?.window?.statusBarColor = SurfaceColors.getColorForElevation(
-                        requireContext(), binding.appBarLayout.elevation
-                    )
-                }
+                activity?.window?.statusBarColor = SurfaceColors.getColorForElevation(
+                    requireContext(), binding.appBarLayout.elevation
+                )
                 return true
             }
 
@@ -183,11 +181,9 @@ class AlbumDetailFrag : Fragment() {
             override fun onDestroyActionMode(mode: ActionMode?) {
                 tracker.clearSelection()
                 Handler(Looper.getMainLooper()).postDelayed({
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                        activity?.window?.statusBarColor = resources.getColor(
-                            android.R.color.transparent, requireActivity().theme
-                        )
-                    }
+                    activity?.window?.statusBarColor = resources.getColor(
+                        android.R.color.transparent, requireActivity().theme
+                    )
                 }, 400)
                 if (requireActivity().intent.getBooleanExtra(
                         Intent.EXTRA_ALLOW_MULTIPLE,

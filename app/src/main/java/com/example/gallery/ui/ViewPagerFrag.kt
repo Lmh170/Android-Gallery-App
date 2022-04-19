@@ -308,12 +308,8 @@ class ViewPagerFrag : Fragment() {
 
     private fun prepareSharedElementTransition() {
         sharedElementEnterTransition = MaterialContainerTransform().apply {
-            scrimColor = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            scrimColor =
                 resources.getColor(android.R.color.black, requireActivity().theme)
-            } else {
-                @Suppress("DEPRECATION")
-                resources.getColor(android.R.color.black)
-            }
         }
 
         setEnterSharedElementCallback(

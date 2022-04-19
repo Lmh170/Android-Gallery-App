@@ -95,12 +95,10 @@ class BottomNavFrag : Fragment() {
         override fun onDestroyActionMode(mode: ActionMode?) {
             tracker.clearSelection()
             Handler(Looper.getMainLooper()).postDelayed({
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    activity?.window?.statusBarColor = resources.getColor(
-                        android.R.color.transparent,
-                        requireActivity().theme
-                    )
-                }
+                activity?.window?.statusBarColor = resources.getColor(
+                    android.R.color.transparent,
+                    requireActivity().theme
+                )
             }, 400)
             actionMode = null
         }
@@ -183,11 +181,9 @@ class BottomNavFrag : Fragment() {
             binding.rvAlbums.isVisible = savedInstanceState.getBoolean(RV_ALBUMS_VISIBILITY)
             binding.rvItems.isVisible = !savedInstanceState.getBoolean(RV_ALBUMS_VISIBILITY)
             if (tracker.hasSelection()) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    activity?.window?.statusBarColor = SurfaceColors.getColorForElevation(
-                        requireContext(), binding.appBarLayout.elevation
-                    )
-                }
+                activity?.window?.statusBarColor = SurfaceColors.getColorForElevation(
+                    requireContext(), binding.appBarLayout.elevation
+                )
                 actionMode = binding.tbMain.startActionMode(callback)
                 actionMode?.title = tracker.selection.size().toString()
             }
@@ -235,11 +231,9 @@ class BottomNavFrag : Fragment() {
                 super.onSelectionChanged()
                 actionMode?.title = tracker.selection.size().toString()
                 if (actionMode == null) {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                        activity?.window?.statusBarColor = SurfaceColors.getColorForElevation(
-                            requireContext(), binding.appBarLayout.elevation
-                        )
-                    }
+                    activity?.window?.statusBarColor = SurfaceColors.getColorForElevation(
+                        requireContext(), binding.appBarLayout.elevation
+                    )
                     actionMode = binding.tbMain.startActionMode(callback)
                 }
                 if (tracker.selection.size() == 0) {
@@ -345,17 +339,12 @@ class BottomNavFrag : Fragment() {
     private fun setUpToolbarForIntent() {
         binding.tbMain.isTitleCentered = false
         binding.tbMain.setNavigationIcon(R.drawable.ic_baseline_arrow_back_24)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            binding.tbMain.setNavigationIconTint(
-                resources.getColor(
-                    android.R.color.black,
-                    activity?.theme
-                )
+        binding.tbMain.setNavigationIconTint(
+            resources.getColor(
+                android.R.color.black,
+                activity?.theme
             )
-        } else {
-            @Suppress("DEPRECATION")
-            binding.tbMain.setNavigationIconTint(resources.getColor(android.R.color.black))
-        }
+        )
         if (!requireActivity().intent.getBooleanExtra(
                 Intent.EXTRA_ALLOW_MULTIPLE,
                 false

@@ -1,6 +1,5 @@
 package com.example.gallery.ui
 
-import android.os.Build
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
@@ -31,9 +30,7 @@ class VideoPlayerActivity : AppCompatActivity() {
         binding = ActivityVideoPlayerBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            window.statusBarColor = resources.getColor(android.R.color.black, theme)
-        }
+        window.statusBarColor = resources.getColor(android.R.color.black, theme)
 
         binding.tbVideo.setNavigationOnClickListener {
             finish()
