@@ -258,7 +258,6 @@ class AlbumDetailFrag : Fragment() {
                     // Locate the ViewHolder for the clicked position.
                     val selectedViewHolder = binding.rvAlbumDetail
                         .findViewHolderForLayoutPosition(MainActivity.currentListPosition) ?: return
-//                    (exitTransition as Hold).excludeChildren((selectedViewHolder as GridAdapter.MediaItemHolder).binding.image, true)
 
                     // Map the first shared element name to the child ImageView.
                     sharedElements[names[0]] =

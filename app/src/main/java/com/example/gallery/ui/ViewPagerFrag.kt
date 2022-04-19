@@ -274,6 +274,7 @@ class ViewPagerFrag : Fragment() {
     }
 
     companion object {
+        // Todo: Specify the message
         fun delete(image: ListItem.MediaItem, context: Context, viewModel: MainViewModel) {
             MaterialAlertDialogBuilder(
                 context,
