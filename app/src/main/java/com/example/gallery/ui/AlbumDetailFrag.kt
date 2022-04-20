@@ -55,7 +55,16 @@ class AlbumDetailFrag : Fragment() {
 
         _binding = FragmentAlbumDetailBinding.inflate(inflater, container, false)
 
-        val adapter = GridItemAdapter(this@AlbumDetailFrag, true)
+        val adapter = GridItemAdapter(this@AlbumDetailFrag, true) { extras, _ ->
+            val args = Bundle()
+            args.putBoolean("isAlbum", true)
+            findNavController().navigate(
+                R.id.action_albumDetailFrag_to_viewPagerFrag,
+                args,
+                null,
+                extras
+            )
+        }
         binding.rvAlbumDetail.apply {
             this.adapter = adapter
             setHasFixedSize(true)

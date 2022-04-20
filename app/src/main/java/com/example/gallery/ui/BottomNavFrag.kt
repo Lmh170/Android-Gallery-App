@@ -192,7 +192,16 @@ class BottomNavFrag : Fragment() {
 
     private fun setUpRecyclerViews() {
         binding.rvItems.apply {
-            this.adapter = GridItemAdapter(this@BottomNavFrag, false)
+            this.adapter = GridItemAdapter(this@BottomNavFrag, false) { extras, _ ->
+                setHoldTransition()
+                prepareTransitions()
+                findNavController().navigate(
+                    R.id.action_bottomNavFrag_to_viewPagerFrag,
+                    null,
+                    null,
+                    extras
+                )
+            }
             val manager = GridLayoutManager(context, resources.getInteger(R.integer.spanCount))
             manager.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
                 override fun getSpanSize(position: Int): Int {

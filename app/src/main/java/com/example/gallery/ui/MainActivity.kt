@@ -56,6 +56,14 @@ class MainActivity : AppCompatActivity() {
         checkIntent()
     }
 
+    override fun onStart() {
+        super.onStart()
+
+        if (!haveStoragePermission()) {
+            requestPermission()
+        }
+    }
+
     private fun checkIntent() {
         // Todo: Support Intent.ACTION_PICK, currently handled as Intent.ACTION_GET_CONTENT
         if (intent.action == Intent.ACTION_PICK || intent.action == Intent.ACTION_GET_CONTENT) {

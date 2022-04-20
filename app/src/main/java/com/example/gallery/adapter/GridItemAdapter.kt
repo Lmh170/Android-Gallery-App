@@ -11,6 +11,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.IntentSenderRequest
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.FragmentNavigator
 import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.selection.ItemDetailsLookup
@@ -42,7 +43,11 @@ import java.util.concurrent.atomic.AtomicBoolean
  * Based on:
  * https://github.com/android/animation-samples/tree/main/GridToPager
  */
-class GridItemAdapter(private val frag: Fragment, private val isAlbum: Boolean) :
+class GridItemAdapter(
+    private val frag: Fragment,
+    private val isAlbum: Boolean,
+    val onClick: (extras: FragmentNavigator.Extras, position: Int) -> Unit
+) :
     ListAdapter<ListItem, ViewHolder>(ListItem.ListItemDiffCallback()) {
 
     private val enterTransitionStarted: AtomicBoolean = AtomicBoolean()
@@ -179,47 +184,12 @@ class GridItemAdapter(private val frag: Fragment, private val isAlbum: Boolean) 
                     }
                 }
 
-                val extras = FragmentNavigatorExtras(it to it.transitionName)
-
-                when (frag) {
-
-                    is BottomNavFrag -> {
-                        frag.setHoldTransition()
-                        frag.prepareTransitions()
-                        frag.findNavController().navigate(
-                            R.id.action_bottomNavFrag_to_viewPagerFrag,
-                            null,
-                            null,
-                            extras
-                        )
-                    }
-
-                    is AlbumDetailFrag -> {
-                        val args = Bundle()
-                        args.putBoolean("isAlbum", true)
-                        frag.findNavController().navigate(
-                            R.id.action_albumDetailFrag_to_viewPagerFrag,
-                            args,
-                            null,
-                            extras
-                        )
-                    }
-
-                    is BinFrag -> {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                            val senderRequest = MediaStore.createTrashRequest(
-                                frag.requireActivity().application.contentResolver,
-                                listOf((getItem(position) as ListItem.MediaItem).uri), false
-                            ).intentSender
-                            val intentSenderRequest =
-                                IntentSenderRequest.Builder(senderRequest).build()
-                            (frag.requireActivity() as MainActivity).restoreRequest.launch(
-                                intentSenderRequest
-                            )
-                        }
-                    }
-
-                }
+                onClick(
+                    FragmentNavigatorExtras(
+                        it to it.transitionName
+                    ),
+                    position
+                )
             }
         } else if (holder is HeaderViewHolder) {
             holder.binding.tvDate.text =
