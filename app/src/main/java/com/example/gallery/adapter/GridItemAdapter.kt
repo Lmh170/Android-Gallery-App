@@ -154,7 +154,7 @@ class GridItemAdapter(
                         )
                     ) {
                         val intent = Intent().apply {
-                            data = (getItem(position) as ListItem.MediaItem).uri
+                            data = (getItem(holder.layoutPosition) as ListItem.MediaItem).uri
                             flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
                         }
 
@@ -163,18 +163,18 @@ class GridItemAdapter(
 
                         return@setOnClickListener
                     } else {
-                        tracker?.select(getItemId(position))
+                        tracker?.select(getItemId(holder.layoutPosition))
 
                         return@setOnClickListener
                     }
                 }
 
                 if (frag !is BinFrag) {
-                    MainActivity.currentListPosition = position
+                    MainActivity.currentListPosition = holder.layoutPosition
                     MainActivity.currentViewPagerPosition = if (isAlbum) {
-                        position
+                        holder.layoutPosition
                     } else {
-                        (getItem(position) as ListItem.MediaItem).viewPagerPosition
+                        (getItem(holder.layoutPosition) as ListItem.MediaItem).viewPagerPosition
                     }
                 }
 
@@ -182,7 +182,7 @@ class GridItemAdapter(
                     FragmentNavigatorExtras(
                         it to it.transitionName
                     ),
-                    position
+                    holder.layoutPosition
                 )
             }
         } else if (holder is HeaderViewHolder) {

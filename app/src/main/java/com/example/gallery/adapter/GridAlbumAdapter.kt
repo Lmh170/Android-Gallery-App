@@ -50,7 +50,7 @@ class GridAlbumAdapter(private val frag: BottomNavFrag) : ListAdapter<Album,
             ) {
                 MainActivity.currentListPosition = 0
 
-                MainActivity.currentAlbumName = getItem(position).name
+                MainActivity.currentAlbumName = getItem(holder.layoutPosition).name
 
                 frag.setSharedAxisTransition()
 
