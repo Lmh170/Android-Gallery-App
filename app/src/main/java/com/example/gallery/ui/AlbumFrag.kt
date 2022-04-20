@@ -22,7 +22,7 @@ import com.example.gallery.MyItemDetailsLookup
 import com.example.gallery.MyItemKeyProvider
 import com.example.gallery.R
 import com.example.gallery.adapter.GridItemAdapter
-import com.example.gallery.databinding.FragmentAlbumDetailBinding
+import com.example.gallery.databinding.FragmentAlbumBinding
 import com.google.android.material.elevation.SurfaceColors
 import com.google.android.material.transition.Hold
 import com.google.android.material.transition.MaterialSharedAxis
@@ -32,8 +32,8 @@ import kotlin.collections.find
 import kotlin.collections.mutableListOf
 import kotlin.collections.set
 
-class AlbumDetailFrag : Fragment() {
-    private lateinit var _binding: FragmentAlbumDetailBinding
+class AlbumFrag : Fragment() {
+    private lateinit var _binding: FragmentAlbumBinding
     private val binding get() = _binding
     private val viewModel: MainViewModel by activityViewModels()
     private var actionMode: ActionMode? = null
@@ -47,24 +47,27 @@ class AlbumDetailFrag : Fragment() {
             val items = albums.find { it.name == MainActivity.currentAlbumName }?.mediaItems
             val position = (binding.rvAlbumDetail.layoutManager as GridLayoutManager)
                 .findFirstCompletelyVisibleItemPosition()
+
             (binding.rvAlbumDetail.adapter as GridItemAdapter).submitList(items as List<ListItem>?) {
                 if (position == 0) binding.rvAlbumDetail.scrollToPosition(0)
             }
         }
+
         if (::_binding.isInitialized) return binding.root
 
-        _binding = FragmentAlbumDetailBinding.inflate(inflater, container, false)
+        _binding = FragmentAlbumBinding.inflate(inflater, container, false)
 
-        val adapter = GridItemAdapter(this@AlbumDetailFrag, true) { extras, _ ->
+        val adapter = GridItemAdapter(this@AlbumFrag, true) { extras, _ ->
             val args = Bundle()
             args.putBoolean("isAlbum", true)
             findNavController().navigate(
-                R.id.action_albumDetailFrag_to_viewPagerFrag,
+                R.id.action_albumFrag_to_viewPagerFrag,
                 args,
                 null,
                 extras
             )
         }
+
         binding.rvAlbumDetail.apply {
             this.adapter = adapter
             setHasFixedSize(true)
@@ -103,6 +106,7 @@ class AlbumDetailFrag : Fragment() {
             MyItemDetailsLookup(binding.rvAlbumDetail),
             StorageStrategy.createLongStorage()
         ).withSelectionPredicate(object : SelectionTracker.SelectionPredicate<Long>() {
+
             override fun canSetStateForKey(key: Long, nextState: Boolean): Boolean =
                 binding.rvAlbumDetail.findViewHolderForItemId(key) != null
 
@@ -127,6 +131,7 @@ class AlbumDetailFrag : Fragment() {
                     binding.fabDone.setOnClickListener {
                         val intent = Intent()
                         val items = mutableListOf<Uri>()
+
                         for (key in tracker.selection) {
                             viewModel.albums.value?.find {
                                 it.name == MainActivity.currentAlbumName
@@ -134,18 +139,23 @@ class AlbumDetailFrag : Fragment() {
                                 it.id == key
                             }?.uri?.let { it1 -> items.add(it1) }
                         }
+
                         intent.clipData = ClipData.newUri(
                             requireActivity().contentResolver,
-                            "uris", items[0]
+                            "uris",
+                            items[0]
                         )
+
                         for (i in 1 until items.size) {
                             intent.clipData?.addItem(ClipData.Item(items[i]))
                         }
+
                         requireActivity().setResult(Activity.RESULT_OK, intent)
                         requireActivity().finish()
                     }
                     return true
                 }
+
                 activity?.menuInflater?.inflate(R.menu.contextual_action_bar, menu)
                 activity?.window?.statusBarColor = SurfaceColors.getColorForElevation(
                     requireContext(), binding.appBarLayout.elevation
@@ -153,14 +163,14 @@ class AlbumDetailFrag : Fragment() {
                 return true
             }
 
-            override fun onPrepareActionMode(mode: ActionMode?, menu: Menu?): Boolean {
-                return false
-            }
+            override fun onPrepareActionMode(mode: ActionMode?, menu: Menu?): Boolean =
+                false
 
             override fun onActionItemClicked(mode: ActionMode?, item: MenuItem?): Boolean {
                 return when (item?.itemId) {
                     R.id.miShare -> {
                         val items = mutableListOf<ListItem.MediaItem>()
+
                         for (id in tracker.selection) {
                             val selectedItem = (binding.rvAlbumDetail.adapter as GridItemAdapter)
                                 .currentList.find {
@@ -168,13 +178,16 @@ class AlbumDetailFrag : Fragment() {
                                 } as ListItem.MediaItem? ?: return false
                             items.add(selectedItem)
                         }
+
                         ViewPagerFrag.share(items, requireActivity())
                         tracker.clearSelection()
                         actionMode?.finish()
                         true
                     }
+
                     R.id.miDelete -> {
                         val items = mutableListOf<ListItem.MediaItem>()
+
                         for (id in tracker.selection) {
                             val selectedItem = (binding.rvAlbumDetail.adapter as GridItemAdapter)
                                 .currentList.find {
@@ -182,21 +195,25 @@ class AlbumDetailFrag : Fragment() {
                                 } as ListItem.MediaItem? ?: return false
                             items.add(selectedItem)
                         }
+
                         ViewPagerFrag.delete(items, requireContext(), viewModel)
                         actionMode?.finish()
                         true
                     }
+
                     else -> false
                 }
             }
 
             override fun onDestroyActionMode(mode: ActionMode?) {
                 tracker.clearSelection()
+
                 Handler(Looper.getMainLooper()).postDelayed({
                     activity?.window?.statusBarColor = resources.getColor(
                         android.R.color.transparent, requireActivity().theme
                     )
                 }, 400)
+
                 if (requireActivity().intent.getBooleanExtra(
                         Intent.EXTRA_ALLOW_MULTIPLE,
                         false
@@ -204,6 +221,7 @@ class AlbumDetailFrag : Fragment() {
                 ) {
                     binding.fabDone.hide()
                 }
+
                 actionMode = null
             }
         }
@@ -211,7 +229,9 @@ class AlbumDetailFrag : Fragment() {
         tracker.addObserver(object : SelectionTracker.SelectionObserver<Long>() {
             override fun onSelectionChanged() {
                 super.onSelectionChanged()
+
                 actionMode?.title = tracker.selection.size().toString()
+
                 if (actionMode == null) {
                     actionMode = binding.tbAlbum.startActionMode(callback)
                 } else if (tracker.selection.size() == 0) {
@@ -257,6 +277,7 @@ class AlbumDetailFrag : Fragment() {
         enterTransition = MaterialSharedAxis(MaterialSharedAxis.Z, true)
         returnTransition = MaterialSharedAxis(MaterialSharedAxis.Z, false)
         exitTransition = Hold()
+
         setExitSharedElementCallback(
             object : SharedElementCallback() {
                 override fun onMapSharedElements(
@@ -288,6 +309,5 @@ class AlbumDetailFrag : Fragment() {
                 controller.isAppearanceLightNavigationBars = true
             }
         }
-
     }
 }

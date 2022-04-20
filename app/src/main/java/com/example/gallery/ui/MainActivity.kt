@@ -26,6 +26,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -43,7 +44,7 @@ class MainActivity : AppCompatActivity() {
         val deleteRequest =
             registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) {
                 if (it.resultCode == RESULT_OK) {
-                    viewModel.deletePendingImage()
+                    viewModel.deletePendingItem()
                     viewModel.loadItems()
                 }
             }
@@ -71,9 +72,11 @@ class MainActivity : AppCompatActivity() {
                 intent.data != null -> {
                     viewModel.loadItems(intent.data!!)
                 }
+
                 intent.type?.contains("image", true) == true -> {
                     val mimeType: String =
                         intent?.type?.substring(intent.type!!.lastIndexOf("/") + 1)!!
+
                     if (mimeType != "*" && intent?.type?.contains("/") == false) {
                         viewModel.loadItems(
                             MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
@@ -83,9 +86,11 @@ class MainActivity : AppCompatActivity() {
                         viewModel.loadItems(MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
                     }
                 }
+
                 intent.type?.contains("video", true) == true -> {
                     val mimeType: String =
                         intent?.type?.substring(intent.type!!.lastIndexOf("/") + 1)!!
+
                     if (mimeType != "*" && intent?.type?.contains("/") == false) {
                         viewModel.loadItems(
                             MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
@@ -95,6 +100,7 @@ class MainActivity : AppCompatActivity() {
                         viewModel.loadItems(MediaStore.Video.Media.EXTERNAL_CONTENT_URI)
                     }
                 }
+
                 else -> viewModel.loadItems()
             }
         } else {

@@ -30,12 +30,16 @@ class BinFrag : Fragment() {
         viewModel.bin.observe(viewLifecycleOwner) {
             val position = (binding.rvBin.layoutManager as GridLayoutManager)
                 .findFirstCompletelyVisibleItemPosition()
+
             (binding.rvBin.adapter as GridItemAdapter).submitList(it) {
                 if (position == 0) binding.rvBin.scrollToPosition(0)
             }
         }
+
         if (::_binding.isInitialized) return binding.root
+
         viewModel.loadBin()
+
         _binding = FragmentBinBinding.inflate(inflater)
 
         binding.rvBin.apply {
@@ -49,6 +53,7 @@ class BinFrag : Fragment() {
 
                     val intentSenderRequest =
                         IntentSenderRequest.Builder(senderRequest).build()
+
                     (requireActivity() as MainActivity).restoreRequest.launch(
                         intentSenderRequest
                     )
@@ -63,6 +68,7 @@ class BinFrag : Fragment() {
         binding.tbBin.setNavigationOnClickListener {
             findNavController().navigateUp()
         }
+
         return binding.root
     }
 }

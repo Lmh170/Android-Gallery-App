@@ -16,10 +16,7 @@ import com.example.gallery.ui.MainActivity
 import com.google.android.material.navigation.NavigationBarView
 
 class GridAlbumAdapter(private val frag: BottomNavFrag) : ListAdapter<Album,
-        GridAlbumAdapter.AlbumHolder>(Album.DiffCallback) {
-
-    inner class AlbumHolder(val binding: AlbumHolderBinding) :
-        RecyclerView.ViewHolder(binding.root)
+        AlbumHolder>(Album.DiffCallback) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AlbumHolder {
         return AlbumHolder(
@@ -46,15 +43,17 @@ class GridAlbumAdapter(private val frag: BottomNavFrag) : ListAdapter<Album,
         holder.binding.ivThumbnailAlbum.transitionName = "album_$position"
 
         holder.binding.ivThumbnailAlbum.setOnClickListener {
-
             if ((frag.binding.bnvMain as NavigationBarView).selectedItemId == R.id.miAlbums
                 || frag.requireActivity().intent.action == Intent.ACTION_PICK || frag.requireActivity()
                     .intent.action ==
                 Intent.ACTION_GET_CONTENT
             ) {
                 MainActivity.currentListPosition = 0
+
                 MainActivity.currentAlbumName = getItem(position).name
+
                 frag.setSharedAxisTransition()
+
                 frag.findNavController().navigate(
                     R.id.action_bottomNavFrag_to_albumDetailFrag,
                     null,
@@ -65,3 +64,6 @@ class GridAlbumAdapter(private val frag: BottomNavFrag) : ListAdapter<Album,
         }
     }
 }
+
+class AlbumHolder(val binding: AlbumHolderBinding) :
+    RecyclerView.ViewHolder(binding.root)

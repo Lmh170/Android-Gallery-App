@@ -24,6 +24,7 @@ import androidx.viewpager2.widget.MarginPageTransformer
 import androidx.viewpager2.widget.ViewPager2
 import com.example.gallery.ListItem
 import com.example.gallery.R
+import com.example.gallery.adapter.ViewHolderPager
 import com.example.gallery.adapter.ViewPagerAdapter
 import com.example.gallery.databinding.FragmentViewPagerBinding
 import com.example.gallery.databinding.ViewDialogInfoBinding
@@ -60,7 +61,9 @@ class ViewPagerFrag : Fragment() {
                 }
             }
         }
+
         prepareSharedElementTransition()
+
         if (::_binding.isInitialized) {
             return binding.root
         }
@@ -75,6 +78,7 @@ class ViewPagerFrag : Fragment() {
 
         setUpViewpager()
         setUpViews()
+
         return binding.root
     }
 
@@ -83,6 +87,7 @@ class ViewPagerFrag : Fragment() {
 
         binding.viewPager.apply {
             this.adapter = adapter
+
             if (requireArguments().getBoolean("isAlbum")) {
                 adapter.submitList(viewModel.albums.value?.find {
                     it.name == MainActivity.currentAlbumName
@@ -92,11 +97,13 @@ class ViewPagerFrag : Fragment() {
             }
 
             firstCurrentItem = MainActivity.currentViewPagerPosition
+
             setCurrentItem(MainActivity.currentViewPagerPosition, false)
 
             registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
                 override fun onPageSelected(position: Int) {
                     MainActivity.currentViewPagerPosition = position
+
                     if (requireArguments().getBoolean("isAlbum")) {
                         MainActivity.currentListPosition = position
                     } else {
@@ -105,6 +112,7 @@ class ViewPagerFrag : Fragment() {
                     }
                 }
             })
+
             setPageTransformer(MarginPageTransformer(50))
         }
     }
@@ -154,13 +162,9 @@ class ViewPagerFrag : Fragment() {
     }
 
     private fun setUpSystemBars() {
-        try {
-            WindowInsetsControllerCompat(requireActivity().window, binding.root).let { controller ->
-                controller.isAppearanceLightStatusBars = false
-                controller.isAppearanceLightNavigationBars = false
-            }
-        } catch (e: IllegalStateException) {
-
+        WindowInsetsControllerCompat(requireActivity().window, binding.root).let { controller ->
+            controller.isAppearanceLightStatusBars = false
+            controller.isAppearanceLightNavigationBars = false
         }
     }
 
@@ -191,29 +195,45 @@ class ViewPagerFrag : Fragment() {
             val currentItem = getCurrentItem() ?: return@setOnClickListener
             share(currentItem, requireActivity())
         }
+
         binding.cvDelete.setOnClickListener {
             getCurrentItem()?.let { delete(it, requireContext(), viewModel) }
         }
+
         binding.cvEdit.setOnClickListener {
             val currentItem = getCurrentItem() ?: return@setOnClickListener
-            val editIntent = Intent(Intent.ACTION_EDIT)
-            editIntent.type = activity?.contentResolver?.getType(currentItem.uri)
-            editIntent.data = currentItem.uri
-            editIntent.flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
-            startActivity(Intent.createChooser(editIntent, "Edit with"))
+
+            Intent(Intent.ACTION_EDIT).apply {
+                type = activity?.contentResolver?.getType(currentItem.uri)
+                data = currentItem.uri
+                flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+            }.also {
+                startActivity(
+                    Intent.createChooser(
+                        it,
+                        "Edit with"
+                    )
+                )
+            }
         }
+
         binding.cvInfo.setOnClickListener {
             val currentItem = getCurrentItem() ?: return@setOnClickListener
-            val info = viewModel.getImageInfo(currentItem.uri)
+
+            val info = viewModel.getItemInfo(currentItem.uri)
+
             val inflater = requireActivity()
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+
             val binding = ViewDialogInfoBinding.inflate(inflater)
+
             binding.tvDateAdded.text = SimpleDateFormat.getDateInstance().format(
                 Date(
                     info[0]
                         .toLong()
                 )
             )
+
             binding.tvName.text = info[3]
             binding.tvTimeAdded.text = SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT)
                 .format(Date(info[0].toLong()))
@@ -239,7 +259,8 @@ class ViewPagerFrag : Fragment() {
 
     private fun getCurrentItem(): ListItem.MediaItem? {
         return try {
-            (binding.viewPager.adapter as ViewPagerAdapter).currentList[binding.viewPager.currentItem]
+            (binding.viewPager.adapter as ViewPagerAdapter)
+                .currentList[binding.viewPager.currentItem]
         } catch (e: IndexOutOfBoundsException) {
             null
         }
@@ -265,11 +286,12 @@ class ViewPagerFrag : Fragment() {
                     val selectedViewHolder =
                         (binding.viewPager.getChildAt(0) as RecyclerView?)
                             ?.findViewHolderForLayoutPosition(binding.viewPager.currentItem)
-                                as ViewPagerAdapter.ViewHolderPager? ?: return
+                                as ViewHolderPager? ?: return
 
                     sharedElements[names[0]] = selectedViewHolder.binding.pagerImage
                 }
             })
+
         postponeEnterTransition()
     }
 
@@ -287,7 +309,7 @@ class ViewPagerFrag : Fragment() {
                     dialog.dismiss()
                 }
                 .setPositiveButton("Delete") { _, _ ->
-                    viewModel.deleteImage(image)
+                    viewModel.deleteItem(image)
                 }
                 .show()
         }
@@ -304,30 +326,44 @@ class ViewPagerFrag : Fragment() {
                     dialog.dismiss()
                 }
                 .setPositiveButton("Delete") { _, _ ->
-                    viewModel.deleteImages(images)
+                    viewModel.deleteItems(images)
                 }
                 .show()
         }
 
         fun share(item: ListItem.MediaItem, activity: Activity) {
-            val share = Intent(Intent.ACTION_SEND)
-            share.data = item.uri
-            share.type = activity.contentResolver.getType(item.uri)
-            share.putExtra(Intent.EXTRA_STREAM, item.uri)
-            share.flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
-            activity.startActivity(Intent.createChooser(share, "Share with"))
+            Intent(Intent.ACTION_SEND).apply {
+                data = item.uri
+                type = activity.contentResolver.getType(item.uri)
+                putExtra(Intent.EXTRA_STREAM, item.uri)
+                flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+            }.also {
+                activity.startActivity(
+                    Intent.createChooser(
+                        it,
+                        "Share with"
+                    )
+                )
+            }
         }
 
         fun share(items: List<ListItem.MediaItem>, activity: Activity) {
-            val share = Intent(Intent.ACTION_SEND_MULTIPLE)
-            val uris = ArrayList<Uri>()
-            for (item in items) {
-                uris.add(item.uri)
+            Intent(Intent.ACTION_SEND_MULTIPLE).apply {
+                val uris = ArrayList<Uri>()
+                for (item in items) {
+                    uris.add(item.uri)
+                }
+                type = "*/*"
+                putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris)
+                flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+            }.also {
+                activity.startActivity(
+                    Intent.createChooser(
+                        it,
+                        "Share with"
+                    )
+                )
             }
-            share.type = "*/*"
-            share.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris)
-            share.flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
-            activity.startActivity(Intent.createChooser(share, "Share with"))
         }
     }
 }

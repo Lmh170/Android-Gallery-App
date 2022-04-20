@@ -18,6 +18,7 @@ class ImageViewerActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         binding = ActivityImageViewerBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -42,18 +43,33 @@ class ImageViewerActivity : AppCompatActivity() {
         }
 
         binding.pagerImage.enableZooming()
-        GlideApp.with(binding.pagerImage).load(intent.data).into(binding.pagerImage)
-        binding.pagerImage.gActivity = this
-        binding.pagerImage.setOnClickListener {
-            toggleSystemUI()
+
+        GlideApp.with(binding.pagerImage)
+            .load(intent.data)
+            .into(binding.pagerImage)
+
+        binding.pagerImage.apply {
+            gActivity = this@ImageViewerActivity
+            setOnClickListener {
+                toggleSystemUI()
+            }
         }
+
         binding.cvEdit.setOnClickListener {
-            val editIntent = Intent(Intent.ACTION_EDIT)
-            editIntent.type = contentResolver?.getType(intent.data!!)
-            editIntent.data = intent.data
-            editIntent.flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
-            startActivity(Intent.createChooser(editIntent, "Edit with"))
+            Intent(Intent.ACTION_EDIT).apply {
+                type = contentResolver?.getType(intent.data!!)
+                data = intent.data
+                flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+            }.also {
+                startActivity(
+                    Intent.createChooser(
+                        it,
+                        "Edit with"
+                    )
+                )
+            }
         }
+
         binding.cvShare.setOnClickListener {
             ViewPagerFrag.share(
                 ListItem.MediaItem(
@@ -70,11 +86,13 @@ class ImageViewerActivity : AppCompatActivity() {
             excludeTarget(binding.ivGradTop, true)
             excludeTarget(binding.ivGardBottom, true)
         })
+
         binding.cvEdit.visibility = View.VISIBLE
         binding.tbViewPager.visibility = View.VISIBLE
         binding.cvShare.visibility = View.VISIBLE
         binding.ivGradTop.visibility = View.VISIBLE
         binding.ivGardBottom.visibility = View.VISIBLE
+
         WindowInsetsControllerCompat(window, window.decorView)
             .show(WindowInsetsCompat.Type.systemBars())
     }
@@ -91,6 +109,7 @@ class ImageViewerActivity : AppCompatActivity() {
         binding.cvEdit.visibility = View.GONE
         binding.ivGradTop.visibility = View.GONE
         binding.ivGardBottom.visibility = View.GONE
+
         WindowInsetsControllerCompat(window, window.decorView)
             .hide(WindowInsetsCompat.Type.systemBars())
     }

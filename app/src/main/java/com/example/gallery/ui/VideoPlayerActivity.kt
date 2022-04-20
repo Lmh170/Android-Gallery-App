@@ -50,6 +50,7 @@ class VideoPlayerActivity : AppCompatActivity() {
                 playbackPosition = savedInstanceState.getLong(KEY_PLAYER_POSITION)
                 currentWindow = savedInstanceState.getInt(KEY_PLAYER_WINDOW)
             }
+
             setControllerVisibilityListener {
                 if (binding.exoPlayer.isControllerFullyVisible) {
                     showSystemUi()
@@ -70,7 +71,9 @@ class VideoPlayerActivity : AppCompatActivity() {
         TransitionManager.beginDelayedTransition(binding.root, MaterialFade().apply {
             duration = 180L
         })
+
         binding.tbVideo.visibility = View.GONE
+
         WindowInsetsControllerCompat(
             window,
             window.decorView
@@ -81,7 +84,9 @@ class VideoPlayerActivity : AppCompatActivity() {
         TransitionManager.beginDelayedTransition(binding.root, MaterialFade().apply {
             duration = 250L
         })
+
         binding.tbVideo.visibility = View.VISIBLE
+
         WindowInsetsControllerCompat(
             window,
             window.decorView
@@ -124,6 +129,7 @@ class VideoPlayerActivity : AppCompatActivity() {
                 val mediaItem = MediaItem.fromUri(intent.data!!)
                 exoPlayer.setMediaItem(mediaItem)
             }
+
         player!!.playWhenReady = true
         player!!.seekTo(currentWindow, playbackPosition)
         player!!.prepare()
@@ -135,6 +141,7 @@ class VideoPlayerActivity : AppCompatActivity() {
             currentWindow = this.currentMediaItemIndex
             release()
         }
+
         player = null
     }
 

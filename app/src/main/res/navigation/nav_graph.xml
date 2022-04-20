@@ -15,7 +15,7 @@
             app:destination="@id/viewPagerFrag" />
         <action
             android:id="@+id/action_bottomNavFrag_to_albumDetailFrag"
-            app:destination="@id/albumDetailFrag" />
+            app:destination="@id/albumFrag" />
         <action
             android:id="@+id/action_bottomNavFrag_to_binFrag"
             app:destination="@id/binFrag" />
@@ -36,12 +36,12 @@
             app:nullable="true" />
     </fragment>
     <fragment
-        android:id="@+id/albumDetailFrag"
-        android:name="com.example.gallery.ui.AlbumDetailFrag"
+        android:id="@+id/albumFrag"
+        android:name="com.example.gallery.ui.AlbumFrag"
         android:label="fragment_album_detail"
-        tools:layout="@layout/fragment_album_detail" >
+        tools:layout="@layout/fragment_album" >
         <action
-            android:id="@+id/action_albumDetailFrag_to_viewPagerFrag"
+            android:id="@+id/action_albumFrag_to_viewPagerFrag"
             app:destination="@id/viewPagerFrag" />
     </fragment>
     <fragment

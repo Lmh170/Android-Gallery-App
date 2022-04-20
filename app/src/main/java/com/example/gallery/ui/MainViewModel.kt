@@ -10,6 +10,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
 import android.provider.MediaStore
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.AndroidViewModel
@@ -75,29 +76,29 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun deletePendingImage() {
+    fun deletePendingItem() {
         if (pendingDeleteItem == null) {
             pendingDeleteItems?.let {
                 pendingDeleteItems = null
-                deleteImages(it)
+                deleteItems(it)
             }
         } else {
             pendingDeleteItem?.let {
                 pendingDeleteItem = null
-                deleteImage(it)
+                deleteItem(it)
             }
         }
     }
 
-    fun deleteImage(image: ListItem.MediaItem) {
+    fun deleteItem(image: ListItem.MediaItem) {
         viewModelScope.launch {
-            performDeleteImage(image)
+            performDeleteItem(image)
         }
     }
 
-    fun deleteImages(images: List<ListItem.MediaItem>) {
+    fun deleteItems(images: List<ListItem.MediaItem>) {
         viewModelScope.launch {
-            performDeleteImages(images)
+            performDeleteItems(images)
         }
     }
 
@@ -301,7 +302,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         return albums
     }
 
-    fun getImageInfo(source: Uri): List<String> {
+    fun getItemInfo(source: Uri): List<String> {
         val info = mutableListOf<String>()
 
         val projection =
@@ -339,30 +340,32 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         return info
     }
 
-    private suspend fun performDeleteImage(image: ListItem.MediaItem) {
+    private suspend fun performDeleteItem(image: ListItem.MediaItem) {
         withContext(Dispatchers.IO) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                val pendingIntent = MediaStore.createTrashRequest(
+                    getApplication<Application>().contentResolver,
+                    listOf(image.uri),
+                    true
+                )
+
+                pendingDeleteItem = null // Item will be deleted with request
+                _permissionNeededForDelete.postValue(pendingIntent.intentSender)
+                return@withContext
+            }
             try {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                    val pendingIntent = MediaStore.createTrashRequest(
-                        getApplication<Application>().contentResolver,
-                        listOf(image.uri),
-                        true
-                    )
-                    pendingDeleteItem = null // Item will be deleted with request
-                    _permissionNeededForDelete.postValue(pendingIntent.intentSender)
-                } else {
-                    getApplication<Application>().contentResolver.delete(
-                        image.uri,
-                        "${MediaStore.Files.FileColumns._ID} = ?",
-                        arrayOf(image.id.toString())
-                    )
-                }
+                getApplication<Application>().contentResolver.delete(
+                    image.uri,
+                    "${MediaStore.Files.FileColumns._ID} = ?",
+                    arrayOf(image.id.toString())
+                )
             } catch (securityException: SecurityException) {
-                // Signal to the Activity that it needs to request permission and
-                // try the delete again if it succeeds.
                 val recoverableSecurityException =
                     securityException as? RecoverableSecurityException
                         ?: throw securityException
+
+                // Signal to the Activity that it needs to request permission and
+                // try the delete again if it succeeds.
                 pendingDeleteItem = image
                 _permissionNeededForDelete.postValue(
                     recoverableSecurityException.userAction.actionIntent.intentSender
@@ -371,7 +374,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    private suspend fun performDeleteImages(items: List<ListItem.MediaItem>) {
+    private suspend fun performDeleteItems(items: List<ListItem.MediaItem>) {
         withContext(Dispatchers.IO) {
             try {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
@@ -400,6 +403,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                                 MediaStore.Video.Media.EXTERNAL_CONTENT_URI, it.id
                             )
                         }
+
                         getApplication<Application>().contentResolver.delete(
                             uri,
                             "${MediaStore.Files.FileColumns._ID} = ?",
@@ -411,6 +415,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 val recoverableSecurityException =
                     securityException as? RecoverableSecurityException
                         ?: throw securityException
+
                 // Signal to the Activity that it needs to request permission and
                 // try the delete again if it succeeds.
                 pendingDeleteItems = items
@@ -495,7 +500,7 @@ private fun ContentResolver.registerObserver(
     uri: Uri,
     observer: (selfChange: Boolean) -> Unit
 ): ContentObserver {
-    val contentObserver = object : ContentObserver(Handler()) {
+    val contentObserver = object : ContentObserver(Handler(Looper.myLooper()!!)) {
         override fun onChange(selfChange: Boolean) {
             observer(selfChange)
         }

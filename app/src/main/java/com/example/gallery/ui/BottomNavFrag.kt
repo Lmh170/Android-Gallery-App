@@ -3,7 +3,6 @@ package com.example.gallery.ui
 import android.app.Activity
 import android.content.Intent
 import android.content.res.Configuration
-import android.graphics.drawable.ColorDrawable
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -39,10 +38,11 @@ import kotlin.collections.set
 
 class BottomNavFrag : Fragment() {
     private lateinit var _binding: FragmentBottomNavBinding
-    val binding get() = _binding
+    val binding: FragmentBottomNavBinding get() = _binding
     private val viewModel: MainViewModel by activityViewModels()
     var actionMode: ActionMode? = null
     private lateinit var tracker: SelectionTracker<Long>
+
     private val callback = object : ActionMode.Callback {
         override fun onCreateActionMode(mode: ActionMode?, menu: Menu?): Boolean {
             activity?.menuInflater?.inflate(R.menu.contextual_action_bar, menu)
@@ -67,8 +67,8 @@ class BottomNavFrag : Fragment() {
                     actionMode?.finish()
                     true
                 }
+
                 R.id.miDelete -> {
-                    // Handle delete icon press
                     val items = mutableListOf<ListItem.MediaItem>()
                     for (id in tracker.selection) {
                         val selectedItem = viewModel.recyclerViewItems.value?.find {
@@ -80,20 +80,14 @@ class BottomNavFrag : Fragment() {
                     actionMode?.finish()
                     true
                 }
-                R.id.home -> {
-                    println("yes yes yes")
-                    true
-                }
-                R.id.action_mode_close_button -> {
-                    println("yes yes yes")
-                    true
-                }
+
                 else -> false
             }
         }
 
         override fun onDestroyActionMode(mode: ActionMode?) {
             tracker.clearSelection()
+
             Handler(Looper.getMainLooper()).postDelayed({
                 activity?.window?.statusBarColor = resources.getColor(
                     android.R.color.transparent,
@@ -104,10 +98,6 @@ class BottomNavFrag : Fragment() {
         }
     }
 
-    companion object {
-        const val RV_ALBUMS_VISIBILITY = "rv_albums_visibility"
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -115,30 +105,34 @@ class BottomNavFrag : Fragment() {
         viewModel.recyclerViewItems.observe(viewLifecycleOwner) { items ->
             val position = (binding.rvItems.layoutManager as GridLayoutManager)
                 .findFirstCompletelyVisibleItemPosition()
+
             (binding.rvItems.adapter as GridItemAdapter).submitList(items) {
                 if (position == 0) binding.rvItems.scrollToPosition(0)
             }
         }
+
         viewModel.albums.observe(viewLifecycleOwner) { items ->
             val position = (binding.rvAlbums.layoutManager as GridLayoutManager)
                 .findFirstCompletelyVisibleItemPosition()
+
             (binding.rvAlbums.adapter as GridAlbumAdapter).submitList(items) {
                 if (position == 0) binding.rvAlbums.scrollToPosition(0)
             }
         }
+
         if (::_binding.isInitialized) return binding.root
 
         _binding = FragmentBottomNavBinding.inflate(inflater, container, false)
 
-        if (requireActivity().intent.action == Intent.ACTION_PICK || requireActivity()
-                .intent.action ==
-            Intent.ACTION_GET_CONTENT
+        if (requireActivity().intent.action == Intent.ACTION_PICK ||
+            requireActivity().intent.action == Intent.ACTION_GET_CONTENT
         ) {
-            setUpToolbarForIntent()
+            setUpForIntent()
         } else {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 binding.tbMain.inflateMenu(R.menu.action_bar_home)
             }
+
             binding.tbMain.setOnMenuItemClickListener {
                 when (it.itemId) {
                     R.id.miTrash -> {
@@ -151,6 +145,7 @@ class BottomNavFrag : Fragment() {
                 }
             }
         }
+
         setUpRecyclerViews()
         setUpNavigationView()
         prepareTransitions()
@@ -160,6 +155,7 @@ class BottomNavFrag : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
         if (binding.rvItems.isVisible && MainActivity.currentListPosition != Int.MIN_VALUE) {
             postponeEnterTransition()
             scrollToPosition()
@@ -169,30 +165,23 @@ class BottomNavFrag : Fragment() {
     override fun onSaveInstanceState(outState: Bundle) {
         if (::_binding.isInitialized) {
             outState.putBoolean(RV_ALBUMS_VISIBILITY, binding.rvAlbums.isVisible)
-            //        tracker.onSaveInstanceState(outState)
         }
+
         super.onSaveInstanceState(outState)
     }
 
     override fun onViewStateRestored(savedInstanceState: Bundle?) {
         super.onViewStateRestored(savedInstanceState)
+
         if (savedInstanceState != null) {
-            //    tracker.onRestoreInstanceState(savedInstanceState)
             binding.rvAlbums.isVisible = savedInstanceState.getBoolean(RV_ALBUMS_VISIBILITY)
             binding.rvItems.isVisible = !savedInstanceState.getBoolean(RV_ALBUMS_VISIBILITY)
-            if (tracker.hasSelection()) {
-                activity?.window?.statusBarColor = SurfaceColors.getColorForElevation(
-                    requireContext(), binding.appBarLayout.elevation
-                )
-                actionMode = binding.tbMain.startActionMode(callback)
-                actionMode?.title = tracker.selection.size().toString()
-            }
         }
     }
 
     private fun setUpRecyclerViews() {
         binding.rvItems.apply {
-            this.adapter = GridItemAdapter(this@BottomNavFrag, false) { extras, _ ->
+            adapter = GridItemAdapter(this@BottomNavFrag, false) { extras, _ ->
                 setHoldTransition()
                 prepareTransitions()
                 findNavController().navigate(
@@ -202,7 +191,9 @@ class BottomNavFrag : Fragment() {
                     extras
                 )
             }
+
             val manager = GridLayoutManager(context, resources.getInteger(R.integer.spanCount))
+
             manager.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
                 override fun getSpanSize(position: Int): Int {
                     return when (adapter?.getItemViewType(position)) {
@@ -211,9 +202,11 @@ class BottomNavFrag : Fragment() {
                     }
                 }
             }
+
             layoutManager = manager
             setHasFixedSize(true)
         }
+
         tracker = SelectionTracker.Builder(
             "GritItemFragSelectionId",
             binding.rvItems,
@@ -221,6 +214,7 @@ class BottomNavFrag : Fragment() {
             MyItemDetailsLookup(binding.rvItems),
             StorageStrategy.createLongStorage()
         ).withSelectionPredicate(object : SelectionTracker.SelectionPredicate<Long>() {
+
             override fun canSetStateForKey(key: Long, nextState: Boolean): Boolean =
                 binding.rvItems.findViewHolderForItemId(key) !is GridItemAdapter.HeaderViewHolder &&
                         binding.rvItems.findViewHolderForItemId(key) != null
@@ -233,18 +227,22 @@ class BottomNavFrag : Fragment() {
                         binding.rvItems.findViewHolderForLayoutPosition(position) != null
 
         }).build()
+
         (binding.rvItems.adapter as GridItemAdapter).tracker = tracker
 
         tracker.addObserver(object : SelectionTracker.SelectionObserver<Long>() {
             override fun onSelectionChanged() {
                 super.onSelectionChanged()
+
                 actionMode?.title = tracker.selection.size().toString()
+
                 if (actionMode == null) {
                     activity?.window?.statusBarColor = SurfaceColors.getColorForElevation(
                         requireContext(), binding.appBarLayout.elevation
                     )
                     actionMode = binding.tbMain.startActionMode(callback)
                 }
+
                 if (tracker.selection.size() == 0) {
                     actionMode?.finish()
                 }
@@ -252,7 +250,7 @@ class BottomNavFrag : Fragment() {
         })
 
         binding.rvAlbums.apply {
-            this.adapter = GridAlbumAdapter(this@BottomNavFrag)
+            adapter = GridAlbumAdapter(this@BottomNavFrag)
             setHasFixedSize(true)
             layoutManager =
                 GridLayoutManager(context, resources.getInteger(R.integer.spanCount).div(2))
@@ -262,6 +260,7 @@ class BottomNavFrag : Fragment() {
     private fun setUpSystemBars() {
         val nightModeFlags: Int =
             resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
+
         if (nightModeFlags == Configuration.UI_MODE_NIGHT_NO ||
             nightModeFlags == Configuration.UI_MODE_NIGHT_UNDEFINED
         ) {
@@ -273,31 +272,31 @@ class BottomNavFrag : Fragment() {
     }
 
     private fun setUpNavigationView() {
+        binding.appBarLayout.statusBarForeground = MaterialShapeDrawable
+            .createWithElevationOverlay(binding.appBarLayout.context)
+
         if (binding.bnvMain is BottomNavigationView) {
             binding.bnvMain.viewTreeObserver.addOnGlobalLayoutListener {
+
                 binding.rvItems.updatePadding(bottom = binding.bnvMain.height)
                 binding.rvAlbums.updatePadding(bottom = binding.bnvMain.height)
+
             }
-            binding.appBarLayout.statusBarForeground = MaterialShapeDrawable
-                .createWithElevationOverlay(binding.appBarLayout.context)
         } else {
-            binding.tbMain.setBackgroundColor(SurfaceColors.SURFACE_2.getColor(requireContext()))
             binding.tbMain.viewTreeObserver.addOnGlobalLayoutListener {
                 binding.bnvMain.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                     topMargin = binding.appBarLayout.height
                 }
             }
+
             binding.bnvMain.viewTreeObserver.addOnGlobalLayoutListener {
+
                 binding.rvItems.updatePadding(left = binding.bnvMain.width)
                 binding.rvAlbums.updatePadding(left = binding.bnvMain.width)
+
             }
-            binding.appBarLayout.statusBarForeground = ColorDrawable(
-                SurfaceColors.SURFACE_2.getColor(
-                    requireContext()
-                )
-            )
         }
-        (binding.bnvMain as NavigationBarView).isItemActiveIndicatorEnabled
+
         (binding.bnvMain as NavigationBarView).setOnItemSelectedListener {
             when (it.itemId) {
                 R.id.miPhotos -> {
@@ -310,10 +309,10 @@ class BottomNavFrag : Fragment() {
                     binding.rvItems.isTransitionGroup = true
                     binding.rvAlbums.isVisible = false
                     binding.rvItems.isVisible = true
-                    MainActivity.currentListPosition = 0
                     binding.appBarLayout.setExpanded(true)
                     true
                 }
+
                 R.id.miAlbums -> {
                     TransitionManager.beginDelayedTransition(
                         binding.root,
@@ -329,24 +328,29 @@ class BottomNavFrag : Fragment() {
                     binding.appBarLayout.setExpanded(true)
                     true
                 }
+
                 else -> false
             }
         }
+
         (binding.bnvMain as NavigationBarView).setOnItemReselectedListener {
             when (it.itemId) {
                 R.id.miPhotos -> {
                     binding.rvItems.scrollToPosition(0)
                 }
+
                 R.id.miAlbums -> {
                     binding.rvAlbums.scrollToPosition(0)
                 }
             }
+
             binding.appBarLayout.setExpanded(true)
         }
     }
 
-    private fun setUpToolbarForIntent() {
+    private fun setUpForIntent() {
         binding.tbMain.isTitleCentered = false
+
         binding.tbMain.setNavigationIcon(R.drawable.ic_baseline_arrow_back_24)
         binding.tbMain.setNavigationIconTint(
             resources.getColor(
@@ -354,6 +358,7 @@ class BottomNavFrag : Fragment() {
                 activity?.theme
             )
         )
+
         if (!requireActivity().intent.getBooleanExtra(
                 Intent.EXTRA_ALLOW_MULTIPLE,
                 false
@@ -363,9 +368,11 @@ class BottomNavFrag : Fragment() {
         } else {
             binding.tbMain.title = getString(R.string.select_multiple_items)
         }
+
         binding.bnvMain.visibility = View.GONE
         binding.rvItems.isVisible = false
         binding.rvAlbums.isVisible = true
+
         binding.tbMain.setNavigationOnClickListener {
             requireActivity().setResult(Activity.RESULT_CANCELED)
             requireActivity().finish()
@@ -382,12 +389,12 @@ class BottomNavFrag : Fragment() {
         reenterTransition = MaterialSharedAxis(MaterialSharedAxis.Z, false)
     }
 
-    fun setHoldTransition() {
+    private fun setHoldTransition() {
         exitTransition = Hold()
         reenterTransition = Hold()
     }
 
-    fun prepareTransitions() {
+    private fun prepareTransitions() {
         setExitSharedElementCallback(
             object : SharedElementCallback() {
                 override fun onMapSharedElements(
@@ -428,7 +435,6 @@ class BottomNavFrag : Fragment() {
             ) {
                 binding.rvItems.removeOnLayoutChangeListener(this)
 
-                // val layoutManager = recyclerView.layoutManager
                 val viewAtPosition =
                     binding.rvItems.layoutManager!!.findViewByPosition(MainActivity.currentListPosition)
 
@@ -446,5 +452,9 @@ class BottomNavFrag : Fragment() {
                 }
             }
         })
+    }
+
+    companion object {
+        const val RV_ALBUMS_VISIBILITY: String = "rv_albums_visibility"
     }
 }
