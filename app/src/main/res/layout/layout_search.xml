@@ -14,13 +14,10 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingStart="15dp"
-            android:paddingEnd="15dp"
+            android:paddingStart="@dimen/layout_search_toolbar_padding"
+            android:paddingEnd="@dimen/layout_search_toolbar_padding"
             app:contentInsetStart="0dp"
             app:elevation="4dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
             app:layout_scrollFlags="scroll|enterAlways|snap">
 
             <com.google.android.material.card.MaterialCardView
@@ -28,19 +25,16 @@
                 style="?attr/materialCardViewFilledStyle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardBackgroundColor="?attr/colorSurfaceVariant"
                 app:cardCornerRadius="25dp">
 
                 <SearchView
                     android:id="@+id/searchInput"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Search"
                     android:iconifiedByDefault="false"
                     android:maxLines="1"
                     android:padding="0dp"
                     android:queryBackground="@null"
-                    android:searchHintIcon="@drawable/ic_outline_search"
                     android:searchIcon="@drawable/ic_outline_search"
                     android:textColor="?attr/colorControlNormal" />
             </com.google.android.material.card.MaterialCardView>

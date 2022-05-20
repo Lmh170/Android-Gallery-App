@@ -8,4 +8,4 @@
     android:name="androidx.navigation.fragment.NavHostFragment"
     app:defaultNavHost="true"
     app:navGraph="@navigation/nav_graph_search"
-    tools:layout="@layout/fragment_search_results"/>
+    tools:layout="@layout/layout_search"/>

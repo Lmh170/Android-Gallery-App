@@ -16,12 +16,12 @@ import androidx.recyclerview.selection.SelectionTracker
 import androidx.recyclerview.widget.GridLayoutManager
 import com.example.gallery.R
 import com.example.gallery.adapter.GridItemAdapter
-import com.example.gallery.databinding.FragmentSearchResultsBinding
+import com.example.gallery.databinding.LayoutSearchBinding
 import com.google.android.material.shape.MaterialShapeDrawable
 
 class SearchResultsFrag : Fragment() {
-    private lateinit var _binding: FragmentSearchResultsBinding
-    private val binding: FragmentSearchResultsBinding get() = _binding
+    private lateinit var _binding: LayoutSearchBinding
+    private val binding: LayoutSearchBinding get() = _binding
     private val viewModel: MainViewModel by activityViewModels()
     private var actionMode: ActionMode? = null
     private lateinit var tracker: SelectionTracker<Long>
@@ -31,23 +31,33 @@ class SearchResultsFrag : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         if (::_binding.isInitialized) return binding.root
-        _binding = FragmentSearchResultsBinding.inflate(inflater, container, false)
+        _binding = LayoutSearchBinding.inflate(inflater, container, false)
 
         viewModel.viewPagerItems.observe(viewLifecycleOwner) {
-            (binding.rvSearchItems.adapter as GridItemAdapter).submitList(it)
+            (binding.rvSuggestions.adapter as GridItemAdapter).submitList(it)
 
             binding.searchInput.setQuery(
                 requireActivity().intent.getStringExtra(SearchManager.QUERY),
                 false
             )
         }
-
-        binding.toolbar.setNavigationOnClickListener {
-            requireActivity().finish()
+        binding.toolbar.apply {
+            setNavigationIcon(R.drawable.ic_baseline_arrow_back_24)
+            setNavigationOnClickListener {
+                requireActivity().finish()
+            }
+            setPadding(
+                0,
+                0,
+                resources.getDimensionPixelSize(R.dimen.layout_search_toolbar_padding),
+                0
+            )
         }
-
-        binding.appBarLayout.statusBarForeground = MaterialShapeDrawable
-            .createWithElevationOverlay(binding.appBarLayout.context)
+        binding.appBarLayout.apply {
+            fitsSystemWindows = true
+            statusBarForeground = MaterialShapeDrawable
+                .createWithElevationOverlay(binding.appBarLayout.context)
+        }
 
         binding.searchInput.apply {
             val searchManager = activity?.getSystemService(Context.SEARCH_SERVICE) as SearchManager
@@ -58,7 +68,7 @@ class SearchResultsFrag : Fragment() {
             )
         }
 
-        binding.rvSearchItems.apply {
+        binding.rvSuggestions.apply {
             adapter = GridItemAdapter(this@SearchResultsFrag, false) { extras, _ ->
                 findNavController().navigate(
                     R.id.action_searchResultsFrag_to_viewPagerFrag2,
