@@ -6,6 +6,7 @@ import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.load.DataSource
@@ -39,7 +40,7 @@ class ViewPagerAdapter(val frag: ViewPagerFrag) : ListAdapter<ListItem.MediaItem
         if ((getItem(position) as ListItem.MediaItem).type ==
             MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO
         ) {
-            holderPager.binding.ivPlayButton.visibility = View.VISIBLE
+            holderPager.binding.ivPlayButton.isVisible = true
 
             holderPager.binding.ivPlayButton.setOnClickListener {
                 Intent(frag.context, VideoPlayerActivity::class.java).apply {
@@ -49,6 +50,7 @@ class ViewPagerAdapter(val frag: ViewPagerFrag) : ListAdapter<ListItem.MediaItem
                 }
             }
         } else {
+            holderPager.binding.ivPlayButton.isVisible = false
             holderPager.binding.pagerImage.enableZooming()
         }
 
@@ -100,7 +102,8 @@ class ViewPagerAdapter(val frag: ViewPagerFrag) : ListAdapter<ListItem.MediaItem
 
                     return false
                 }
-            }).into(holderPager.binding.pagerImage)
+            })
+            .into(holderPager.binding.pagerImage)
 
         holderPager.binding.apply {
             pagerImage.setOnClickListener { frag.toggleSystemUI() }

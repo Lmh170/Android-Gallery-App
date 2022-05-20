@@ -21,20 +21,22 @@ sealed class ListItem {
                     oldItem == newItem
             }
         }
-
     }
 
-    data class Header(override val id: Long) : ListItem()
+    data class Header(override val id: Long, val description: String? = null) : ListItem()
 
-    class ListItemDiffCallback : DiffUtil.ItemCallback<ListItem>() {
-        override fun areItemsTheSame(oldItem: ListItem, newItem: ListItem): Boolean =
-            oldItem.id == newItem.id
+    // Todo(optimze)
+    companion object {
+        val ListItemDiffCallback= object : DiffUtil.ItemCallback<ListItem>() {
+            override fun areItemsTheSame(oldItem: ListItem, newItem: ListItem): Boolean =
+                oldItem.id == newItem.id
 
-        override fun areContentsTheSame(oldItem: ListItem, newItem: ListItem): Boolean {
-            return if (oldItem is MediaItem && newItem is MediaItem) {
-                oldItem.uri == newItem.uri
-            } else {
-                oldItem == newItem
+            override fun areContentsTheSame(oldItem: ListItem, newItem: ListItem): Boolean {
+                return if (oldItem is MediaItem && newItem is MediaItem) {
+                    oldItem.uri == newItem.uri
+                } else {
+                    oldItem == newItem
+                }
             }
         }
     }

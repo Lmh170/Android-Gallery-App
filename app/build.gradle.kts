@@ -40,30 +40,35 @@ android {
 
 dependencies {
     implementation("androidx.core:core-ktx:1.7.0")
-    implementation ("androidx.appcompat:appcompat:1.4.1")
-    implementation ("com.google.android.material:material:1.5.0")
-    implementation ("androidx.constraintlayout:constraintlayout:2.1.3")
-    implementation ("androidx.legacy:legacy-support-v4:1.0.0")
-    testImplementation ("junit:junit:4.13.2")
-    androidTestImplementation ("androidx.test.ext:junit:1.1.3")
-    androidTestImplementation ("androidx.test.espresso:espresso-core:3.4.0")
+    implementation("androidx.appcompat:appcompat:1.4.1")
+    implementation("com.google.android.material:material:1.6.0")
+    implementation("androidx.constraintlayout:constraintlayout:2.1.3")
+    testImplementation("junit:junit:4.13.2")
+    androidTestImplementation("androidx.test.ext:junit:1.1.3")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.4.0")
+
+    //ExifInterface
+    implementation("androidx.exifinterface:exifinterface:1.3.3")
 
     // RecyclerView selection
-    implementation ("androidx.recyclerview:recyclerview-selection:1.1.0")
+    implementation("androidx.recyclerview:recyclerview-selection:1.1.0")
 
     // ViewModel
-    implementation ("androidx.lifecycle:lifecycle-livedata-ktx:2.4.1")
-    implementation ("androidx.lifecycle:lifecycle-viewmodel-ktx:2.4.1")
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.4.1")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.4.1")
 
     // Navigation
-    implementation ("androidx.navigation:navigation-fragment-ktx:2.4.2")
-    implementation ("androidx.navigation:navigation-ui-ktx:2.4.2")
-    androidTestImplementation ("androidx.navigation:navigation-testing:2.4.2")
+    implementation("androidx.navigation:navigation-fragment-ktx:2.4.2")
+    implementation("androidx.navigation:navigation-ui-ktx:2.4.2")
+    androidTestImplementation("androidx.navigation:navigation-testing:2.4.2")
 
     // Glide
-    implementation ("com.github.bumptech.glide:glide:4.13.1")
-    kapt ("com.github.bumptech.glide:compiler:4.13.1")
+    implementation("com.github.bumptech.glide:glide:4.13.1")
+    kapt("com.github.bumptech.glide:compiler:4.13.1")
 
     // ExoPlayer
-    implementation ("com.google.android.exoplayer:exoplayer:2.17.1")
+    implementation("com.google.android.exoplayer:exoplayer:2.17.1")
+
+    // FlexboxLayout
+    implementation("com.google.android.flexbox:flexbox:3.0.0")
 }

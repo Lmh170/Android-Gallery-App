@@ -22,4 +22,6 @@
     <string name="show_overflow">Show Overflow</string>
     <string name="hide_overflow">Hide Overflow</string>
     <string name="pause_play">Pause / Play</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

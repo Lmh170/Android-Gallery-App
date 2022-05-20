@@ -6,6 +6,10 @@
         android:icon="@drawable/ic_outline_photo_24"
         android:title="@string/photos" />
     <item
+        android:id="@+id/miSearch"
+        android:icon="@drawable/ic_outline_search"
+        android:title="@android:string/search_go" />
+    <item
         android:id="@+id/miAlbums"
         android:icon="@drawable/ic_outline_auto_stories_24"
         android:title="@string/albums" />

@@ -196,7 +196,7 @@ class AlbumFrag : Fragment() {
                             items.add(selectedItem)
                         }
 
-                        ViewPagerFrag.delete(items, requireContext(), viewModel)
+                        viewModel.deleteItems(items)
                         actionMode?.finish()
                         true
                     }

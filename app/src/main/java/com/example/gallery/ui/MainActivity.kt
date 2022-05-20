@@ -34,24 +34,42 @@ class MainActivity : AppCompatActivity() {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             restoreRequest =
-                registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) {
-                    if (it.resultCode == RESULT_OK) {
+                registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
+                    if (result.resultCode == RESULT_OK) {
                         viewModel.loadBin()
                     }
                 }
         }
 
         val deleteRequest =
-            registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) {
-                if (it.resultCode == RESULT_OK) {
+            registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
+                if (result.resultCode == RESULT_OK) {
                     viewModel.deletePendingItem()
                     viewModel.loadItems()
                 }
             }
 
+        val editRequest =
+            registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
+                if (result.resultCode == RESULT_OK) {
+                    viewModel.editPendingItemDescription()
+                }
+            }
+
         viewModel.permissionNeededForDelete.observe(this) { intentSender ->
-            val intentSenderRequest = IntentSenderRequest.Builder(intentSender).build()
-            deleteRequest.launch(intentSenderRequest)
+            deleteRequest.launch(
+                IntentSenderRequest.Builder(
+                    intentSender
+                ).build()
+            )
+        }
+
+        viewModel.permissionNeededForEdit.observe(this) { intentSender ->
+            editRequest.launch(
+                IntentSenderRequest.Builder(
+                    intentSender
+                ).build()
+            )
         }
 
         checkIntent()
@@ -70,7 +88,15 @@ class MainActivity : AppCompatActivity() {
         if (intent.action == Intent.ACTION_PICK || intent.action == Intent.ACTION_GET_CONTENT) {
             when {
                 intent.data != null -> {
-                    viewModel.loadItems(intent.data!!)
+                    viewModel.loadItems(
+                        intent.data!!, arrayOf(
+                            MediaStore.MediaColumns.BUCKET_DISPLAY_NAME,
+                            MediaStore.MediaColumns._ID,
+                            MediaStore.Files.FileColumns.MEDIA_TYPE,
+                            MediaStore.MediaColumns.DATE_ADDED,
+                            MediaStore.MediaColumns.DATE_MODIFIED
+                        ), null, null
+                    )
                 }
 
                 intent.type?.contains("image", true) == true -> {
@@ -80,10 +106,29 @@ class MainActivity : AppCompatActivity() {
                     if (mimeType != "*" && intent?.type?.contains("/") == false) {
                         viewModel.loadItems(
                             MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                            mimeType
+                            arrayOf(
+                                MediaStore.MediaColumns.BUCKET_DISPLAY_NAME,
+                                MediaStore.MediaColumns._ID,
+                                MediaStore.Files.FileColumns.MEDIA_TYPE,
+                                MediaStore.MediaColumns.DATE_ADDED,
+                                MediaStore.MediaColumns.DATE_MODIFIED
+                            ),
+                            MediaStore.Files.FileColumns.MIME_TYPE + " = " + mimeType,
+                            null
                         )
                     } else {
-                        viewModel.loadItems(MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+                        viewModel.loadItems(
+                            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                            arrayOf(
+                                MediaStore.MediaColumns.BUCKET_DISPLAY_NAME,
+                                MediaStore.MediaColumns._ID,
+                                MediaStore.Files.FileColumns.MEDIA_TYPE,
+                                MediaStore.MediaColumns.DATE_ADDED,
+                                MediaStore.MediaColumns.DATE_MODIFIED
+                            ),
+                            null,
+                            null
+                        )
                     }
                 }
 
@@ -94,13 +139,31 @@ class MainActivity : AppCompatActivity() {
                     if (mimeType != "*" && intent?.type?.contains("/") == false) {
                         viewModel.loadItems(
                             MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
-                            mimeType
+                            arrayOf(
+                                MediaStore.MediaColumns.BUCKET_DISPLAY_NAME,
+                                MediaStore.MediaColumns._ID,
+                                MediaStore.Files.FileColumns.MEDIA_TYPE,
+                                MediaStore.MediaColumns.DATE_ADDED,
+                                MediaStore.MediaColumns.DATE_MODIFIED
+                            ),
+                            MediaStore.Files.FileColumns.MIME_TYPE + " = " + mimeType,
+                            null
                         )
                     } else {
-                        viewModel.loadItems(MediaStore.Video.Media.EXTERNAL_CONTENT_URI)
+                        viewModel.loadItems(
+                            MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
+                            arrayOf(
+                                MediaStore.MediaColumns.BUCKET_DISPLAY_NAME,
+                                MediaStore.MediaColumns._ID,
+                                MediaStore.Files.FileColumns.MEDIA_TYPE,
+                                MediaStore.MediaColumns.DATE_ADDED,
+                                MediaStore.MediaColumns.DATE_MODIFIED
+                            ),
+                            null,
+                            null
+                        )
                     }
                 }
-
                 else -> viewModel.loadItems()
             }
         } else {
@@ -157,13 +220,18 @@ class MainActivity : AppCompatActivity() {
         ContextCompat.checkSelfPermission(
             this,
             Manifest.permission.READ_EXTERNAL_STORAGE
-        ) == PackageManager.PERMISSION_GRANTED
+        ) == PackageManager.PERMISSION_GRANTED &&
+                ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.ACCESS_MEDIA_LOCATION
+                ) == PackageManager.PERMISSION_GRANTED
 
     private fun requestPermission() {
         if (!haveStoragePermission()) {
             val permissions =
                 arrayOf(
-                    Manifest.permission.READ_EXTERNAL_STORAGE
+                    Manifest.permission.READ_EXTERNAL_STORAGE,
+                    Manifest.permission.ACCESS_MEDIA_LOCATION
                 )
             ActivityCompat.requestPermissions(this, permissions, EXTERNAL_STORAGE_REQUEST)
         }

@@ -41,7 +41,7 @@ class GridItemAdapter(
     private val isAlbum: Boolean,
     val onClick: (extras: FragmentNavigator.Extras, position: Int) -> Unit
 ) :
-    ListAdapter<ListItem, ViewHolder>(ListItem.ListItemDiffCallback()) {
+    ListAdapter<ListItem, ViewHolder>(ListItem.ListItemDiffCallback) {
 
     private val enterTransitionStarted: AtomicBoolean = AtomicBoolean()
     var tracker: SelectionTracker<Long>? = null
@@ -63,8 +63,7 @@ class GridItemAdapter(
                 ListGridMediaItemHolderBinding.inflate(
                     LayoutInflater.from(parent.context),
                     parent, false
-                ),
-                viewType
+                )
             )
         }
     }
@@ -204,7 +203,7 @@ class GridItemAdapter(
     override fun getItemId(position: Int): Long =
         getItem(position).id
 
-    inner class MediaItemHolder(val binding: ListGridMediaItemHolderBinding, val type: Int) :
+    inner class MediaItemHolder(val binding: ListGridMediaItemHolderBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
         fun getItemDetails(): ItemDetailsLookup.ItemDetails<Long> =

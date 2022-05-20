@@ -1,6 +1,8 @@
 package com.example.gallery.ui
 
 import android.app.Activity
+import android.app.SearchManager
+import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
 import android.os.Build
@@ -9,6 +11,7 @@ import android.os.Handler
 import android.os.Looper
 import android.view.*
 import androidx.core.app.SharedElementCallback
+import androidx.core.net.toUri
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
@@ -20,13 +23,13 @@ import androidx.recyclerview.selection.SelectionTracker
 import androidx.recyclerview.selection.StorageStrategy
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.transition.TransitionManager
-import com.example.gallery.ListItem
-import com.example.gallery.MyItemDetailsLookup
-import com.example.gallery.MyItemKeyProvider
-import com.example.gallery.R
+import com.example.gallery.*
 import com.example.gallery.adapter.GridAlbumAdapter
 import com.example.gallery.adapter.GridItemAdapter
 import com.example.gallery.databinding.FragmentBottomNavBinding
+import com.google.android.flexbox.FlexWrap
+import com.google.android.flexbox.FlexboxLayout
+import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.elevation.SurfaceColors
 import com.google.android.material.navigation.NavigationBarView
@@ -76,7 +79,7 @@ class BottomNavFrag : Fragment() {
                         } ?: return false
                         items.add(selectedItem as ListItem.MediaItem)
                     }
-                    ViewPagerFrag.delete(items, requireContext(), viewModel)
+                    viewModel.deleteItems(items)
                     actionMode?.finish()
                     true
                 }
@@ -109,6 +112,10 @@ class BottomNavFrag : Fragment() {
             (binding.rvItems.adapter as GridItemAdapter).submitList(items) {
                 if (position == 0) binding.rvItems.scrollToPosition(0)
             }
+        }
+
+        viewModel.suggestedItems.observe(viewLifecycleOwner) { items ->
+            (binding.layoutSearch.rvSuggestions.adapter as GridItemAdapter).submitList(items)
         }
 
         viewModel.albums.observe(viewLifecycleOwner) { items ->
@@ -146,7 +153,7 @@ class BottomNavFrag : Fragment() {
             }
         }
 
-        setUpRecyclerViews()
+        setUpViews()
         setUpNavigationView()
         prepareTransitions()
 
@@ -164,9 +171,10 @@ class BottomNavFrag : Fragment() {
 
     override fun onSaveInstanceState(outState: Bundle) {
         if (::_binding.isInitialized) {
+            outState.putBoolean(RV_ITEMS_VISIBILITY, binding.rvItems.isVisible)
+            outState.putBoolean(SEARCH_VISIBILITY, binding.layoutSearch.root.isVisible)
             outState.putBoolean(RV_ALBUMS_VISIBILITY, binding.rvAlbums.isVisible)
         }
-
         super.onSaveInstanceState(outState)
     }
 
@@ -174,14 +182,16 @@ class BottomNavFrag : Fragment() {
         super.onViewStateRestored(savedInstanceState)
 
         if (savedInstanceState != null) {
+            binding.rvItems.isVisible = savedInstanceState.getBoolean(RV_ITEMS_VISIBILITY)
+            binding.layoutSearch.root.isVisible = savedInstanceState.getBoolean(SEARCH_VISIBILITY)
             binding.rvAlbums.isVisible = savedInstanceState.getBoolean(RV_ALBUMS_VISIBILITY)
-            binding.rvItems.isVisible = !savedInstanceState.getBoolean(RV_ALBUMS_VISIBILITY)
         }
     }
 
-    private fun setUpRecyclerViews() {
+    private fun setUpViews() {
         binding.rvItems.apply {
             adapter = GridItemAdapter(this@BottomNavFrag, false) { extras, _ ->
+                if ((binding.bnvMain as NavigationBarView).selectedItemId != R.id.miPhotos) return@GridItemAdapter
                 setHoldTransition()
                 prepareTransitions()
                 findNavController().navigate(
@@ -226,34 +236,57 @@ class BottomNavFrag : Fragment() {
                 binding.rvItems.findViewHolderForLayoutPosition(position) !is GridItemAdapter.HeaderViewHolder &&
                         binding.rvItems.findViewHolderForLayoutPosition(position) != null
 
-        }).build()
+        }).build().apply {
+            addObserver(object : SelectionTracker.SelectionObserver<Long>() {
+                override fun onSelectionChanged() {
+                    super.onSelectionChanged()
+
+                    actionMode?.title = selection.size().toString()
+
+                    if (actionMode == null) {
+                        activity?.window?.statusBarColor = SurfaceColors.getColorForElevation(
+                            requireContext(), binding.appBarLayout.elevation
+                        )
+                        actionMode = binding.tbMain.startActionMode(callback)
+                    }
+
+                    if (selection.size() == 0) {
+                        actionMode?.finish()
+                    }
+                }
+            })
+        }
 
         (binding.rvItems.adapter as GridItemAdapter).tracker = tracker
 
-        tracker.addObserver(object : SelectionTracker.SelectionObserver<Long>() {
-            override fun onSelectionChanged() {
-                super.onSelectionChanged()
+        val searchManager =
+            activity?.getSystemService(Context.SEARCH_SERVICE) as SearchManager
 
-                actionMode?.title = tracker.selection.size().toString()
-
-                if (actionMode == null) {
-                    activity?.window?.statusBarColor = SurfaceColors.getColorForElevation(
-                        requireContext(), binding.appBarLayout.elevation
-                    )
-                    actionMode = binding.tbMain.startActionMode(callback)
-                }
-
-                if (tracker.selection.size() == 0) {
-                    actionMode?.finish()
-                }
-            }
-        })
+        binding.layoutSearch.searchInput.setSearchableInfo(
+            searchManager.getSearchableInfo(
+                activity?.componentName
+            )
+        )
 
         binding.rvAlbums.apply {
             adapter = GridAlbumAdapter(this@BottomNavFrag)
             setHasFixedSize(true)
             layoutManager =
                 GridLayoutManager(context, resources.getInteger(R.integer.spanCount).div(2))
+        }
+
+        viewModel.viewPagerItems.observe(viewLifecycleOwner) {
+            (binding.layoutSearch.rvSuggestions.adapter as GridItemAdapter).submitList(it.take(10))
+        }
+
+        binding.layoutSearch.rvSuggestions.apply {
+            adapter = GridItemAdapter(this@BottomNavFrag, false){ _, _ ->
+            }.also {
+            }
+
+            layoutManager = FlexboxLayoutManager(context).apply {
+                flexWrap = FlexWrap.WRAP
+            }
         }
     }
 
@@ -292,6 +325,7 @@ class BottomNavFrag : Fragment() {
             binding.bnvMain.viewTreeObserver.addOnGlobalLayoutListener {
 
                 binding.rvItems.updatePadding(left = binding.bnvMain.width)
+                binding.layoutSearch.root.updatePadding(left = binding.bnvMain.width)
                 binding.rvAlbums.updatePadding(left = binding.bnvMain.width)
 
             }
@@ -308,7 +342,25 @@ class BottomNavFrag : Fragment() {
 
                     binding.rvItems.isTransitionGroup = true
                     binding.rvAlbums.isVisible = false
+                    binding.layoutSearch.root.isVisible = false
                     binding.rvItems.isVisible = true
+                    binding.appBarLayout.setExpanded(true)
+                    true
+                }
+
+                R.id.miSearch -> {
+                    TransitionManager.beginDelayedTransition(
+                        binding.root,
+                        MaterialFadeThrough().apply {
+                            excludeTarget(binding.bnvMain, true)
+                        })
+
+                    binding.rvItems.isTransitionGroup = true
+                    actionMode?.finish()
+                    actionMode = null
+                    binding.rvItems.isVisible = false
+                    binding.rvAlbums.isVisible = false
+                    binding.layoutSearch.root.isVisible = true
                     binding.appBarLayout.setExpanded(true)
                     true
                 }
@@ -324,6 +376,7 @@ class BottomNavFrag : Fragment() {
                     actionMode?.finish()
                     actionMode = null
                     binding.rvItems.isVisible = false
+                    binding.layoutSearch.root.isVisible = false
                     binding.rvAlbums.isVisible = true
                     binding.appBarLayout.setExpanded(true)
                     true
@@ -455,6 +508,8 @@ class BottomNavFrag : Fragment() {
     }
 
     companion object {
+        const val RV_ITEMS_VISIBILITY: String = "rv_items_visibility"
+        const val SEARCH_VISIBILITY: String = "search_visibility"
         const val RV_ALBUMS_VISIBILITY: String = "rv_albums_visibility"
     }
 }

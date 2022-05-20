@@ -27,6 +27,8 @@ class BinFrag : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        viewModel.loadBin()
+
         viewModel.bin.observe(viewLifecycleOwner) {
             val position = (binding.rvBin.layoutManager as GridLayoutManager)
                 .findFirstCompletelyVisibleItemPosition()
@@ -37,8 +39,6 @@ class BinFrag : Fragment() {
         }
 
         if (::_binding.isInitialized) return binding.root
-
-        viewModel.loadBin()
 
         _binding = FragmentBinBinding.inflate(inflater)
 

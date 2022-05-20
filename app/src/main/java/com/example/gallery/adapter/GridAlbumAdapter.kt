@@ -28,7 +28,6 @@ class GridAlbumAdapter(private val frag: BottomNavFrag) : ListAdapter<Album,
     }
 
     override fun onBindViewHolder(holder: AlbumHolder, position: Int) {
-
         GlideApp.with(holder.binding.ivThumbnailAlbum)
             .load(getItem(position).mediaItems[0].uri)
             .signature(
