@@ -89,13 +89,16 @@ class MainActivity : AppCompatActivity() {
             when {
                 intent.data != null -> {
                     viewModel.loadItems(
-                        intent.data!!, arrayOf(
+                        intent.data!!,
+                        arrayOf(
                             MediaStore.MediaColumns.BUCKET_DISPLAY_NAME,
                             MediaStore.MediaColumns._ID,
                             MediaStore.Files.FileColumns.MEDIA_TYPE,
                             MediaStore.MediaColumns.DATE_ADDED,
                             MediaStore.MediaColumns.DATE_MODIFIED
-                        ), null, null
+                        ),
+                        null,
+                        null
                     )
                 }
 
@@ -109,7 +112,6 @@ class MainActivity : AppCompatActivity() {
                             arrayOf(
                                 MediaStore.MediaColumns.BUCKET_DISPLAY_NAME,
                                 MediaStore.MediaColumns._ID,
-                                MediaStore.Files.FileColumns.MEDIA_TYPE,
                                 MediaStore.MediaColumns.DATE_ADDED,
                                 MediaStore.MediaColumns.DATE_MODIFIED
                             ),
@@ -122,7 +124,6 @@ class MainActivity : AppCompatActivity() {
                             arrayOf(
                                 MediaStore.MediaColumns.BUCKET_DISPLAY_NAME,
                                 MediaStore.MediaColumns._ID,
-                                MediaStore.Files.FileColumns.MEDIA_TYPE,
                                 MediaStore.MediaColumns.DATE_ADDED,
                                 MediaStore.MediaColumns.DATE_MODIFIED
                             ),
@@ -142,7 +143,6 @@ class MainActivity : AppCompatActivity() {
                             arrayOf(
                                 MediaStore.MediaColumns.BUCKET_DISPLAY_NAME,
                                 MediaStore.MediaColumns._ID,
-                                MediaStore.Files.FileColumns.MEDIA_TYPE,
                                 MediaStore.MediaColumns.DATE_ADDED,
                                 MediaStore.MediaColumns.DATE_MODIFIED
                             ),
@@ -155,7 +155,6 @@ class MainActivity : AppCompatActivity() {
                             arrayOf(
                                 MediaStore.MediaColumns.BUCKET_DISPLAY_NAME,
                                 MediaStore.MediaColumns._ID,
-                                MediaStore.Files.FileColumns.MEDIA_TYPE,
                                 MediaStore.MediaColumns.DATE_ADDED,
                                 MediaStore.MediaColumns.DATE_MODIFIED
                             ),

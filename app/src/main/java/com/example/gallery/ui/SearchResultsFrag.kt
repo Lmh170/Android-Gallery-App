@@ -9,6 +9,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
@@ -46,11 +47,8 @@ class SearchResultsFrag : Fragment() {
             setNavigationOnClickListener {
                 requireActivity().finish()
             }
-            setPadding(
-                0,
-                0,
-                resources.getDimensionPixelSize(R.dimen.layout_search_toolbar_padding),
-                0
+            updatePadding(
+                right = resources.getDimensionPixelSize(R.dimen.layout_search_toolbar_padding)
             )
         }
         binding.appBarLayout.apply {

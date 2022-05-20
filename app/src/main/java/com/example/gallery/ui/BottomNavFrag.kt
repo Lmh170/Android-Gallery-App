@@ -11,7 +11,6 @@ import android.os.Handler
 import android.os.Looper
 import android.view.*
 import androidx.core.app.SharedElementCallback
-import androidx.core.net.toUri
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
@@ -23,13 +22,13 @@ import androidx.recyclerview.selection.SelectionTracker
 import androidx.recyclerview.selection.StorageStrategy
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.transition.TransitionManager
-import com.example.gallery.*
+import com.example.gallery.ListItem
+import com.example.gallery.MyItemDetailsLookup
+import com.example.gallery.MyItemKeyProvider
+import com.example.gallery.R
 import com.example.gallery.adapter.GridAlbumAdapter
 import com.example.gallery.adapter.GridItemAdapter
 import com.example.gallery.databinding.FragmentBottomNavBinding
-import com.google.android.flexbox.FlexWrap
-import com.google.android.flexbox.FlexboxLayout
-import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.elevation.SurfaceColors
 import com.google.android.material.navigation.NavigationBarView
@@ -280,13 +279,11 @@ class BottomNavFrag : Fragment() {
         }
 
         binding.layoutSearch.rvSuggestions.apply {
-            adapter = GridItemAdapter(this@BottomNavFrag, false){ _, _ ->
-            }.also {
+            adapter = GridItemAdapter(this@BottomNavFrag, false) { _, _ ->
             }
 
-            layoutManager = FlexboxLayoutManager(context).apply {
-                flexWrap = FlexWrap.WRAP
-            }
+            layoutManager =
+                GridLayoutManager(context, resources.getInteger(R.integer.spanCount))
         }
     }
 
