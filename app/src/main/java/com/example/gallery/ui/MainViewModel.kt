@@ -6,14 +6,12 @@ import android.content.ContentResolver
 import android.content.ContentUris
 import android.content.IntentSender
 import android.database.ContentObserver
-import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.provider.MediaStore
-import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.exifinterface.media.ExifInterface
 import androidx.lifecycle.AndroidViewModel
@@ -22,6 +20,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.example.gallery.Album
 import com.example.gallery.ListItem
+import com.example.gallery.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -70,6 +69,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             val calMin = Calendar.getInstance().apply {
                 set(Calendar.YEAR, get(Calendar.YEAR) - 1)
                 set(Calendar.HOUR_OF_DAY, 0)
+                set(Calendar.DAY_OF_MONTH, get(Calendar.DAY_OF_MONTH) - 7)
             }
             val calMax = Calendar.getInstance().apply {
                 set(Calendar.YEAR, get(Calendar.YEAR) - 1)
@@ -77,7 +77,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             }
 
             _suggestedItems.postValue(
-                queryItems(
+                (queryItems(
                     MediaStore.Files.getContentUri(MediaStore.VOLUME_EXTERNAL),
                     arrayOf(
                         MediaStore.MediaColumns.BUCKET_DISPLAY_NAME,
@@ -93,7 +93,15 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                         calMin.timeInMillis.div(1000).toString(),
                         calMax.timeInMillis.div(1000).toString()
                     )
-                )
+                ) as MutableList<ListItem>).also {
+                    it.add(
+                        0,
+                        ListItem.Header(
+                            0,
+                            getApplication<Application>().resources.getString(R.string.week_last_year)
+                        )
+                    )
+                }
             )
 
             if (contentObserver == null) {

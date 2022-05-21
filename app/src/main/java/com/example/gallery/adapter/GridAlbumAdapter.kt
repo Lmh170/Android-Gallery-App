@@ -57,10 +57,7 @@ class GridAlbumAdapter(private val frag: BottomNavFrag) : ListAdapter<Album,
                 frag.setSharedAxisTransition()
 
                 frag.findNavController().navigate(
-                    R.id.action_bottomNavFrag_to_albumDetailFrag,
-                    null,
-                    null,
-                    null
+                    R.id.action_bottomNavFrag_to_albumDetailFrag
                 )
             }
         }

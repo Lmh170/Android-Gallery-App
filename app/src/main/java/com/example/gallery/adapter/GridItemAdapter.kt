@@ -86,7 +86,6 @@ class GridItemAdapter(
                     shapeAppearanceModel = ShapeAppearanceModel().withCornerSize(0f)
                     animate().scaleX(1f).scaleY(1f).duration = 100
                 }
-
             }
 
             if ((getItem(position) as ListItem.MediaItem).type ==
@@ -187,10 +186,15 @@ class GridItemAdapter(
                 )
             }
         } else if (holder is HeaderViewHolder) {
-            holder.binding.tvDate.text =
-                SimpleDateFormat.getDateInstance(SimpleDateFormat.FULL).format(
-                    Date(getItemId(position))
-                )
+            if ((getItem(position) as ListItem.Header).description.isNullOrEmpty()) {
+                holder.binding.tvDate.text =
+                    SimpleDateFormat.getDateInstance(SimpleDateFormat.FULL).format(
+                        Date(getItemId(position))
+                    )
+            } else {
+                holder.binding.tvDate.text = (getItem(position) as ListItem.Header).description
+            }
+
         }
     }
 

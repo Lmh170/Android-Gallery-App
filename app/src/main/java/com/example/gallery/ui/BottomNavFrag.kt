@@ -282,8 +282,18 @@ class BottomNavFrag : Fragment() {
             adapter = GridItemAdapter(this@BottomNavFrag, false) { _, _ ->
             }
 
-            layoutManager =
-                GridLayoutManager(context, resources.getInteger(R.integer.spanCount))
+            val manager = GridLayoutManager(context, resources.getInteger(R.integer.spanCount))
+
+            manager.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
+                override fun getSpanSize(position: Int): Int {
+                    return when (adapter?.getItemViewType(position)) {
+                        GridItemAdapter.ITEM_VIEW_TYPE_HEADER -> resources.getInteger(R.integer.spanCount)
+                        else -> 1
+                    }
+                }
+            }
+
+            layoutManager = manager
         }
     }
 
@@ -309,6 +319,7 @@ class BottomNavFrag : Fragment() {
             binding.bnvMain.viewTreeObserver.addOnGlobalLayoutListener {
 
                 binding.rvItems.updatePadding(bottom = binding.bnvMain.height)
+                binding.layoutSearch.root.updatePadding(bottom = binding.bnvMain.height + binding.tbMain.height)
                 binding.rvAlbums.updatePadding(bottom = binding.bnvMain.height)
 
             }
@@ -322,7 +333,7 @@ class BottomNavFrag : Fragment() {
             binding.bnvMain.viewTreeObserver.addOnGlobalLayoutListener {
 
                 binding.rvItems.updatePadding(left = binding.bnvMain.width)
-                binding.layoutSearch.root.updatePadding(left = binding.bnvMain.width)
+                binding.layoutSearch.root.updatePadding(left = binding.bnvMain.width, bottom = binding.tbMain.height)
                 binding.rvAlbums.updatePadding(left = binding.bnvMain.width)
 
             }
