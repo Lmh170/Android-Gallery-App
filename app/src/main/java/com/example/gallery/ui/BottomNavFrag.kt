@@ -113,10 +113,6 @@ class BottomNavFrag : Fragment() {
             }
         }
 
-        viewModel.suggestedItems.observe(viewLifecycleOwner) { items ->
-            (binding.layoutSearch.rvSuggestions.adapter as GridItemAdapter).submitList(items)
-        }
-
         viewModel.albums.observe(viewLifecycleOwner) { items ->
             val position = (binding.rvAlbums.layoutManager as GridLayoutManager)
                 .findFirstCompletelyVisibleItemPosition()
@@ -171,7 +167,6 @@ class BottomNavFrag : Fragment() {
     override fun onSaveInstanceState(outState: Bundle) {
         if (::_binding.isInitialized) {
             outState.putBoolean(RV_ITEMS_VISIBILITY, binding.rvItems.isVisible)
-            outState.putBoolean(SEARCH_VISIBILITY, binding.layoutSearch.root.isVisible)
             outState.putBoolean(RV_ALBUMS_VISIBILITY, binding.rvAlbums.isVisible)
         }
         super.onSaveInstanceState(outState)
@@ -182,7 +177,6 @@ class BottomNavFrag : Fragment() {
 
         if (savedInstanceState != null) {
             binding.rvItems.isVisible = savedInstanceState.getBoolean(RV_ITEMS_VISIBILITY)
-            binding.layoutSearch.root.isVisible = savedInstanceState.getBoolean(SEARCH_VISIBILITY)
             binding.rvAlbums.isVisible = savedInstanceState.getBoolean(RV_ALBUMS_VISIBILITY)
         }
     }
@@ -207,6 +201,7 @@ class BottomNavFrag : Fragment() {
                 override fun getSpanSize(position: Int): Int {
                     return when (adapter?.getItemViewType(position)) {
                         GridItemAdapter.ITEM_VIEW_TYPE_HEADER -> resources.getInteger(R.integer.spanCount)
+                        GridItemAdapter.ITEM_VIEW_TYPE_SEARCH -> resources.getInteger(R.integer.spanCount)
                         else -> 1
                     }
                 }
@@ -225,15 +220,13 @@ class BottomNavFrag : Fragment() {
         ).withSelectionPredicate(object : SelectionTracker.SelectionPredicate<Long>() {
 
             override fun canSetStateForKey(key: Long, nextState: Boolean): Boolean =
-                binding.rvItems.findViewHolderForItemId(key) !is GridItemAdapter.HeaderViewHolder &&
-                        binding.rvItems.findViewHolderForItemId(key) != null
+                binding.rvItems.findViewHolderForItemId(key) is GridItemAdapter.MediaItemHolder
 
             override fun canSelectMultiple(): Boolean =
                 true
 
             override fun canSetStateAtPosition(position: Int, nextState: Boolean): Boolean =
-                binding.rvItems.findViewHolderForLayoutPosition(position) !is GridItemAdapter.HeaderViewHolder &&
-                        binding.rvItems.findViewHolderForLayoutPosition(position) != null
+                binding.rvItems.findViewHolderForLayoutPosition(position) is GridItemAdapter.MediaItemHolder
 
         }).build().apply {
             addObserver(object : SelectionTracker.SelectionObserver<Long>() {
@@ -258,42 +251,11 @@ class BottomNavFrag : Fragment() {
 
         (binding.rvItems.adapter as GridItemAdapter).tracker = tracker
 
-        val searchManager =
-            activity?.getSystemService(Context.SEARCH_SERVICE) as SearchManager
-
-        binding.layoutSearch.searchInput.setSearchableInfo(
-            searchManager.getSearchableInfo(
-                activity?.componentName
-            )
-        )
-
         binding.rvAlbums.apply {
             adapter = GridAlbumAdapter(this@BottomNavFrag)
             setHasFixedSize(true)
             layoutManager =
                 GridLayoutManager(context, resources.getInteger(R.integer.spanCount).div(2))
-        }
-
-        viewModel.viewPagerItems.observe(viewLifecycleOwner) {
-            (binding.layoutSearch.rvSuggestions.adapter as GridItemAdapter).submitList(it.take(10))
-        }
-
-        binding.layoutSearch.rvSuggestions.apply {
-            adapter = GridItemAdapter(this@BottomNavFrag, false) { _, _ ->
-            }
-
-            val manager = GridLayoutManager(context, resources.getInteger(R.integer.spanCount))
-
-            manager.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
-                override fun getSpanSize(position: Int): Int {
-                    return when (adapter?.getItemViewType(position)) {
-                        GridItemAdapter.ITEM_VIEW_TYPE_HEADER -> resources.getInteger(R.integer.spanCount)
-                        else -> 1
-                    }
-                }
-            }
-
-            layoutManager = manager
         }
     }
 
@@ -319,7 +281,6 @@ class BottomNavFrag : Fragment() {
             binding.bnvMain.viewTreeObserver.addOnGlobalLayoutListener {
 
                 binding.rvItems.updatePadding(bottom = binding.bnvMain.height)
-                binding.layoutSearch.root.updatePadding(bottom = binding.bnvMain.height + binding.tbMain.height)
                 binding.rvAlbums.updatePadding(bottom = binding.bnvMain.height)
 
             }
@@ -333,7 +294,6 @@ class BottomNavFrag : Fragment() {
             binding.bnvMain.viewTreeObserver.addOnGlobalLayoutListener {
 
                 binding.rvItems.updatePadding(left = binding.bnvMain.width)
-                binding.layoutSearch.root.updatePadding(left = binding.bnvMain.width, bottom = binding.tbMain.height)
                 binding.rvAlbums.updatePadding(left = binding.bnvMain.width)
 
             }
@@ -350,25 +310,7 @@ class BottomNavFrag : Fragment() {
 
                     binding.rvItems.isTransitionGroup = true
                     binding.rvAlbums.isVisible = false
-                    binding.layoutSearch.root.isVisible = false
                     binding.rvItems.isVisible = true
-                    binding.appBarLayout.setExpanded(true)
-                    true
-                }
-
-                R.id.miSearch -> {
-                    TransitionManager.beginDelayedTransition(
-                        binding.root,
-                        MaterialFadeThrough().apply {
-                            excludeTarget(binding.bnvMain, true)
-                        })
-
-                    binding.rvItems.isTransitionGroup = true
-                    actionMode?.finish()
-                    actionMode = null
-                    binding.rvItems.isVisible = false
-                    binding.rvAlbums.isVisible = false
-                    binding.layoutSearch.root.isVisible = true
                     binding.appBarLayout.setExpanded(true)
                     true
                 }
@@ -384,7 +326,6 @@ class BottomNavFrag : Fragment() {
                     actionMode?.finish()
                     actionMode = null
                     binding.rvItems.isVisible = false
-                    binding.layoutSearch.root.isVisible = false
                     binding.rvAlbums.isVisible = true
                     binding.appBarLayout.setExpanded(true)
                     true
@@ -517,7 +458,6 @@ class BottomNavFrag : Fragment() {
 
     companion object {
         const val RV_ITEMS_VISIBILITY: String = "rv_items_visibility"
-        const val SEARCH_VISIBILITY: String = "search_visibility"
         const val RV_ALBUMS_VISIBILITY: String = "rv_albums_visibility"
     }
 }

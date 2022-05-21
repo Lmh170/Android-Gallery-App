@@ -30,11 +30,6 @@
         tools:context=".ui.GridItemFrag"
         app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
-    <include
-        android:id="@+id/layoutSearch"
-        layout="@layout/layout_search"
-        android:visibility="gone" />
-
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvAlbums"
         android:layout_width="match_parent"

@@ -1,12 +1,15 @@
 package com.example.gallery.adapter
 
 import android.app.Activity
+import android.app.SearchManager
+import android.content.Context
 import android.content.Intent
 import android.graphics.drawable.Drawable
 import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.FragmentNavigator
 import androidx.navigation.fragment.FragmentNavigatorExtras
@@ -24,6 +27,7 @@ import com.bumptech.glide.signature.MediaStoreSignature
 import com.example.gallery.GlideApp
 import com.example.gallery.ListItem
 import com.example.gallery.R
+import com.example.gallery.databinding.LayoutSearchBinding
 import com.example.gallery.databinding.ListGridHeaderBinding
 import com.example.gallery.databinding.ListGridMediaItemHolderBinding
 import com.example.gallery.ui.BinFrag
@@ -55,6 +59,13 @@ class GridItemAdapter(
         return when (viewType) {
             ITEM_VIEW_TYPE_HEADER -> HeaderViewHolder(
                 ListGridHeaderBinding.inflate(
+                    LayoutInflater.from(parent.context),
+                    parent, false
+                )
+            )
+
+            ITEM_VIEW_TYPE_SEARCH -> SearchViewHolder(
+                LayoutSearchBinding.inflate(
                     LayoutInflater.from(parent.context),
                     parent, false
                 )
@@ -194,7 +205,15 @@ class GridItemAdapter(
             } else {
                 holder.binding.tvDate.text = (getItem(position) as ListItem.Header).description
             }
+        } else if (holder is SearchViewHolder) {
+            val searchManager =
+                frag.activity?.getSystemService(Context.SEARCH_SERVICE) as SearchManager
 
+            holder.binding.searchInput.setSearchableInfo(
+                searchManager.getSearchableInfo(
+                    frag.activity?.componentName
+                )
+            )
         }
     }
 
@@ -202,6 +221,7 @@ class GridItemAdapter(
         return when (getItem(position)) {
             is ListItem.MediaItem -> (getItem(position) as ListItem.MediaItem).type
             is ListItem.Header -> ITEM_VIEW_TYPE_HEADER
+            is ListItem.Search -> ITEM_VIEW_TYPE_SEARCH
             else -> throw IllegalStateException("Unknown ViewType")
         }
     }
@@ -222,20 +242,14 @@ class GridItemAdapter(
             }
     }
 
-    inner class HeaderViewHolder(val binding: ListGridHeaderBinding) :
-        RecyclerView.ViewHolder(binding.root) {
-
-        fun getItemDetails(): ItemDetailsLookup.ItemDetails<Long> =
-            object : ItemDetailsLookup.ItemDetails<Long>() {
-                override fun getPosition(): Int =
-                    layoutPosition
-
-                override fun getSelectionKey(): Long =
-                    getItem(layoutPosition).id
-            }
-    }
-
     companion object {
         const val ITEM_VIEW_TYPE_HEADER: Int = 8123
+        const val ITEM_VIEW_TYPE_SEARCH: Int = 149003
     }
 }
+
+class HeaderViewHolder(val binding: ListGridHeaderBinding) :
+    RecyclerView.ViewHolder(binding.root)
+
+class SearchViewHolder(val binding: LayoutSearchBinding) :
+    RecyclerView.ViewHolder(binding.root)

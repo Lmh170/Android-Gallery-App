@@ -20,7 +20,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.example.gallery.Album
 import com.example.gallery.ListItem
-import com.example.gallery.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -36,9 +35,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _viewPagerItems = MutableLiveData<List<ListItem.MediaItem>>()
     val viewPagerItems: LiveData<List<ListItem.MediaItem>> get() = _viewPagerItems
-
-    private val _suggestedItems = MutableLiveData<List<ListItem>>()
-    val suggestedItems: LiveData<List<ListItem>> get() = _suggestedItems
 
     private val _albums = MutableLiveData<List<Album>>()
     val albums: LiveData<List<Album>> get() = _albums
@@ -65,44 +61,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             _recyclerViewItems.postValue(imageList)
             _viewPagerItems.postValue(viewPagerImageList)
             _albums.postValue(getAlbums(viewPagerImageList))
-
-            val calMin = Calendar.getInstance().apply {
-                set(Calendar.YEAR, get(Calendar.YEAR) - 1)
-                set(Calendar.HOUR_OF_DAY, 0)
-                set(Calendar.DAY_OF_MONTH, get(Calendar.DAY_OF_MONTH) - 7)
-            }
-            val calMax = Calendar.getInstance().apply {
-                set(Calendar.YEAR, get(Calendar.YEAR) - 1)
-                set(Calendar.HOUR_OF_DAY, 24)
-            }
-
-            _suggestedItems.postValue(
-                (queryItems(
-                    MediaStore.Files.getContentUri(MediaStore.VOLUME_EXTERNAL),
-                    arrayOf(
-                        MediaStore.MediaColumns.BUCKET_DISPLAY_NAME,
-                        MediaStore.MediaColumns._ID,
-                        MediaStore.Files.FileColumns.MEDIA_TYPE,
-                        MediaStore.MediaColumns.DATE_ADDED,
-                        MediaStore.MediaColumns.DATE_MODIFIED
-                    ),
-                    "${MediaStore.MediaColumns.DATE_ADDED} > ?"
-                            + " AND "
-                            + "${MediaStore.MediaColumns.DATE_ADDED} < ?",
-                    arrayOf(
-                        calMin.timeInMillis.div(1000).toString(),
-                        calMax.timeInMillis.div(1000).toString()
-                    )
-                ) as MutableList<ListItem>).also {
-                    it.add(
-                        0,
-                        ListItem.Header(
-                            0,
-                            getApplication<Application>().resources.getString(R.string.week_last_year)
-                        )
-                    )
-                }
-            )
 
             if (contentObserver == null) {
                 contentObserver = getApplication<Application>().contentResolver.registerObserver(
@@ -131,8 +89,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private suspend fun queryItems(): List<ListItem> {
         val images = mutableListOf<ListItem>()
-        var listPosition = -1 // because the first item has the index 0
-        var viewPagerPosition = -1 // because the first item has the index 0
+
+        images += ListItem.Search()
+
+        var listPosition = 0
+        var viewPagerPosition = -1 //
 
         withContext(Dispatchers.IO) {
             val projection = arrayOf(

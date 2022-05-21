@@ -25,8 +25,11 @@ sealed class ListItem {
 
     data class Header(override val id: Long, val description: String? = null) : ListItem()
 
-    // Todo(optimze)
+    data class Search(override val id: Long = searchID) : ListItem()
+
+    // Todo(optimize)
     companion object {
+        val searchID: Long = 0x12332
         val ListItemDiffCallback= object : DiffUtil.ItemCallback<ListItem>() {
             override fun areItemsTheSame(oldItem: ListItem, newItem: ListItem): Boolean =
                 oldItem.id == newItem.id
