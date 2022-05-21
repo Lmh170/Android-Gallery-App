@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.signature.MediaStoreSignature
 import com.example.gallery.Album
 import com.example.gallery.GlideApp
@@ -36,6 +37,8 @@ class GridAlbumAdapter(private val frag: BottomNavFrag) : ListAdapter<Album,
                         .mediaItems[0].dateModified, 0
                 )
             )
+            .error(R.drawable.ic_baseline_image_not_supported_24)
+            .diskCacheStrategy(DiskCacheStrategy.ALL)
             .into(holder.binding.ivThumbnailAlbum)
 
         holder.binding.tvAlbumName.text = getItem(position).name

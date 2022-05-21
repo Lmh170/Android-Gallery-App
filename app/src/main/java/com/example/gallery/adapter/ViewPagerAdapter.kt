@@ -4,18 +4,19 @@ import android.content.Intent
 import android.graphics.drawable.Drawable
 import android.provider.MediaStore
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.load.DataSource
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
 import com.bumptech.glide.signature.MediaStoreSignature
 import com.example.gallery.GlideApp
 import com.example.gallery.ListItem
+import com.example.gallery.R
 import com.example.gallery.databinding.ViewPagerItemHolderBinding
 import com.example.gallery.ui.MainActivity
 import com.example.gallery.ui.VideoPlayerActivity
@@ -59,6 +60,7 @@ class ViewPagerAdapter(val frag: ViewPagerFrag) : ListAdapter<ListItem.MediaItem
 
         GlideApp.with(holderPager.binding.pagerImage)
             .load(getItem(position).uri)
+            .error(R.drawable.ic_baseline_image_not_supported_24)
             .signature(
                 MediaStoreSignature(
                     null, getItem(position)
@@ -73,15 +75,15 @@ class ViewPagerAdapter(val frag: ViewPagerFrag) : ListAdapter<ListItem.MediaItem
                     isFirstResource: Boolean
                 ): Boolean {
                     if (MainActivity.currentViewPagerPosition != holderPager.layoutPosition) {
-                        return true
+                        return false
                     }
                     if (enterTransitionStarted.getAndSet(true)) {
-                        return true
+                        return false
                     }
 
                     frag.startPostponedEnterTransition()
 
-                    return true
+                    return false
                 }
 
                 override fun onResourceReady(
@@ -103,6 +105,7 @@ class ViewPagerAdapter(val frag: ViewPagerFrag) : ListAdapter<ListItem.MediaItem
                     return false
                 }
             })
+            .diskCacheStrategy(DiskCacheStrategy.ALL)
             .into(holderPager.binding.pagerImage)
 
         holderPager.binding.apply {

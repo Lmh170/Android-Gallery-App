@@ -48,7 +48,7 @@ class SearchResultsFrag : Fragment() {
                 requireActivity().finish()
             }
             updatePadding(
-                right = resources.getDimensionPixelSize(R.dimen.layout_search_toolbar_padding)
+                left = 0
             )
         }
         binding.appBarLayout.apply {

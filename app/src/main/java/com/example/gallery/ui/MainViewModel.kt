@@ -23,7 +23,6 @@ import androidx.lifecycle.viewModelScope
 import com.example.gallery.Album
 import com.example.gallery.ListItem
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.*
@@ -73,7 +72,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 set(Calendar.HOUR_OF_DAY, 0)
             }
             val calMax = Calendar.getInstance().apply {
-                set(Calendar.YEAR, get(Calendar.YEAR), -1)
+                set(Calendar.YEAR, get(Calendar.YEAR) - 1)
                 set(Calendar.HOUR_OF_DAY, 24)
             }
 
@@ -242,7 +241,13 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                             MediaStore.Video.Media.EXTERNAL_CONTENT_URI, id
                         )
                     } else {
-                        if (cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.MEDIA_TYPE)) == MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE) {
+                        if (cursor.getInt(
+                                cursor.getColumnIndexOrThrow(
+                                    MediaStore.Files.FileColumns.MEDIA_TYPE
+                                )
+                            )
+                            == MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE
+                        ) {
                             ContentUris.withAppendedId(
                                 MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id
                             )
@@ -355,9 +360,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             val location = getImageLocation(item)
             info += location[0].toString()
             info += location[1].toString()
-        } else {
-            val location = extractVideoLocationInfo(item.uri)
-            info += location.toString()
         }
 
         return info
@@ -371,18 +373,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
         return doubleArrayOf(0.0, 0.0)
-    }
-
-    private fun extractVideoLocationInfo(videoUri: Uri): String? {
-        val retriever = MediaMetadataRetriever()
-        try {
-            retriever.setDataSource(getApplication(), videoUri)
-        } catch (e: RuntimeException) {
-            Toast.makeText(getApplication(), "Could not get Video Location", Toast.LENGTH_SHORT)
-                .show()
-        }
-        // Metadata should use a standardized format.
-        return retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_LOCATION)
     }
 
     private fun performEditDescription(item: ListItem.MediaItem, description: String) {
