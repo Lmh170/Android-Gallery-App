@@ -45,7 +45,7 @@ class ViewPagerAdapter(val frag: ViewPagerFrag) : ListAdapter<ListItem.MediaItem
 
             holderPager.binding.ivPlayButton.setOnClickListener {
                 Intent(frag.context, VideoPlayerActivity::class.java).apply {
-                    data = (getItem(position) as ListItem.MediaItem).uri
+                    data = (getItem(holderPager.layoutPosition) as ListItem.MediaItem).uri
                 }.also {
                     frag.startActivity(it)
                 }
@@ -55,7 +55,7 @@ class ViewPagerAdapter(val frag: ViewPagerFrag) : ListAdapter<ListItem.MediaItem
             holderPager.binding.pagerImage.enableZooming()
         }
 
-        holderPager.binding.pagerImage.transitionName = getItem(position).id.toString()
+        holderPager.binding.pagerImage.transitionName = getItem(holderPager.layoutPosition).id.toString()
         holderPager.binding.pagerImage.gFrag = frag
 
         GlideApp.with(holderPager.binding.pagerImage)
@@ -63,8 +63,9 @@ class ViewPagerAdapter(val frag: ViewPagerFrag) : ListAdapter<ListItem.MediaItem
             .error(R.drawable.ic_baseline_image_not_supported_24)
             .signature(
                 MediaStoreSignature(
-                    null, getItem(position)
-                        .dateModified, 0
+                    null,
+                    getItem(position).dateModified,
+                    0
                 )
             )
             .listener(object : RequestListener<Drawable> {

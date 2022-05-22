@@ -80,10 +80,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     ) {
         viewModelScope.launch {
             val imageList = queryItems(source, projection, selection, selectionArgs)
-            val viewPagerImageList = extractItems(imageList)
             _recyclerViewItems.postValue(imageList)
-            _viewPagerItems.postValue(viewPagerImageList)
-            _albums.postValue(getAlbums(viewPagerImageList))
+            _viewPagerItems.postValue(imageList)
+            _albums.postValue(getAlbums(imageList))
         }
     }
 
@@ -104,10 +103,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 MediaStore.MediaColumns.DATE_MODIFIED
             )
 
-            val selection = (MediaStore.Files.FileColumns.MEDIA_TYPE + "="
+            val selection = (MediaStore.Files.FileColumns.MEDIA_TYPE
+                    + "="
                     + MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE
                     + " OR "
-                    + MediaStore.Files.FileColumns.MEDIA_TYPE + "="
+                    + MediaStore.Files.FileColumns.MEDIA_TYPE
+                    + "="
                     + MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO)
 
             val sortOrder = "${MediaStore.MediaColumns.DATE_ADDED} DESC"
@@ -179,8 +180,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         projection: Array<String>,
         selection: String?,
         selectionArgs: Array<String>?
-    ): List<ListItem> {
-        val images = mutableListOf<ListItem>()
+    ): List<ListItem.MediaItem> {
+        val images = mutableListOf<ListItem.MediaItem>()
 
         withContext(Dispatchers.IO) {
             val sortOrder = "${MediaStore.MediaColumns.DATE_ADDED} DESC"
@@ -220,10 +221,17 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                             ContentUris.withAppendedId(
                                 MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id
                             )
-                        } else {
+                        } else if (cursor.getInt(
+                                cursor.getColumnIndexOrThrow(
+                                    MediaStore.Files.FileColumns.MEDIA_TYPE
+                                )
+                            )
+                            == MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO) {
                             ContentUris.withAppendedId(
                                 MediaStore.Video.Media.EXTERNAL_CONTENT_URI, id
                             )
+                        } else {
+                            throw Exception("Unknown type")
                         }
                     }
 
@@ -232,7 +240,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     } else if (source == MediaStore.Video.Media.EXTERNAL_CONTENT_URI) {
                         MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO
                     } else {
-                        if (cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.MEDIA_TYPE)) == MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE) {
+                        if (cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.MEDIA_TYPE))
+                            == MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE) {
                             MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE
                         } else {
                             MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO
@@ -410,7 +419,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 _permissionNeededForDelete.postValue(pendingIntent.intentSender)
                 return@withContext
             }
-
             try {
                 getApplication<Application>().contentResolver.delete(
                     image.uri,
@@ -452,18 +460,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     pendingItems = null // Items will be deleted with request
                 } else {
                     items.forEach {
-                        val uri = if (it.type == MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE) {
-                            ContentUris.withAppendedId(
-                                MediaStore.Images.Media.EXTERNAL_CONTENT_URI, it.id
-                            )
-                        } else {
-                            ContentUris.withAppendedId(
-                                MediaStore.Video.Media.EXTERNAL_CONTENT_URI, it.id
-                            )
-                        }
-
                         getApplication<Application>().contentResolver.delete(
-                            uri,
+                            it.uri,
                             "${MediaStore.MediaColumns._ID} = ?",
                             arrayOf(it.id.toString())
                         )
@@ -568,7 +566,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 /**
  * Convenience extension method to register a [ContentObserver] given a lambda.
  */
-private fun ContentResolver.registerObserver(
+fun ContentResolver.registerObserver(
     uri: Uri,
     observer: (selfChange: Boolean) -> Unit
 ): ContentObserver {

@@ -85,7 +85,6 @@ class GridItemAdapter(
             holder.binding.image.isActivated = tracker?.isSelected(getItemId(position)) == true
 
             if (holder.binding.image.isActivated) {
-
                 holder.binding.image.apply {
                     shapeAppearanceModel = ShapeAppearanceModel().withCornerSize(70f)
                     animate().scaleX(0.75f).scaleY(0.75f).duration = 100
@@ -105,7 +104,7 @@ class GridItemAdapter(
                 holder.binding.ivPlayMediaItem.visibility = View.VISIBLE
             }
 
-            holder.binding.image.transitionName = getItemId(position).toString()
+            holder.binding.image.transitionName = getItemId(holder.layoutPosition).toString()
 
             GlideApp.with(holder.binding.image)
                 .load((getItem(position) as ListItem.MediaItem).uri)

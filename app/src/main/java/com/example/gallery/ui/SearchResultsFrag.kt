@@ -8,6 +8,7 @@ import android.view.ActionMode
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.app.SharedElementCallback
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.view.isVisible
 import androidx.core.view.updatePadding
@@ -21,6 +22,7 @@ import com.example.gallery.adapter.GridItemAdapter
 import com.example.gallery.databinding.FragmentSearchResultsBinding
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.shape.MaterialShapeDrawable
+import com.google.android.material.transition.Hold
 
 class SearchResultsFrag : Fragment() {
     private lateinit var _binding: FragmentSearchResultsBinding
@@ -34,11 +36,7 @@ class SearchResultsFrag : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        if (::_binding.isInitialized) return binding.root
-
-        _binding = FragmentSearchResultsBinding.inflate(inflater, container, false)
-
-        viewModel.viewPagerItems.observe(viewLifecycleOwner) {
+        viewModel.recyclerViewItems.observe(viewLifecycleOwner) {
             (binding.rvSearchResults.adapter as GridItemAdapter).submitList(it)
 
             binding.tbSearch.searchInput.setQuery(
@@ -46,6 +44,11 @@ class SearchResultsFrag : Fragment() {
                 false
             )
         }
+
+        if (::_binding.isInitialized) return binding.root
+
+        _binding = FragmentSearchResultsBinding.inflate(inflater, container, false)
+
         binding.tbSearch.toolbar.apply {
             setNavigationIcon(R.drawable.ic_baseline_arrow_back_24)
             setNavigationOnClickListener {
@@ -55,6 +58,7 @@ class SearchResultsFrag : Fragment() {
                 left = 0
             )
         }
+
         binding.tbSearch.appBarLayout.apply {
             fitsSystemWindows = true
             statusBarForeground = MaterialShapeDrawable
@@ -101,6 +105,9 @@ class SearchResultsFrag : Fragment() {
                 GridLayoutManager(requireContext(), resources.getInteger(R.integer.spanCount))
             setHasFixedSize(true)
         }
+
+        prepareTransitions()
+
         return binding.root
     }
 
@@ -121,5 +128,75 @@ class SearchResultsFrag : Fragment() {
                 controller.isAppearanceLightNavigationBars = true
             }
         }
+    }
+
+    private fun prepareTransitions() {
+        exitTransition = Hold()
+        reenterTransition = Hold()
+
+        setExitSharedElementCallback(
+            object : SharedElementCallback() {
+                override fun onMapSharedElements(
+                    names: List<String>,
+                    sharedElements: MutableMap<String, View>
+                ) {
+
+                    if ((binding.rvSearchResults.layoutManager as GridLayoutManager)
+                            .findFirstCompletelyVisibleItemPosition() != 0
+                    ) {
+                        binding.tbSearch.appBarLayout.setExpanded(false, false)
+                    }
+
+                    binding.rvSearchResults.isTransitionGroup = false
+
+                    val selectedViewHolder = binding.rvSearchResults
+                        .findViewHolderForLayoutPosition(MainActivity.currentListPosition) ?: return
+
+                    sharedElements[names[0]] =
+                        (selectedViewHolder as GridItemAdapter.MediaItemHolder).binding.image
+                }
+            }
+        )
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        postponeEnterTransition()
+        scrollToPosition()
+    }
+
+    private fun scrollToPosition() {
+        binding.rvSearchResults.addOnLayoutChangeListener(object : View.OnLayoutChangeListener {
+            override fun onLayoutChange(
+                v: View,
+                left: Int,
+                top: Int,
+                right: Int,
+                bottom: Int,
+                oldLeft: Int,
+                oldTop: Int,
+                oldRight: Int,
+                oldBottom: Int
+            ) {
+                binding.rvSearchResults.removeOnLayoutChangeListener(this)
+
+                val viewAtPosition =
+                    binding.rvSearchResults.layoutManager!!.findViewByPosition(MainActivity.currentListPosition)
+
+                // Scroll to position if the view for the current position is null (not currently part of
+                // layout manager children), or it's not completely visible.
+                if (viewAtPosition == null || !binding.rvSearchResults.layoutManager!!
+                        .isViewPartiallyVisible(viewAtPosition, true, true)
+                ) {
+                    binding.rvSearchResults.post {
+                        binding.rvSearchResults.layoutManager!!.scrollToPosition(MainActivity.currentListPosition)
+                        startPostponedEnterTransition()
+                    }
+                } else {
+                    startPostponedEnterTransition()
+                }
+            }
+        })
     }
 }

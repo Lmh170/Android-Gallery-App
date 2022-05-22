@@ -62,9 +62,8 @@ class ViewPagerFrag : Fragment() {
 
         prepareSharedElementTransition()
 
-        if (::_binding.isInitialized) {
-            return binding.root
-        }
+        if (::_binding.isInitialized) return binding.root
+
 
         _binding = FragmentViewPagerBinding.inflate(inflater, container, false)
 
@@ -202,7 +201,6 @@ class ViewPagerFrag : Fragment() {
             val currentItem = getCurrentItem() ?: return@setOnClickListener
 
             Intent(Intent.ACTION_EDIT).apply {
-                type = activity?.contentResolver?.getType(currentItem.uri)
                 data = currentItem.uri
                 flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
             }.also {

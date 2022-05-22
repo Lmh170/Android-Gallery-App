@@ -42,7 +42,6 @@ class GridAlbumAdapter(private val frag: BottomNavFrag) : ListAdapter<Album,
             .into(holder.binding.ivThumbnailAlbum)
 
         holder.binding.tvAlbumName.text = getItem(position).name
-        holder.binding.ivThumbnailAlbum.transitionName = "album_$position"
 
         holder.binding.ivThumbnailAlbum.setOnClickListener {
             if ((frag.binding.bnvMain as NavigationBarView).selectedItemId == R.id.miAlbums
