@@ -35,9 +35,9 @@ class SearchableActivity : AppCompatActivity() {
                     var extendedQuery = query
                     extendedQuery = extendedQuery.removeRange("DATE:".indices)
 
-                    selection = "${MediaStore.MediaColumns.DATE_ADDED} > ?" +
+                    selection = "${MediaStore.MediaColumns.DATE_ADDED} >= ?" +
                             " AND " +
-                            "${MediaStore.MediaColumns.DATE_ADDED} < ?"
+                            "${MediaStore.MediaColumns.DATE_ADDED} <= ?"
 
                     selectionArgs += extendedQuery.take(10)
                     extendedQuery = extendedQuery.removeRange(0..10)

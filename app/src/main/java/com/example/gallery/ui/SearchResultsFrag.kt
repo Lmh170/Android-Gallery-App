@@ -95,8 +95,6 @@ class SearchResultsFrag : Fragment() {
                     null,
                     extras
                 )
-            }.apply {
-                submitList(viewModel.viewPagerItems.value)
             }
 
             layoutManager =

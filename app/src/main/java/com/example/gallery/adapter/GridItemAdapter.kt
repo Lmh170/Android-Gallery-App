@@ -222,8 +222,19 @@ class GridItemAdapter(
                     .also { picker ->
                         picker.show(frag.childFragmentManager, it.toString())
                         picker.addOnPositiveButtonClickListener { pair ->
+                            val min = Calendar.getInstance().apply {
+                                timeInMillis = pair.first
+                                println("time: " + get(Calendar.HOUR_OF_DAY))
+                                set(Calendar.HOUR_OF_DAY, 0)
+                            }
+                            val max = Calendar.getInstance().apply {
+                                timeInMillis = pair.second
+                                println("time: " + get(Calendar.HOUR_OF_DAY))
+                                set(Calendar.HOUR_OF_DAY, 23)
+                            }
+
                             holder.binding.searchInput.setQuery(
-                                "DATE:${pair.first.div(1000)}/${pair.second.div(1000)}",
+                                "DATE:${min.timeInMillis.div(1000)}/${max.timeInMillis.div(1000)}",
                                 true
                             )
                         }
