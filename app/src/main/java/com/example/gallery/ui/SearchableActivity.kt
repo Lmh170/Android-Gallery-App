@@ -28,12 +28,30 @@ class SearchableActivity : AppCompatActivity() {
     private fun handleIntent(intent: Intent) {
         if (Intent.ACTION_SEARCH == intent.action) {
             intent.getStringExtra(SearchManager.QUERY)?.also { query ->
-                SearchRecentSuggestions(
-                    this,
-                    MySuggestionProvider.AUTHORITY,
-                    MySuggestionProvider.MODE
-                )
-                    .saveRecentQuery(query, null)
+                val selection: String
+                var selectionArgs: Array<String> = emptyArray()
+
+                if (query.contains("DATE:")) {
+                    var extendedQuery = query
+                    extendedQuery = extendedQuery.removeRange("DATE:".indices)
+
+                    selection = "${MediaStore.MediaColumns.DATE_ADDED} > ?" +
+                            " AND " +
+                            "${MediaStore.MediaColumns.DATE_ADDED} < ?"
+
+                    selectionArgs += extendedQuery.take(10)
+                    extendedQuery = extendedQuery.removeRange(0..10)
+                    selectionArgs += extendedQuery
+                } else {
+                    SearchRecentSuggestions(
+                        this,
+                        MySuggestionProvider.AUTHORITY,
+                        MySuggestionProvider.MODE
+                    )
+                        .saveRecentQuery(query, null)
+                    selection = "${MediaStore.Images.Media.DESCRIPTION} LIKE ?"
+                    selectionArgs = arrayOf("%$query%")
+                }
 
                 viewModel.loadItems(
                     MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
@@ -44,8 +62,8 @@ class SearchableActivity : AppCompatActivity() {
                         MediaStore.MediaColumns.DATE_MODIFIED,
                         MediaStore.Images.Media.DESCRIPTION
                     ),
-                    "${MediaStore.Images.Media.DESCRIPTION} like ?",
-                    arrayOf("%$query%")
+                    selection,
+                    selectionArgs
                 )
             }
         }

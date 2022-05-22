@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import com.example.gallery.R
 import com.example.gallery.adapter.GridItemAdapter
 import com.example.gallery.databinding.FragmentSearchResultsBinding
+import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.shape.MaterialShapeDrawable
 
 class SearchResultsFrag : Fragment() {
@@ -68,6 +69,22 @@ class SearchResultsFrag : Fragment() {
                 false
             )
         }
+
+        binding.tbSearch.btnSearchDate.setOnClickListener {
+            MaterialDatePicker.Builder.dateRangePicker()
+                .setTitleText("Select dates")
+                .build()
+                .also { picker ->
+                    picker.show(childFragmentManager, it.toString())
+                    picker.addOnPositiveButtonClickListener { pair ->
+                        binding.tbSearch.searchInput.setQuery(
+                            "DATE:${pair.first.div(1000)}/${pair.second.div(1000)}",
+                            true
+                        )
+                    }
+                }
+        }
+
 
         binding.rvSearchResults.apply {
             isVisible = true

@@ -9,7 +9,6 @@ import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.FragmentNavigator
 import androidx.navigation.fragment.FragmentNavigatorExtras
@@ -32,6 +31,7 @@ import com.example.gallery.databinding.ListGridHeaderBinding
 import com.example.gallery.databinding.ListGridMediaItemHolderBinding
 import com.example.gallery.ui.BinFrag
 import com.example.gallery.ui.MainActivity
+import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.shape.ShapeAppearanceModel
 import java.text.SimpleDateFormat
 import java.util.*
@@ -214,6 +214,21 @@ class GridItemAdapter(
                     frag.activity?.componentName
                 )
             )
+
+            holder.binding.btnSearchDate.setOnClickListener {
+                MaterialDatePicker.Builder.dateRangePicker()
+                    .setTitleText("Select dates")
+                    .build()
+                    .also { picker ->
+                        picker.show(frag.childFragmentManager, it.toString())
+                        picker.addOnPositiveButtonClickListener { pair ->
+                            holder.binding.searchInput.setQuery(
+                                "DATE:${pair.first.div(1000)}/${pair.second.div(1000)}",
+                                true
+                            )
+                        }
+                    }
+            }
         }
     }
 
