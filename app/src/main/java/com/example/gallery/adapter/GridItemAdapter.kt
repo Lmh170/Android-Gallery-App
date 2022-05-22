@@ -237,6 +237,7 @@ class GridItemAdapter(
                                 "DATE:${min.timeInMillis.div(1000)}/${max.timeInMillis.div(1000)}",
                                 true
                             )
+                            holder.binding.searchInput.setQuery(null, false)
                         }
                     }
             }
