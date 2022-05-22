@@ -1,6 +1,8 @@
 package com.example.gallery.adapter
 
 import android.app.Activity
+import android.app.SearchManager
+import android.content.Context
 import android.content.Intent
 import android.graphics.drawable.Drawable
 import android.provider.MediaStore
@@ -23,10 +25,13 @@ import com.bumptech.glide.request.target.Target
 import com.bumptech.glide.signature.MediaStoreSignature
 import com.example.gallery.GlideApp
 import com.example.gallery.ListItem
+import com.example.gallery.R
+import com.example.gallery.databinding.LayoutSearchBinding
 import com.example.gallery.databinding.ListGridHeaderBinding
 import com.example.gallery.databinding.ListGridMediaItemHolderBinding
 import com.example.gallery.ui.BinFrag
 import com.example.gallery.ui.MainActivity
+import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.shape.ShapeAppearanceModel
 import java.text.SimpleDateFormat
 import java.util.*
@@ -41,7 +46,7 @@ class GridItemAdapter(
     private val isAlbum: Boolean,
     val onClick: (extras: FragmentNavigator.Extras, position: Int) -> Unit
 ) :
-    ListAdapter<ListItem, ViewHolder>(ListItem.ListItemDiffCallback()) {
+    ListAdapter<ListItem, ViewHolder>(ListItem.ListItemDiffCallback) {
 
     private val enterTransitionStarted: AtomicBoolean = AtomicBoolean()
     var tracker: SelectionTracker<Long>? = null
@@ -59,12 +64,18 @@ class GridItemAdapter(
                 )
             )
 
+            ITEM_VIEW_TYPE_SEARCH -> SearchViewHolder(
+                LayoutSearchBinding.inflate(
+                    LayoutInflater.from(parent.context),
+                    parent, false
+                )
+            )
+
             else -> MediaItemHolder(
                 ListGridMediaItemHolderBinding.inflate(
                     LayoutInflater.from(parent.context),
                     parent, false
-                ),
-                viewType
+                )
             )
         }
     }
@@ -74,7 +85,6 @@ class GridItemAdapter(
             holder.binding.image.isActivated = tracker?.isSelected(getItemId(position)) == true
 
             if (holder.binding.image.isActivated) {
-
                 holder.binding.image.apply {
                     shapeAppearanceModel = ShapeAppearanceModel().withCornerSize(70f)
                     animate().scaleX(0.75f).scaleY(0.75f).duration = 100
@@ -86,7 +96,6 @@ class GridItemAdapter(
                     shapeAppearanceModel = ShapeAppearanceModel().withCornerSize(0f)
                     animate().scaleX(1f).scaleY(1f).duration = 100
                 }
-
             }
 
             if ((getItem(position) as ListItem.MediaItem).type ==
@@ -95,10 +104,11 @@ class GridItemAdapter(
                 holder.binding.ivPlayMediaItem.visibility = View.VISIBLE
             }
 
-            holder.binding.image.transitionName = getItemId(position).toString()
+            holder.binding.image.transitionName = getItemId(holder.layoutPosition).toString()
 
             GlideApp.with(holder.binding.image)
                 .load((getItem(position) as ListItem.MediaItem).uri)
+                .error(R.drawable.ic_baseline_image_not_supported_24)
                 .signature(
                     MediaStoreSignature(
                         null,
@@ -111,15 +121,15 @@ class GridItemAdapter(
                         target: Target<Drawable?>, isFirstResource: Boolean
                     ): Boolean {
                         if (MainActivity.currentListPosition != holder.layoutPosition) {
-                            return true
+                            return false
                         }
                         if (enterTransitionStarted.getAndSet(true)) {
-                            return true
+                            return false
                         }
 
                         frag.startPostponedEnterTransition()
 
-                        return true
+                        return false
                     }
 
                     override fun onResourceReady(
@@ -186,10 +196,50 @@ class GridItemAdapter(
                 )
             }
         } else if (holder is HeaderViewHolder) {
-            holder.binding.tvDate.text =
-                SimpleDateFormat.getDateInstance(SimpleDateFormat.FULL).format(
-                    Date(getItemId(position))
+            if ((getItem(position) as ListItem.Header).description.isNullOrEmpty()) {
+                holder.binding.tvDate.text =
+                    SimpleDateFormat.getDateInstance(SimpleDateFormat.FULL).format(
+                        Date(getItemId(position))
+                    )
+            } else {
+                holder.binding.tvDate.text = (getItem(position) as ListItem.Header).description
+            }
+        } else if (holder is SearchViewHolder) {
+            val searchManager =
+                frag.activity?.getSystemService(Context.SEARCH_SERVICE) as SearchManager
+
+            holder.binding.searchInput.setSearchableInfo(
+                searchManager.getSearchableInfo(
+                    frag.activity?.componentName
                 )
+            )
+
+            holder.binding.btnSearchDate.setOnClickListener {
+                MaterialDatePicker.Builder.dateRangePicker()
+                    .setTitleText("Select dates")
+                    .build()
+                    .also { picker ->
+                        picker.show(frag.childFragmentManager, it.toString())
+                        picker.addOnPositiveButtonClickListener { pair ->
+                            val min = Calendar.getInstance().apply {
+                                timeInMillis = pair.first
+                                println("time: " + get(Calendar.HOUR_OF_DAY))
+                                set(Calendar.HOUR_OF_DAY, 0)
+                            }
+                            val max = Calendar.getInstance().apply {
+                                timeInMillis = pair.second
+                                println("time: " + get(Calendar.HOUR_OF_DAY))
+                                set(Calendar.HOUR_OF_DAY, 23)
+                            }
+
+                            holder.binding.searchInput.setQuery(
+                                "DATE:${min.timeInMillis.div(1000)}/${max.timeInMillis.div(1000)}",
+                                true
+                            )
+                            holder.binding.searchInput.setQuery(null, false)
+                        }
+                    }
+            }
         }
     }
 
@@ -197,6 +247,7 @@ class GridItemAdapter(
         return when (getItem(position)) {
             is ListItem.MediaItem -> (getItem(position) as ListItem.MediaItem).type
             is ListItem.Header -> ITEM_VIEW_TYPE_HEADER
+            is ListItem.Search -> ITEM_VIEW_TYPE_SEARCH
             else -> throw IllegalStateException("Unknown ViewType")
         }
     }
@@ -204,20 +255,7 @@ class GridItemAdapter(
     override fun getItemId(position: Int): Long =
         getItem(position).id
 
-    inner class MediaItemHolder(val binding: ListGridMediaItemHolderBinding, val type: Int) :
-        RecyclerView.ViewHolder(binding.root) {
-
-        fun getItemDetails(): ItemDetailsLookup.ItemDetails<Long> =
-            object : ItemDetailsLookup.ItemDetails<Long>() {
-                override fun getPosition(): Int =
-                    layoutPosition
-
-                override fun getSelectionKey(): Long =
-                    getItem(layoutPosition).id
-            }
-    }
-
-    inner class HeaderViewHolder(val binding: ListGridHeaderBinding) :
+    inner class MediaItemHolder(val binding: ListGridMediaItemHolderBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
         fun getItemDetails(): ItemDetailsLookup.ItemDetails<Long> =
@@ -232,5 +270,12 @@ class GridItemAdapter(
 
     companion object {
         const val ITEM_VIEW_TYPE_HEADER: Int = 8123
+        const val ITEM_VIEW_TYPE_SEARCH: Int = 149003
     }
 }
+
+class HeaderViewHolder(val binding: ListGridHeaderBinding) :
+    RecyclerView.ViewHolder(binding.root)
+
+class SearchViewHolder(val binding: LayoutSearchBinding) :
+    RecyclerView.ViewHolder(binding.root)

@@ -12,14 +12,8 @@ class MyItemDetailsLookup(private val recyclerView: RecyclerView) :
         val view = recyclerView.findChildViewUnder(event.x, event.y) ?: return null
         val viewHolder = recyclerView.getChildViewHolder(view) ?: return null
 
-        return when (viewHolder) {
-            is GridItemAdapter.MediaItemHolder -> {
-                viewHolder.getItemDetails()
-            }
-            is GridItemAdapter.HeaderViewHolder -> {
-                viewHolder.getItemDetails()
-            }
-            else -> null
-        }
+        return if (viewHolder is GridItemAdapter.MediaItemHolder) {
+            viewHolder.getItemDetails()
+        } else null
     }
 }

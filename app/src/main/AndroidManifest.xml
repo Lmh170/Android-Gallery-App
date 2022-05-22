@@ -1,30 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     package="com.example.gallery"
     android:installLocation="auto">
 
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
-
-    <!-- Revoke ACCESS_NETWORK_STATE permission declared by ExoPlayer -->
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"
-        tools:node="remove" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_MEDIA_LOCATION"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
 
     <application
+        android:name=".MyApplication"
         android:allowBackup="true"
+        android:fullBackupOnly="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Gallery"
-        android:fullBackupOnly="true"
-        android:name="com.example.gallery.MyApplication">
-
-
+        android:theme="@style/Theme.Gallery">
+        <meta-data
+            android:name="android.app.default_searchable"
+            android:value=".ui.SearchableActivity" />
         <activity
-            android:name="com.example.gallery.ui.MainActivity"
+            android:name=".ui.SearchableActivity"
+            android:exported="true"
+            android:theme="@style/Theme.Gallery"
+            android:launchMode="singleTop">
+            <intent-filter>
+                <action android:name="android.intent.action.SEARCH"/>
+            </intent-filter>
+            <meta-data android:name="android.app.searchable"
+                android:resource="@xml/searchable"/>
+        </activity>
+        <activity
+            android:name=".ui.MainActivity"
             android:exported="true">
-
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -33,7 +43,8 @@
                 <category android:name="android.intent.category.APP_GALLERY" />
             </intent-filter>
 
-            <!-- Lets the user select an item from the gallery and returns it
+            <!--
+            Lets the user select an item from the gallery and returns it
             https://developer.android.com/reference/android/content/Intent#ACTION_GET_CONTENT
             https://developer.android.com/guide/topics/providers/content-provider-basics#MIMETypeReference
             -->
@@ -45,30 +56,49 @@
 
                 <data android:mimeType="image/*" />
                 <data android:mimeType="video/*" />
-                <data android:mimeType="vnd.android.cursor.dir/image"/>
-                <data android:mimeType="vnd.android.cursor.dir/video"/>
+                <data android:mimeType="vnd.android.cursor.dir/image" />
+                <data android:mimeType="vnd.android.cursor.dir/video" />
             </intent-filter>
 
-            <!-- Lets the user pick an item from supplied data and returns it
+            <!--
+            Lets the user pick an item from supplied data and returns it
             https://developer.android.com/reference/android/content/Intent#ACTION_PICK
             -->
             <intent-filter>
-                <!-- App does not support the PICK intent, this intent-filter is added for
-                 backward compatibility. Handle it as GET_CONTENT. -->
-                <action android:name="android.intent.action.PICK"/>
 
-                <category android:name="android.intent.category.DEFAULT"/>
-                <category android:name="android.intent.category.APP_GALLERY"/>
+                <!--
+                 App does not support the PICK intent, this intent-filter is added for
+                 backward compatibility. Handle it as GET_CONTENT.
+                -->
+                <action android:name="android.intent.action.PICK" />
 
-                <data android:mimeType="image/*"/>
-                <data android:mimeType="video/*"/>
-                <data android:mimeType="vnd.android.cursor.dir/image"/>
-                <data android:mimeType="vnd.android.cursor.dir/video"/>
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.APP_GALLERY" />
+
+                <data android:mimeType="image/*" />
+                <data android:mimeType="video/*" />
+                <data android:mimeType="vnd.android.cursor.dir/image" />
+                <data android:mimeType="vnd.android.cursor.dir/video" />
             </intent-filter>
-
         </activity>
+        <activity
+            android:name=".ui.ImageViewerActivity"
+            android:exported="true">
 
-        <!-- Todo: Add a ViewPager activity to support viewing multiple items:
+            <!-- Displays an image to the user specified in intent.data -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.APP_GALLERY" />
+
+                <data android:mimeType="image/*" />
+                <data android:mimeType="vnd.android.cursor.dir/image" />
+                <data android:scheme="content" />
+            </intent-filter>
+        </activity>
+        <!--
+         Todo: Add a ViewPager activity to support viewing multiple items:
              <action android:name="com.android.camera.action.REVIEW"/>
              <action android:name="android.provider.action.REVIEW"/>
              <action android:name="android.provider.action.REVIEW_SECURE"/>
@@ -78,41 +108,28 @@
              https://developer.android.com/reference/android/provider/MediaStore#ACTION_REVIEW_SECURE
              https://developer.android.com/about/versions/12/reference/common-intents-31
         -->
+        <activity
+            android:name=".ui.VideoPlayerActivity"
+            android:exported="true">
 
-        <activity android:name=".ui.VideoPlayerActivity" android:exported="true">
-
-            <!-- Displays a video to the user specified in intent.data
+            <!--
+            Displays a video to the user specified in intent.data
             https://developer.android.com/reference/android/content/Intent#ACTION_VIEW
             -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
-                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.APP_GALLERY" />
 
-                <data android:mimeType="video/*"/>
-                <data android:mimeType="vnd.android.cursor.dir/video"/>
+                <data android:mimeType="video/*" />
+                <data android:mimeType="vnd.android.cursor.dir/video" />
                 <data android:scheme="content" />
             </intent-filter>
-
         </activity>
 
-        <activity android:name=".ui.ImageViewerActivity" android:exported="true">
-
-            <!-- Displays an image to the user specified in intent.data-->
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-
-                <category android:name="android.intent.category.DEFAULT"/>
-                <category android:name="android.intent.category.APP_GALLERY" />
-
-                <data android:mimeType="image/*"/>
-                <data android:mimeType="vnd.android.cursor.dir/image"/>
-                <data android:scheme="content" />
-            </intent-filter>
-
-        </activity>
-
+        <provider android:name=".MySuggestionProvider"
+            android:authorities="com.example.gallery.MySuggestionProvider"
+            android:exported="false" />
     </application>
-
 </manifest>

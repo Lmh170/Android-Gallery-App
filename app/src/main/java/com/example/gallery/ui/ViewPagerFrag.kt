@@ -1,20 +1,17 @@
 package com.example.gallery.ui
 
 import android.app.Activity
-import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.app.SharedElementCallback
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.WindowInsetsControllerCompat
-import androidx.core.view.updateLayoutParams
+import androidx.core.view.*
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
@@ -26,6 +23,7 @@ import com.example.gallery.ListItem
 import com.example.gallery.R
 import com.example.gallery.adapter.ViewHolderPager
 import com.example.gallery.adapter.ViewPagerAdapter
+import com.example.gallery.databinding.EditTextBinding
 import com.example.gallery.databinding.FragmentViewPagerBinding
 import com.example.gallery.databinding.ViewDialogInfoBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -38,7 +36,7 @@ import kotlin.collections.set
 
 class ViewPagerFrag : Fragment() {
     private lateinit var _binding: FragmentViewPagerBinding
-    val binding get() = _binding
+    val binding: FragmentViewPagerBinding get() = _binding
     private val viewModel: MainViewModel by activityViewModels()
     private var isSystemUiVisible = true
     private var shortAnimationDuration = 0L
@@ -64,9 +62,8 @@ class ViewPagerFrag : Fragment() {
 
         prepareSharedElementTransition()
 
-        if (::_binding.isInitialized) {
-            return binding.root
-        }
+        if (::_binding.isInitialized) return binding.root
+
 
         _binding = FragmentViewPagerBinding.inflate(inflater, container, false)
 
@@ -197,14 +194,13 @@ class ViewPagerFrag : Fragment() {
         }
 
         binding.cvDelete.setOnClickListener {
-            getCurrentItem()?.let { delete(it, requireContext(), viewModel) }
+            getCurrentItem()?.let { viewModel.deleteItem(it) }
         }
 
         binding.cvEdit.setOnClickListener {
             val currentItem = getCurrentItem() ?: return@setOnClickListener
 
             Intent(Intent.ACTION_EDIT).apply {
-                type = activity?.contentResolver?.getType(currentItem.uri)
                 data = currentItem.uri
                 flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
             }.also {
@@ -220,34 +216,85 @@ class ViewPagerFrag : Fragment() {
         binding.cvInfo.setOnClickListener {
             val currentItem = getCurrentItem() ?: return@setOnClickListener
 
-            val info = viewModel.getItemInfo(currentItem.uri)
+            val info = viewModel.performGetItemInfo(currentItem)
 
-            val inflater = requireActivity()
-                .getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+            val infoBinding = ViewDialogInfoBinding.inflate(
+                layoutInflater
+            )
 
-            val binding = ViewDialogInfoBinding.inflate(inflater)
-
-            binding.tvDateAdded.text = SimpleDateFormat.getDateInstance().format(
+            infoBinding.tvDateAdded.text = SimpleDateFormat.getDateInstance().format(
                 Date(
-                    info[0]
-                        .toLong()
+                    info[0].toLong()
                 )
             )
 
-            binding.tvName.text = info[3]
-            binding.tvTimeAdded.text = SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT)
-                .format(Date(info[0].toLong()))
-            binding.tvPath.text = info[2]
-            binding.tvSize.text = String.format(resources.getString(R.string.item_size), info[1])
+            infoBinding.tvName.text = info[3]
+
+            infoBinding.tvTimeAdded.text =
+                SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT)
+                    .format(Date(info[0].toLong()))
+
+            infoBinding.tvPath.text = info[2]
+
+            infoBinding.tvSize.text =
+                String.format(resources.getString(R.string.item_size), info[1])
+
+            info[4].let { sInfo: String? ->
+                if (sInfo?.isNotEmpty() == true) {
+                    infoBinding.tvDescription.text = info[4]
+                } else {
+                    infoBinding.tvDescription.text = "No description"
+                }
+            }
+
+            if (info.size < 6 || info[5] == "0.0" && info[6] == "0.0" ||
+                currentItem.type == MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO
+            ) {
+                infoBinding.tvLocation.isVisible = false
+                infoBinding.tvLocationHolder.isVisible = false
+                infoBinding.ivLocation.isVisible = false
+                infoBinding.btnLeaveApp.isVisible = false
+            } else {
+                infoBinding.tvLocation.text = "${info[5]}, ${info[6]}"
+                infoBinding.btnLeaveApp.setOnClickListener {
+                    launchMapIntent(info)
+                }
+            }
+
+            infoBinding.btnEditDescription.setOnClickListener {
+                val editTextBinding = EditTextBinding.inflate(layoutInflater)
+
+                MaterialAlertDialogBuilder(requireContext())
+                    .setTitle("Edit description")
+                    .setView(editTextBinding.root)
+                    .setPositiveButton("Edit") { _, _ ->
+                        viewModel.editImageDescription(
+                            currentItem,
+                            editTextBinding.tietDescription.text.toString()
+                        )
+                    }
+                    .setNegativeButton("Cancel", null)
+                    .show()
+            }
 
             MaterialAlertDialogBuilder(
                 requireContext(), R.style.ThemeOverlay_Material3_MaterialAlertDialog_Centered
             )
-                .setTitle(resources.getString(R.string.info))
-                .setView(binding.root)
-                .setIcon(R.drawable.ic_outline_info_24)
+                .setTitle(getString(R.string.info))
+                .setView(infoBinding.root)
+                .setIcon(R.drawable.ic_baseline_info_24)
                 .setPositiveButton(getString(R.string.close), null)
                 .show()
+
+        }
+    }
+
+    private fun launchMapIntent(latLong: List<String>) {
+        Intent().apply {
+            action = Intent.ACTION_VIEW
+            data = Uri.parse("geo:${latLong[5]}, ${latLong[6]}")
+        }.also { intent ->
+            startActivity(intent)
         }
     }
 
@@ -296,41 +343,6 @@ class ViewPagerFrag : Fragment() {
     }
 
     companion object {
-        // Todo: Specify the message
-        fun delete(image: ListItem.MediaItem, context: Context, viewModel: MainViewModel) {
-            MaterialAlertDialogBuilder(
-                context,
-                R.style.ThemeOverlay_Material3_MaterialAlertDialog_Centered
-            )
-                .setTitle("Permanently delete?")
-                .setMessage("This item will be permanently deleted.")
-                .setIcon(R.drawable.ic_outline_delete_24)
-                .setNegativeButton("Cancel") { dialog: DialogInterface, _: Int ->
-                    dialog.dismiss()
-                }
-                .setPositiveButton("Delete") { _, _ ->
-                    viewModel.deleteItem(image)
-                }
-                .show()
-        }
-
-        fun delete(images: List<ListItem.MediaItem>, context: Context, viewModel: MainViewModel) {
-            MaterialAlertDialogBuilder(
-                context,
-                R.style.ThemeOverlay_Material3_MaterialAlertDialog_Centered
-            )
-                .setTitle("Permanently delete?")
-                .setMessage("This items will be permanently deleted.")
-                .setIcon(R.drawable.ic_outline_delete_24)
-                .setNegativeButton("Cancel") { dialog: DialogInterface, _: Int ->
-                    dialog.dismiss()
-                }
-                .setPositiveButton("Delete") { _, _ ->
-                    viewModel.deleteItems(images)
-                }
-                .show()
-        }
-
         fun share(item: ListItem.MediaItem, activity: Activity) {
             Intent(Intent.ACTION_SEND).apply {
                 data = item.uri

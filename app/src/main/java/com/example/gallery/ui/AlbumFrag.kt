@@ -8,6 +8,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.os.Parcelable
 import android.view.*
 import androidx.core.app.SharedElementCallback
 import androidx.core.view.WindowInsetsControllerCompat
@@ -26,6 +27,7 @@ import com.example.gallery.databinding.FragmentAlbumBinding
 import com.google.android.material.elevation.SurfaceColors
 import com.google.android.material.transition.Hold
 import com.google.android.material.transition.MaterialSharedAxis
+import java.util.ArrayList
 import kotlin.collections.List
 import kotlin.collections.MutableMap
 import kotlin.collections.find
@@ -150,6 +152,15 @@ class AlbumFrag : Fragment() {
                             intent.clipData?.addItem(ClipData.Item(items[i]))
                         }
 
+                        if (items.size == 1) {
+                            intent.putExtra(Intent.EXTRA_STREAM, items[0] as Parcelable)
+                        } else {
+                            intent.putParcelableArrayListExtra(
+                                Intent.EXTRA_STREAM,
+                                items as ArrayList<out Parcelable>
+                            )
+                        }
+
                         requireActivity().setResult(Activity.RESULT_OK, intent)
                         requireActivity().finish()
                     }
@@ -196,7 +207,7 @@ class AlbumFrag : Fragment() {
                             items.add(selectedItem)
                         }
 
-                        ViewPagerFrag.delete(items, requireContext(), viewModel)
+                        viewModel.deleteItems(items)
                         actionMode?.finish()
                         true
                     }

@@ -22,4 +22,7 @@
     <string name="show_overflow">Show Overflow</string>
     <string name="hide_overflow">Hide Overflow</string>
     <string name="pause_play">Pause / Play</string>
+    <string name="week_last_year">This week last year</string>
+    <string name="search_date_range">Search date range</string>
+    <string name="search_photos">Search photos</string>
 </resources>

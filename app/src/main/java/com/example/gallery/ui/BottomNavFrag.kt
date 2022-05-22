@@ -1,6 +1,8 @@
 package com.example.gallery.ui
 
 import android.app.Activity
+import android.app.SearchManager
+import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
 import android.os.Build
@@ -76,7 +78,7 @@ class BottomNavFrag : Fragment() {
                         } ?: return false
                         items.add(selectedItem as ListItem.MediaItem)
                     }
-                    ViewPagerFrag.delete(items, requireContext(), viewModel)
+                    viewModel.deleteItems(items)
                     actionMode?.finish()
                     true
                 }
@@ -146,7 +148,7 @@ class BottomNavFrag : Fragment() {
             }
         }
 
-        setUpRecyclerViews()
+        setUpViews()
         setUpNavigationView()
         prepareTransitions()
 
@@ -164,9 +166,9 @@ class BottomNavFrag : Fragment() {
 
     override fun onSaveInstanceState(outState: Bundle) {
         if (::_binding.isInitialized) {
+            outState.putBoolean(RV_ITEMS_VISIBILITY, binding.rvItems.isVisible)
             outState.putBoolean(RV_ALBUMS_VISIBILITY, binding.rvAlbums.isVisible)
         }
-
         super.onSaveInstanceState(outState)
     }
 
@@ -174,14 +176,15 @@ class BottomNavFrag : Fragment() {
         super.onViewStateRestored(savedInstanceState)
 
         if (savedInstanceState != null) {
+            binding.rvItems.isVisible = savedInstanceState.getBoolean(RV_ITEMS_VISIBILITY)
             binding.rvAlbums.isVisible = savedInstanceState.getBoolean(RV_ALBUMS_VISIBILITY)
-            binding.rvItems.isVisible = !savedInstanceState.getBoolean(RV_ALBUMS_VISIBILITY)
         }
     }
 
-    private fun setUpRecyclerViews() {
+    private fun setUpViews() {
         binding.rvItems.apply {
             adapter = GridItemAdapter(this@BottomNavFrag, false) { extras, _ ->
+                if ((binding.bnvMain as NavigationBarView).selectedItemId != R.id.miPhotos) return@GridItemAdapter
                 setHoldTransition()
                 prepareTransitions()
                 findNavController().navigate(
@@ -198,6 +201,7 @@ class BottomNavFrag : Fragment() {
                 override fun getSpanSize(position: Int): Int {
                     return when (adapter?.getItemViewType(position)) {
                         GridItemAdapter.ITEM_VIEW_TYPE_HEADER -> resources.getInteger(R.integer.spanCount)
+                        GridItemAdapter.ITEM_VIEW_TYPE_SEARCH -> resources.getInteger(R.integer.spanCount)
                         else -> 1
                     }
                 }
@@ -216,38 +220,36 @@ class BottomNavFrag : Fragment() {
         ).withSelectionPredicate(object : SelectionTracker.SelectionPredicate<Long>() {
 
             override fun canSetStateForKey(key: Long, nextState: Boolean): Boolean =
-                binding.rvItems.findViewHolderForItemId(key) !is GridItemAdapter.HeaderViewHolder &&
-                        binding.rvItems.findViewHolderForItemId(key) != null
+                binding.rvItems.findViewHolderForItemId(key) is GridItemAdapter.MediaItemHolder
 
             override fun canSelectMultiple(): Boolean =
                 true
 
             override fun canSetStateAtPosition(position: Int, nextState: Boolean): Boolean =
-                binding.rvItems.findViewHolderForLayoutPosition(position) !is GridItemAdapter.HeaderViewHolder &&
-                        binding.rvItems.findViewHolderForLayoutPosition(position) != null
+                binding.rvItems.findViewHolderForLayoutPosition(position) is GridItemAdapter.MediaItemHolder
 
-        }).build()
+        }).build().apply {
+            addObserver(object : SelectionTracker.SelectionObserver<Long>() {
+                override fun onSelectionChanged() {
+                    super.onSelectionChanged()
+
+                    actionMode?.title = selection.size().toString()
+
+                    if (actionMode == null) {
+                        activity?.window?.statusBarColor = SurfaceColors.getColorForElevation(
+                            requireContext(), binding.appBarLayout.elevation
+                        )
+                        actionMode = binding.tbMain.startActionMode(callback)
+                    }
+
+                    if (selection.size() == 0) {
+                        actionMode?.finish()
+                    }
+                }
+            })
+        }
 
         (binding.rvItems.adapter as GridItemAdapter).tracker = tracker
-
-        tracker.addObserver(object : SelectionTracker.SelectionObserver<Long>() {
-            override fun onSelectionChanged() {
-                super.onSelectionChanged()
-
-                actionMode?.title = tracker.selection.size().toString()
-
-                if (actionMode == null) {
-                    activity?.window?.statusBarColor = SurfaceColors.getColorForElevation(
-                        requireContext(), binding.appBarLayout.elevation
-                    )
-                    actionMode = binding.tbMain.startActionMode(callback)
-                }
-
-                if (tracker.selection.size() == 0) {
-                    actionMode?.finish()
-                }
-            }
-        })
 
         binding.rvAlbums.apply {
             adapter = GridAlbumAdapter(this@BottomNavFrag)
@@ -455,6 +457,7 @@ class BottomNavFrag : Fragment() {
     }
 
     companion object {
+        const val RV_ITEMS_VISIBILITY: String = "rv_items_visibility"
         const val RV_ALBUMS_VISIBILITY: String = "rv_albums_visibility"
     }
 }

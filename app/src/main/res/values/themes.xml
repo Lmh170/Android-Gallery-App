@@ -30,4 +30,7 @@
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">50%</item>
     </style>
+
+
+    <style name="Theme.Apps.PopUpOverlay" parent="ThemeOverlay.Material3.Light" />
 </resources>
