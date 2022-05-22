@@ -247,7 +247,7 @@ class ViewPagerFrag : Fragment() {
                 }
             }
 
-            if (info[5] == "0.0" && info[6] == "0.0" ||
+            if (info.size < 6 || info[5] == "0.0" && info[6] == "0.0" ||
                 currentItem.type == MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO
             ) {
                 infoBinding.tvLocation.isVisible = false

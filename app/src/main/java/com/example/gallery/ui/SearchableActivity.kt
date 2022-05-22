@@ -76,7 +76,6 @@ class SearchableActivity : AppCompatActivity() {
     private fun handleIntent(intent: Intent) {
         if (Intent.ACTION_SEARCH == intent.action) {
             intent.getStringExtra(SearchManager.QUERY)?.also { query ->
-
                 if (query.contains("DATE:")) {
                     var extendedQuery = query
                     extendedQuery = extendedQuery.removeRange("DATE:".indices)
@@ -99,17 +98,19 @@ class SearchableActivity : AppCompatActivity() {
                         MediaStore.Files.FileColumns.MEDIA_TYPE
                     )
 
-                    selection = "${MediaStore.MediaColumns.DATE_ADDED} >= ?" +
-                            " AND " +
-                            "${MediaStore.MediaColumns.DATE_ADDED} <= ?" +
-                            " AND " +
+                    selection = "(" +
                             MediaStore.Files.FileColumns.MEDIA_TYPE +
                             "=" +
                             MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE +
                             " OR " +
                             MediaStore.Files.FileColumns.MEDIA_TYPE +
                             "=" +
-                            MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO
+                            MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO +
+                            ")" +
+                            " AND " +
+                            "${MediaStore.MediaColumns.DATE_ADDED} >= ?" +
+                            " AND " +
+                            "${MediaStore.MediaColumns.DATE_ADDED} <= ?"
 
                     selectionArgs = arrayOf(extendedQuery.take(10))
                     extendedQuery = extendedQuery.removeRange(0..10)

@@ -84,6 +84,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun checkIntent() {
+        println("intent: action=${intent.action} category=${intent.categories} clipData=${intent.clipData} data=${intent.data} extras=${intent.extras} type=${intent.type}")
         // Todo: Support Intent.ACTION_PICK, currently handled as Intent.ACTION_GET_CONTENT
         if (intent.action == Intent.ACTION_PICK || intent.action == Intent.ACTION_GET_CONTENT) {
             when {
@@ -93,75 +94,12 @@ class MainActivity : AppCompatActivity() {
                         arrayOf(
                             MediaStore.MediaColumns.BUCKET_DISPLAY_NAME,
                             MediaStore.MediaColumns._ID,
-                            MediaStore.Files.FileColumns.MEDIA_TYPE,
                             MediaStore.MediaColumns.DATE_ADDED,
                             MediaStore.MediaColumns.DATE_MODIFIED
                         ),
                         null,
                         null
                     )
-                }
-
-                intent.type?.contains("image", true) == true -> {
-                    val mimeType: String =
-                        intent?.type?.substring(intent.type!!.lastIndexOf("/") + 1)!!
-
-                    if (mimeType != "*" && intent?.type?.contains("/") == false) {
-                        viewModel.loadItems(
-                            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                            arrayOf(
-                                MediaStore.MediaColumns.BUCKET_DISPLAY_NAME,
-                                MediaStore.MediaColumns._ID,
-                                MediaStore.MediaColumns.DATE_ADDED,
-                                MediaStore.MediaColumns.DATE_MODIFIED
-                            ),
-                            MediaStore.Files.FileColumns.MIME_TYPE + " = " + mimeType,
-                            null
-                        )
-                    } else {
-                        viewModel.loadItems(
-                            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                            arrayOf(
-                                MediaStore.MediaColumns.BUCKET_DISPLAY_NAME,
-                                MediaStore.MediaColumns._ID,
-                                MediaStore.MediaColumns.DATE_ADDED,
-                                MediaStore.MediaColumns.DATE_MODIFIED
-                            ),
-                            null,
-                            null
-                        )
-                    }
-                }
-
-                intent.type?.contains("video", true) == true -> {
-                    val mimeType: String =
-                        intent?.type?.substring(intent.type!!.lastIndexOf("/") + 1)!!
-
-                    if (mimeType != "*" && intent?.type?.contains("/") == false) {
-                        viewModel.loadItems(
-                            MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
-                            arrayOf(
-                                MediaStore.MediaColumns.BUCKET_DISPLAY_NAME,
-                                MediaStore.MediaColumns._ID,
-                                MediaStore.MediaColumns.DATE_ADDED,
-                                MediaStore.MediaColumns.DATE_MODIFIED
-                            ),
-                            MediaStore.Files.FileColumns.MIME_TYPE + " = " + mimeType,
-                            null
-                        )
-                    } else {
-                        viewModel.loadItems(
-                            MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
-                            arrayOf(
-                                MediaStore.MediaColumns.BUCKET_DISPLAY_NAME,
-                                MediaStore.MediaColumns._ID,
-                                MediaStore.MediaColumns.DATE_ADDED,
-                                MediaStore.MediaColumns.DATE_MODIFIED
-                            ),
-                            null,
-                            null
-                        )
-                    }
                 }
                 else -> viewModel.loadItems()
             }
