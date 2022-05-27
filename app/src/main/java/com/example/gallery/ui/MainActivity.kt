@@ -1,6 +1,8 @@
 package com.example.gallery.ui
 
 import android.Manifest
+import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -45,11 +47,11 @@ class MainActivity : AppCompatActivity() {
             registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
                 if (result.resultCode == RESULT_OK) {
                     viewModel.deletePendingItem()
-                    viewModel.loadItems()
+                    handleIntent()
                 }
             }
 
-        val editRequest =
+        val editDescriptionRequest =
             registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
                 if (result.resultCode == RESULT_OK) {
                     viewModel.editPendingItemDescription()
@@ -65,44 +67,95 @@ class MainActivity : AppCompatActivity() {
         }
 
         viewModel.permissionNeededForEdit.observe(this) { intentSender ->
-            editRequest.launch(
+            editDescriptionRequest.launch(
                 IntentSenderRequest.Builder(
                     intentSender
                 ).build()
             )
         }
 
-        checkIntent()
+        handleIntent()
     }
 
     override fun onStart() {
         super.onStart()
 
-        if (!haveStoragePermission()) {
-            requestPermission()
+        if (!haveStoragePermission(this)) {
+            requestStoragePermission(this)
         }
     }
 
-    private fun checkIntent() {
+    private fun handleIntent() {
         println("intent: action=${intent.action} category=${intent.categories} clipData=${intent.clipData} data=${intent.data} extras=${intent.extras} type=${intent.type}")
         // Todo: Support Intent.ACTION_PICK, currently handled as Intent.ACTION_GET_CONTENT
         if (intent.action == Intent.ACTION_PICK || intent.action == Intent.ACTION_GET_CONTENT) {
+            var source = MediaStore.Files.getContentUri(MediaStore.VOLUME_EXTERNAL)
+            var projection = arrayOf(
+                MediaStore.MediaColumns.BUCKET_DISPLAY_NAME,
+                MediaStore.MediaColumns._ID,
+                MediaStore.MediaColumns.DATE_ADDED,
+                MediaStore.MediaColumns.DATE_MODIFIED
+            )
+            var selection = ""
+            var selectionArgs: Array<String>? = null
+
             when {
                 intent.data != null -> {
-                    viewModel.loadItems(
-                        intent.data!!,
-                        arrayOf(
-                            MediaStore.MediaColumns.BUCKET_DISPLAY_NAME,
-                            MediaStore.MediaColumns._ID,
-                            MediaStore.MediaColumns.DATE_ADDED,
-                            MediaStore.MediaColumns.DATE_MODIFIED
-                        ),
-                        null,
-                        null
-                    )
+                    source = viewModel.convertMediaUriToContentUri(intent.data!!)
+                    projection += MediaStore.Files.FileColumns.MEDIA_TYPE
+                    selection += "(" +
+                            MediaStore.Files.FileColumns.MEDIA_TYPE +
+                            "=" +
+                            MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE +
+                            " OR " +
+                            MediaStore.Files.FileColumns.MEDIA_TYPE +
+                            "=" +
+                            MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO +
+                            ")"
+
                 }
-                else -> viewModel.loadItems()
+                intent.type != null -> {
+                    if (intent.type!!.contains("image")) {
+                        source = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+                    } else if (intent.type!!.contains("video")) {
+                        source = MediaStore.Video.Media.EXTERNAL_CONTENT_URI
+                    } else {
+                        projection += MediaStore.Files.FileColumns.MEDIA_TYPE
+                        selection += "(" +
+                                MediaStore.Files.FileColumns.MEDIA_TYPE +
+                                "=" +
+                                MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE +
+                                " OR " +
+                                MediaStore.Files.FileColumns.MEDIA_TYPE +
+                                "=" +
+                                MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO +
+                                ")"
+                    }
+
+                    if (!intent.type!!.contains("*")) {
+                        selection += "${MediaStore.MediaColumns.MIME_TYPE} = ?"
+                        selectionArgs = arrayOf(intent.type!!)
+                    }
+                }
+                else -> {
+                    projection += MediaStore.Files.FileColumns.MEDIA_TYPE
+                    selection += "(" +
+                            MediaStore.Files.FileColumns.MEDIA_TYPE +
+                            "=" +
+                            MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE +
+                            " OR " +
+                            MediaStore.Files.FileColumns.MEDIA_TYPE +
+                            "=" +
+                            MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO +
+                            ")"
+                }
             }
+            viewModel.loadItems(
+                source,
+                projection,
+                selection,
+                selectionArgs
+            )
         } else {
             viewModel.loadItems()
         }
@@ -117,7 +170,7 @@ class MainActivity : AppCompatActivity() {
         when (requestCode) {
             EXTERNAL_STORAGE_REQUEST -> {
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    viewModel.loadItems()
+                    handleIntent()
                 } else {
                     val showRationale =
                         ActivityCompat.shouldShowRequestPermissionRationale(
@@ -131,46 +184,13 @@ class MainActivity : AppCompatActivity() {
                             "App requires access to storage to access your Photos",
                             Snackbar.LENGTH_INDEFINITE
                         ).setAction("Grant Permission") {
-                            requestPermission()
+                            requestStoragePermission(this)
                         }.show()
                     } else {
-                        goToSettings()
+                        goToSettings(this)
                     }
                 }
             }
-        }
-    }
-
-    private fun goToSettings() {
-        Intent(
-            Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
-            Uri.parse("package:$packageName")
-        ).apply {
-            addCategory(Intent.CATEGORY_DEFAULT)
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        }.also { intent ->
-            startActivity(intent)
-        }
-    }
-
-    private fun haveStoragePermission() =
-        ContextCompat.checkSelfPermission(
-            this,
-            Manifest.permission.READ_EXTERNAL_STORAGE
-        ) == PackageManager.PERMISSION_GRANTED &&
-                ContextCompat.checkSelfPermission(
-                    this,
-                    Manifest.permission.ACCESS_MEDIA_LOCATION
-                ) == PackageManager.PERMISSION_GRANTED
-
-    private fun requestPermission() {
-        if (!haveStoragePermission()) {
-            val permissions =
-                arrayOf(
-                    Manifest.permission.READ_EXTERNAL_STORAGE,
-                    Manifest.permission.ACCESS_MEDIA_LOCATION
-                )
-            ActivityCompat.requestPermissions(this, permissions, EXTERNAL_STORAGE_REQUEST)
         }
     }
 
@@ -178,6 +198,39 @@ class MainActivity : AppCompatActivity() {
         var currentListPosition: Int = 0
         var currentViewPagerPosition: Int = 0
         lateinit var currentAlbumName: String
-        private const val EXTERNAL_STORAGE_REQUEST = 0x1045
+        const val EXTERNAL_STORAGE_REQUEST: Int = 0x1045
+
+        fun haveStoragePermission(context: Context): Boolean =
+            ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.READ_EXTERNAL_STORAGE
+            ) == PackageManager.PERMISSION_GRANTED &&
+                    ContextCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.ACCESS_MEDIA_LOCATION
+                    ) == PackageManager.PERMISSION_GRANTED
+
+        fun requestStoragePermission(activity: Activity) {
+            if (!haveStoragePermission(activity)) {
+                val permissions =
+                    arrayOf(
+                        Manifest.permission.READ_EXTERNAL_STORAGE,
+                        Manifest.permission.ACCESS_MEDIA_LOCATION
+                    )
+                ActivityCompat.requestPermissions(activity, permissions, EXTERNAL_STORAGE_REQUEST)
+            }
+        }
+
+        fun goToSettings(activity: Activity) {
+            Intent(
+                Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                Uri.parse("package:${activity.packageName}")
+            ).apply {
+                addCategory(Intent.CATEGORY_DEFAULT)
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }.also { intent ->
+                activity.startActivity(intent)
+            }
+        }
     }
 }

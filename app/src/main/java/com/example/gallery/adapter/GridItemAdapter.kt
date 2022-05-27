@@ -9,6 +9,7 @@ import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.FragmentNavigator
 import androidx.navigation.fragment.FragmentNavigatorExtras
@@ -101,7 +102,7 @@ class GridItemAdapter(
             if ((getItem(position) as ListItem.MediaItem).type ==
                 MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO
             ) {
-                holder.binding.ivPlayMediaItem.visibility = View.VISIBLE
+                holder.binding.ivPlayMediaItem.isVisible = true
             }
 
             holder.binding.image.transitionName = getItemId(holder.layoutPosition).toString()
@@ -150,7 +151,8 @@ class GridItemAdapter(
 
                         return false
                     }
-                })
+                }
+                )
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .into(holder.binding.image)
 
@@ -158,11 +160,15 @@ class GridItemAdapter(
                 if (frag.requireActivity().intent.action == Intent.ACTION_PICK ||
                     frag.requireActivity().intent.action == Intent.ACTION_GET_CONTENT
                 ) {
-                    if (!frag.requireActivity().intent.getBooleanExtra(
+                    if (frag.requireActivity().intent.getBooleanExtra(
                             Intent.EXTRA_ALLOW_MULTIPLE,
                             false
-                        )
+                        ) && frag.requireActivity().intent.action == Intent.ACTION_GET_CONTENT
                     ) {
+                        tracker?.select(getItemId(holder.layoutPosition))
+
+                        return@setOnClickListener
+                    } else {
                         val intent = Intent().apply {
                             data = (getItem(holder.layoutPosition) as ListItem.MediaItem).uri
                             flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
@@ -170,10 +176,6 @@ class GridItemAdapter(
 
                         frag.requireActivity().setResult(Activity.RESULT_OK, intent)
                         frag.requireActivity().finish()
-
-                        return@setOnClickListener
-                    } else {
-                        tracker?.select(getItemId(holder.layoutPosition))
 
                         return@setOnClickListener
                     }

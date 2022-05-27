@@ -5,10 +5,9 @@ import android.app.SearchManager
 import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
-import android.os.Build
-import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
+import android.os.*
+import android.provider.MediaStore
+import android.util.TypedValue
 import android.view.*
 import androidx.core.app.SharedElementCallback
 import androidx.core.view.WindowInsetsControllerCompat
@@ -236,9 +235,10 @@ class BottomNavFrag : Fragment() {
                     actionMode?.title = selection.size().toString()
 
                     if (actionMode == null) {
-                        activity?.window?.statusBarColor = SurfaceColors.getColorForElevation(
-                            requireContext(), binding.appBarLayout.elevation
-                        )
+                        requireActivity().window?.statusBarColor =
+                            SurfaceColors.getColorForElevation(
+                                requireContext(), binding.appBarLayout.elevation
+                            )
                         actionMode = binding.tbMain.startActionMode(callback)
                     }
 
@@ -354,12 +354,16 @@ class BottomNavFrag : Fragment() {
         binding.tbMain.isTitleCentered = false
 
         binding.tbMain.setNavigationIcon(R.drawable.ic_baseline_arrow_back_24)
-        binding.tbMain.setNavigationIconTint(
-            resources.getColor(
-                android.R.color.black,
-                activity?.theme
+
+        TypedValue().also {
+            requireActivity().theme.resolveAttribute(R.attr.colorOnSurface, it, true)
+
+            binding.tbMain.setNavigationIconTint(
+                it.data
             )
-        )
+        }
+
+
 
         if (!requireActivity().intent.getBooleanExtra(
                 Intent.EXTRA_ALLOW_MULTIPLE,
@@ -371,7 +375,7 @@ class BottomNavFrag : Fragment() {
             binding.tbMain.title = getString(R.string.select_multiple_items)
         }
 
-        binding.bnvMain.visibility = View.GONE
+        binding.bnvMain.isVisible = false
         binding.rvItems.isVisible = false
         binding.rvAlbums.isVisible = true
 

@@ -1,7 +1,6 @@
 package com.example.gallery.ui
 
 import android.app.Activity
-import android.content.DialogInterface
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
@@ -40,14 +39,13 @@ class ViewPagerFrag : Fragment() {
     private val viewModel: MainViewModel by activityViewModels()
     private var isSystemUiVisible = true
     private var shortAnimationDuration = 0L
-    private var firstCurrentItem = 0
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         when {
-            requireArguments().getBoolean("isAlbum") -> {
+            arguments?.getBoolean("isAlbum") == true -> {
                 viewModel.albums.observe(viewLifecycleOwner) { albums ->
                     val items = albums.find { it.name == MainActivity.currentAlbumName }?.mediaItems
                     (binding.viewPager.adapter as ViewPagerAdapter).submitList(items)
@@ -64,13 +62,16 @@ class ViewPagerFrag : Fragment() {
 
         if (::_binding.isInitialized) return binding.root
 
-
         _binding = FragmentViewPagerBinding.inflate(inflater, container, false)
 
         shortAnimationDuration = resources.getInteger(android.R.integer.config_shortAnimTime)
             .toLong()
         binding.tbViewPager.setNavigationOnClickListener {
-            findNavController().navigateUp()
+            if (activity is MainActivity) {
+                findNavController().navigateUp()
+            } else if (activity is ViewPagerActivity) {
+                requireActivity().finish()
+            }
         }
 
         setUpViewpager()
@@ -85,7 +86,7 @@ class ViewPagerFrag : Fragment() {
         binding.viewPager.apply {
             this.adapter = adapter
 
-            if (requireArguments().getBoolean("isAlbum")) {
+            if (arguments?.getBoolean("isAlbum") == true) {
                 adapter.submitList(viewModel.albums.value?.find {
                     it.name == MainActivity.currentAlbumName
                 }?.mediaItems)
@@ -93,15 +94,13 @@ class ViewPagerFrag : Fragment() {
                 adapter.submitList(viewModel.viewPagerItems.value)
             }
 
-            firstCurrentItem = MainActivity.currentViewPagerPosition
-
             setCurrentItem(MainActivity.currentViewPagerPosition, false)
 
             registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
                 override fun onPageSelected(position: Int) {
                     MainActivity.currentViewPagerPosition = position
 
-                    if (requireArguments().getBoolean("isAlbum")) {
+                    if (arguments?.getBoolean("isAlbum") == true) {
                         MainActivity.currentListPosition = position
                     } else {
                         MainActivity.currentListPosition =
@@ -121,14 +120,16 @@ class ViewPagerFrag : Fragment() {
             excludeTarget(binding.ivGardBottom, true)
         })
 
-        binding.cvInfo.visibility = View.VISIBLE
-        binding.cvDelete.visibility = View.VISIBLE
+        if (!isDocumentUri()) {
+            binding.cvInfo.isVisible = true
+            binding.cvDelete.isVisible = true
+        }
 
-        binding.cvEdit.visibility = View.VISIBLE
-        binding.tbViewPager.visibility = View.VISIBLE
-        binding.cvShare.visibility = View.VISIBLE
-        binding.ivGradTop.visibility = View.VISIBLE
-        binding.ivGardBottom.visibility = View.VISIBLE
+        binding.cvEdit.isVisible = true
+        binding.tbViewPager.isVisible = true
+        binding.cvShare.isVisible = true
+        binding.ivGradTop.isVisible = true
+        binding.ivGardBottom.isVisible = true
 
         ViewCompat.getWindowInsetsController(requireActivity().window.decorView)
             ?.show(WindowInsetsCompat.Type.systemBars())
@@ -141,13 +142,13 @@ class ViewPagerFrag : Fragment() {
             excludeTarget(binding.ivGardBottom, true)
         })
 
-        binding.tbViewPager.visibility = View.GONE
-        binding.cvShare.visibility = View.GONE
-        binding.cvEdit.visibility = View.GONE
-        binding.cvInfo.visibility = View.GONE
-        binding.cvDelete.visibility = View.GONE
-        binding.ivGradTop.visibility = View.GONE
-        binding.ivGardBottom.visibility = View.GONE
+        binding.tbViewPager.isVisible = false
+        binding.cvShare.isVisible = false
+        binding.cvEdit.isVisible = false
+        binding.cvInfo.isVisible = false
+        binding.cvDelete.isVisible = false
+        binding.ivGradTop.isVisible = false
+        binding.ivGardBottom.isVisible = false
 
         ViewCompat.getWindowInsetsController(requireActivity().window.decorView)
             ?.hide(WindowInsetsCompat.Type.systemBars())
@@ -158,12 +159,12 @@ class ViewPagerFrag : Fragment() {
         isSystemUiVisible = !isSystemUiVisible
     }
 
-    private fun setUpSystemBars() {
+    private fun setUpSystemBars() =
         WindowInsetsControllerCompat(requireActivity().window, binding.root).let { controller ->
             controller.isAppearanceLightStatusBars = false
             controller.isAppearanceLightNavigationBars = false
         }
-    }
+
 
     private fun setUpViews() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
@@ -193,10 +194,6 @@ class ViewPagerFrag : Fragment() {
             share(currentItem, requireActivity())
         }
 
-        binding.cvDelete.setOnClickListener {
-            getCurrentItem()?.let { viewModel.deleteItem(it) }
-        }
-
         binding.cvEdit.setOnClickListener {
             val currentItem = getCurrentItem() ?: return@setOnClickListener
 
@@ -211,6 +208,16 @@ class ViewPagerFrag : Fragment() {
                     )
                 )
             }
+        }
+
+        if (isDocumentUri()) {
+            binding.cvInfo.isVisible = false
+            binding.cvDelete.isVisible = false
+            return
+        }
+
+        binding.cvDelete.setOnClickListener {
+            getCurrentItem()?.let { viewModel.deleteItem(it) }
         }
 
         binding.cvInfo.setOnClickListener {
@@ -243,7 +250,7 @@ class ViewPagerFrag : Fragment() {
                 if (sInfo?.isNotEmpty() == true) {
                     infoBinding.tvDescription.text = info[4]
                 } else {
-                    infoBinding.tvDescription.text = "No description"
+                    infoBinding.tvDescription.text = resources.getString(R.string.no_description)
                 }
             }
 
@@ -288,6 +295,9 @@ class ViewPagerFrag : Fragment() {
 
         }
     }
+
+    private fun isDocumentUri() =
+        requireActivity().intent.data.toString().contains("com.android.providers.media.documents")
 
     private fun launchMapIntent(latLong: List<String>) {
         Intent().apply {
@@ -346,7 +356,6 @@ class ViewPagerFrag : Fragment() {
         fun share(item: ListItem.MediaItem, activity: Activity) {
             Intent(Intent.ACTION_SEND).apply {
                 data = item.uri
-                type = activity.contentResolver.getType(item.uri)
                 putExtra(Intent.EXTRA_STREAM, item.uri)
                 flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
             }.also {

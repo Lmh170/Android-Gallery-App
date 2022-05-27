@@ -7,10 +7,7 @@ import android.content.ContentUris
 import android.content.IntentSender
 import android.database.ContentObserver
 import android.net.Uri
-import android.os.Build
-import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
+import android.os.*
 import android.provider.MediaStore
 import androidx.annotation.RequiresApi
 import androidx.exifinterface.media.ExifInterface
@@ -20,9 +17,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.example.gallery.Album
 import com.example.gallery.ListItem
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import java.util.*
 
 /**
@@ -53,6 +48,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val permissionNeededForEdit: LiveData<IntentSender> = _permissionNeededForEdit
 
     private var contentObserver: ContentObserver? = null
+
+    fun setRecyclerViewItems(items: List<ListItem>) {
+        _recyclerViewItems.postValue(items)
+        _viewPagerItems.postValue(extractItems(items))
+    }
 
     fun loadItems() {
         viewModelScope.launch {
@@ -86,10 +86,59 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    private suspend fun queryItems(): List<ListItem> {
-        val images = mutableListOf<ListItem>()
+    fun uriToMediaItem(contentUri: Uri): ListItem.MediaItem? {
 
-        images += ListItem.Search()
+        getApplication<Application>().contentResolver.query(
+            convertMediaUriToContentUri(contentUri)!!,
+            arrayOf(
+                MediaStore.MediaColumns.BUCKET_DISPLAY_NAME,
+                MediaStore.MediaColumns._ID,
+                MediaStore.Files.FileColumns.MEDIA_TYPE,
+                MediaStore.MediaColumns.DATE_ADDED,
+                MediaStore.MediaColumns.DATE_MODIFIED
+            ),
+            null,
+            null
+        )?.use { cursor ->
+
+            if (!cursor.moveToFirst()) return null
+
+            val album = cursor.getString(0)
+            val id = cursor.getLong(1)
+            val type = cursor.getInt(2)
+            var dateAdded = cursor.getLong(3)
+            val dateModified = cursor.getLong(4)
+
+            // convert seconds to milliseconds
+            if (dateAdded < 1000000000000L) dateAdded *= 1000
+
+            val uri = if (type == MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE) {
+                ContentUris.withAppendedId(
+                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id
+                )
+            } else {
+                ContentUris.withAppendedId(
+                    MediaStore.Video.Media.EXTERNAL_CONTENT_URI, id
+                )
+            }
+
+            return ListItem.MediaItem(
+                id,
+                uri,
+                album,
+                type,
+                dateModified,
+                0,
+                0
+            )
+        }
+        return null
+    }
+
+    private suspend fun queryItems(): List<ListItem> {
+        val items = mutableListOf<ListItem>()
+
+        items += ListItem.Search()
 
         var listPosition = 0
         var viewPagerPosition = -1 //
@@ -153,14 +202,14 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                         lastDate.get(Calendar.MONTH) > selectedDate.get(Calendar.MONTH) ||
                         lastDate.get(Calendar.YEAR) > selectedDate.get(Calendar.YEAR)
                     ) {
-                        images += ListItem.Header(selectedDate.timeInMillis)
+                        items += ListItem.Header(selectedDate.timeInMillis)
                         lastDate = selectedDate
                         listPosition += 1
                     }
 
                     viewPagerPosition += 1
                     listPosition += 1
-                    images += ListItem.MediaItem(
+                    items += ListItem.MediaItem(
                         id,
                         uri,
                         album,
@@ -172,7 +221,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 }
             }
         }
-        return images
+        return items
     }
 
     private suspend fun queryItems(
@@ -193,11 +242,23 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 selectionArgs,
                 sortOrder
             )?.use { cursor ->
+
+                val albumColumn =
+                    cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.BUCKET_DISPLAY_NAME)
+                val idColumn =
+                    cursor.getColumnIndexOrThrow(MediaStore.MediaColumns._ID)
+                val typeColumn =
+                    cursor.getColumnIndex(MediaStore.Files.FileColumns.MEDIA_TYPE)
+                val dateAddedColumn =
+                    cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATE_ADDED)
+                val dateModifiedColumn =
+                    cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATE_MODIFIED)
+
                 while (cursor.moveToNext()) {
-                    val album = cursor.getString(0)
-                    val id = cursor.getLong(1)
-                    var dateAdded = cursor.getLong(2)
-                    val dateModified = cursor.getLong(3)
+                    val album = cursor.getString(albumColumn)
+                    val id = cursor.getLong(idColumn)
+                    var dateAdded = cursor.getLong(dateAddedColumn)
+                    val dateModified = cursor.getLong(dateModifiedColumn)
 
                     // convert seconds to milliseconds
                     if (dateAdded < 1000000000000L) dateAdded *= 1000
@@ -212,9 +273,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                         )
                     } else {
                         if (cursor.getInt(
-                                cursor.getColumnIndexOrThrow(
-                                    MediaStore.Files.FileColumns.MEDIA_TYPE
-                                )
+                                typeColumn
                             )
                             == MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE
                         ) {
@@ -222,11 +281,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                                 MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id
                             )
                         } else if (cursor.getInt(
-                                cursor.getColumnIndexOrThrow(
-                                    MediaStore.Files.FileColumns.MEDIA_TYPE
-                                )
+                                typeColumn
                             )
-                            == MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO) {
+                            == MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO
+                        ) {
                             ContentUris.withAppendedId(
                                 MediaStore.Video.Media.EXTERNAL_CONTENT_URI, id
                             )
@@ -240,8 +298,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     } else if (source == MediaStore.Video.Media.EXTERNAL_CONTENT_URI) {
                         MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO
                     } else {
-                        if (cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.MEDIA_TYPE))
-                            == MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE) {
+                        if (cursor.getInt(typeColumn)
+                            == MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE
+                        ) {
                             MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE
                         } else {
                             MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO
@@ -560,6 +619,21 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         contentObserver?.let {
             getApplication<Application>().contentResolver.unregisterContentObserver(it)
         }
+    }
+
+    /**
+     * Convert a media [Uri] to a content [Uri] to be used when requesting
+     * [MediaStore.Files.FileColumns] values.
+     *
+     * Some columns are only available on the [MediaStore.Files] collection and this method converts
+     * [Uri] from other MediaStore collections (e.g. [MediaStore.Images])
+     *
+     * @param uri [Uri] representing the MediaStore entry.
+     */
+    fun convertMediaUriToContentUri(uri: Uri): Uri? {
+        val entryId = uri.lastPathSegment ?: return null
+
+        return MediaStore.Files.getContentUri(MediaStore.getVolumeName(uri), entryId.toLong())
     }
 }
 

@@ -1,11 +1,11 @@
 package com.example.gallery.ui
 
 import android.os.Bundle
-import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.core.view.isVisible
 import androidx.transition.TransitionManager
 import com.example.gallery.databinding.ActivityVideoPlayerBinding
 import com.google.android.exoplayer2.ExoPlayer
@@ -21,8 +21,8 @@ class VideoPlayerActivity : AppCompatActivity() {
     private var playbackPosition = 0L
 
     companion object {
-        const val KEY_PLAYER_POSITION = "current_position"
-        const val KEY_PLAYER_WINDOW = "current_window"
+        const val KEY_PLAYER_POSITION: String = "current_position"
+        const val KEY_PLAYER_WINDOW: String = "current_window"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -72,7 +72,7 @@ class VideoPlayerActivity : AppCompatActivity() {
             duration = 180L
         })
 
-        binding.tbVideo.visibility = View.GONE
+        binding.tbVideo.isVisible = false
 
         WindowInsetsControllerCompat(
             window,
@@ -85,7 +85,7 @@ class VideoPlayerActivity : AppCompatActivity() {
             duration = 250L
         })
 
-        binding.tbVideo.visibility = View.VISIBLE
+        binding.tbVideo.isVisible = true
 
         WindowInsetsControllerCompat(
             window,

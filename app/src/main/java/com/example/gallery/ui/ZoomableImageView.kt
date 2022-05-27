@@ -37,7 +37,6 @@ class ZoomableImageView @JvmOverloads constructor(
     private var isZoomingDisabled = true
 
     var gFrag: ViewPagerFrag? = null
-    var gActivity: ImageViewerActivity? = null
 
     init {
         sharedConstructing()
@@ -45,11 +44,8 @@ class ZoomableImageView @JvmOverloads constructor(
 
     private val currentInstance: ZoomableImageView
         get() {
-            return if (gFrag != null) {
-                gFrag!!.binding.viewPager.getChildAt(0).findViewById(R.id.pagerImage)
-            } else {
-                gActivity!!.binding.pagerImage
-            }
+            return gFrag!!.binding.viewPager.getChildAt(0).findViewById(R.id.pagerImage)
+
         }
 
     fun enableZooming() {
@@ -124,7 +120,7 @@ class ZoomableImageView @JvmOverloads constructor(
             mode = ZOOM
 
             if (isZoomingDisabled) {
-                gFrag?.showSystemUI() ?: gActivity?.showSystemUI()
+                gFrag?.showSystemUI()
             } else {
                 gFrag?.binding?.viewPager?.isUserInputEnabled = false
             }
@@ -185,7 +181,7 @@ class ZoomableImageView @JvmOverloads constructor(
         isInZoomMode = true
 
         gFrag.let {
-            it?.hideSystemUI() ?: gActivity?.hideSystemUI()
+            it?.hideSystemUI()
             it?.binding?.viewPager?.isUserInputEnabled = false
         }
     }
@@ -196,7 +192,7 @@ class ZoomableImageView @JvmOverloads constructor(
 
         isInZoomMode = false
 
-        gFrag?.showSystemUI() ?: gActivity?.showSystemUI()
+        gFrag?.showSystemUI()
     }
 
     fun fixTrans() {

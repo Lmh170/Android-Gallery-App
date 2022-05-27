@@ -25,4 +25,5 @@
     <string name="week_last_year">This week last year</string>
     <string name="search_date_range">Search date range</string>
     <string name="search_photos">Search photos</string>
+    <string name="no_description">No description</string>
 </resources>

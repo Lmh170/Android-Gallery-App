@@ -167,8 +167,8 @@ class AlbumFrag : Fragment() {
                     return true
                 }
 
-                activity?.menuInflater?.inflate(R.menu.contextual_action_bar, menu)
-                activity?.window?.statusBarColor = SurfaceColors.getColorForElevation(
+                requireActivity().menuInflater.inflate(R.menu.contextual_action_bar, menu)
+                requireActivity().window?.statusBarColor = SurfaceColors.getColorForElevation(
                     requireContext(), binding.appBarLayout.elevation
                 )
                 return true
@@ -220,7 +220,7 @@ class AlbumFrag : Fragment() {
                 tracker.clearSelection()
 
                 Handler(Looper.getMainLooper()).postDelayed({
-                    activity?.window?.statusBarColor = resources.getColor(
+                    requireActivity().window?.statusBarColor = resources.getColor(
                         android.R.color.transparent, requireActivity().theme
                     )
                 }, 400)
