@@ -19,6 +19,22 @@ class ViewPagerActivity : AppCompatActivity() {
     private lateinit var binding: ActivityViewPagerBinding
     private val viewModel: MainViewModel by viewModels()
 
+    val deleteRequest =
+        registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
+            if (result.resultCode == RESULT_OK) {
+                viewModel.deletePendingItem()
+                handleIntent()
+                if (intent.action == Intent.ACTION_VIEW) finish()
+            }
+        }
+
+    val editDescriptionRequest =
+        registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
+            if (result.resultCode == RESULT_OK) {
+                viewModel.editPendingItemDescription()
+            }
+        }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityViewPagerBinding.inflate(layoutInflater)
@@ -29,22 +45,6 @@ class ViewPagerActivity : AppCompatActivity() {
         println("intent: action=${intent.action} category=${intent.categories} clipData=${intent.clipData} data=${intent.data} extras=${intent.extras} type=${intent.type}")
 
         handleIntent()
-
-        val deleteRequest =
-            registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
-                if (result.resultCode == RESULT_OK) {
-                    viewModel.deletePendingItem()
-                    handleIntent()
-                    if (intent.action == Intent.ACTION_VIEW) finish()
-                }
-            }
-
-        val editDescriptionRequest =
-            registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
-                if (result.resultCode == RESULT_OK) {
-                    viewModel.editPendingItemDescription()
-                }
-            }
 
         viewModel.permissionNeededForDelete.observe(this) { intentSender ->
             deleteRequest.launch(

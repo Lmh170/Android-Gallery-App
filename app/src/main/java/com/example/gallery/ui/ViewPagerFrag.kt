@@ -355,7 +355,12 @@ class ViewPagerFrag : Fragment() {
     companion object {
         fun share(item: ListItem.MediaItem, activity: Activity) {
             Intent(Intent.ACTION_SEND).apply {
-                data = item.uri
+                setDataAndType(
+                    item.uri,
+                    activity.contentResolver.getType(
+                        item.uri
+                    )
+                )
                 putExtra(Intent.EXTRA_STREAM, item.uri)
                 flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
             }.also {
@@ -375,6 +380,7 @@ class ViewPagerFrag : Fragment() {
                     uris.add(item.uri)
                 }
                 type = "*/*"
+                println("type: $type")
                 putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris)
                 flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
             }.also {

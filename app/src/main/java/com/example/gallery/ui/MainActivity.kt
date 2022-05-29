@@ -26,6 +26,21 @@ class MainActivity : AppCompatActivity() {
     private val viewModel: MainViewModel by viewModels()
     lateinit var restoreRequest: ActivityResultLauncher<IntentSenderRequest>
 
+    val deleteRequest =
+        registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
+            if (result.resultCode == RESULT_OK) {
+                viewModel.deletePendingItem()
+                handleIntent()
+            }
+        }
+
+    val editDescriptionRequest =
+        registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
+            if (result.resultCode == RESULT_OK) {
+                viewModel.editPendingItemDescription()
+            }
+        }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -42,21 +57,6 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
         }
-
-        val deleteRequest =
-            registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
-                if (result.resultCode == RESULT_OK) {
-                    viewModel.deletePendingItem()
-                    handleIntent()
-                }
-            }
-
-        val editDescriptionRequest =
-            registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
-                if (result.resultCode == RESULT_OK) {
-                    viewModel.editPendingItemDescription()
-                }
-            }
 
         viewModel.permissionNeededForDelete.observe(this) { intentSender ->
             deleteRequest.launch(
