@@ -76,38 +76,19 @@ class ViewPagerActivity : AppCompatActivity() {
 
         when (intent.action) {
             Intent.ACTION_VIEW -> {
-                try {
-                    // does not work for data=content://com.android.providers.media.documents/document/image
-
-                    if (!MainActivity.haveStoragePermission(this)) {
-                        MainActivity.requestStoragePermission(
-                            this
-                        )
-                        return
-                    }
-                    source = viewModel.convertMediaUriToContentUri(intent.data!!)
-                    projection += MediaStore.Files.FileColumns.MEDIA_TYPE
-                    viewModel.loadItems(
-                        source,
-                        projection,
-                        selection,
-                        selectionArgs
-                    )
-                } catch (e: IllegalArgumentException) {
-                    viewModel.setRecyclerViewItems(
-                        listOf(
-                            ListItem.MediaItem(
-                                Long.MIN_VALUE,
-                                intent.data!!,
-                                "",
-                                MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE,
-                                0L,
-                                0,
-                                0
-                            )
+                viewModel.setRecyclerViewItems(
+                    listOf(
+                        ListItem.MediaItem(
+                            Long.MIN_VALUE,
+                            intent.data!!,
+                            "",
+                            MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE,
+                            0L,
+                            0,
+                            0
                         )
                     )
-                }
+                )
             }
             "com.android.camera.action.REVIEW", MediaStore.ACTION_REVIEW -> {
                 if (!MainActivity.haveStoragePermission(this)) {

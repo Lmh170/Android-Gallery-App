@@ -110,6 +110,7 @@ class GridItemAdapter(
             GlideApp.with(holder.binding.image)
                 .load((getItem(position) as ListItem.MediaItem).uri)
                 .error(R.drawable.ic_baseline_image_not_supported_24)
+                .centerCrop()
                 .signature(
                     MediaStoreSignature(
                         null,

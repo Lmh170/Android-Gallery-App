@@ -67,9 +67,9 @@ class ViewPagerFrag : Fragment() {
         shortAnimationDuration = resources.getInteger(android.R.integer.config_shortAnimTime)
             .toLong()
         binding.tbViewPager.setNavigationOnClickListener {
-            if (activity is MainActivity) {
+            if (activity is MainActivity || activity is SearchableActivity) {
                 findNavController().navigateUp()
-            } else if (activity is ViewPagerActivity) {
+            } else {
                 requireActivity().finish()
             }
         }
@@ -120,7 +120,7 @@ class ViewPagerFrag : Fragment() {
             excludeTarget(binding.ivGardBottom, true)
         })
 
-        if (!isDocumentUri()) {
+        if (!isActionView()) {
             binding.cvInfo.isVisible = true
             binding.cvDelete.isVisible = true
         }
@@ -210,7 +210,7 @@ class ViewPagerFrag : Fragment() {
             }
         }
 
-        if (isDocumentUri()) {
+        if (isActionView()) {
             binding.cvInfo.isVisible = false
             binding.cvDelete.isVisible = false
             return
@@ -296,8 +296,8 @@ class ViewPagerFrag : Fragment() {
         }
     }
 
-    private fun isDocumentUri() =
-        requireActivity().intent.data.toString().contains("com.android.providers.media.documents")
+    private fun isActionView() =
+        requireActivity().intent.action == Intent.ACTION_VIEW
 
     private fun launchMapIntent(latLong: List<String>) {
         Intent().apply {

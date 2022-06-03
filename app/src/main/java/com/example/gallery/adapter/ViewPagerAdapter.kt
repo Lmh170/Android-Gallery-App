@@ -61,6 +61,7 @@ class ViewPagerAdapter(val frag: ViewPagerFrag) : ListAdapter<ListItem.MediaItem
         GlideApp.with(holderPager.binding.pagerImage)
             .load(getItem(position).uri)
             .error(R.drawable.ic_baseline_image_not_supported_24)
+            .centerInside()
             .signature(
                 MediaStoreSignature(
                     null,
