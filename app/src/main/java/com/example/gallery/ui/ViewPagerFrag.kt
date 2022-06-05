@@ -123,9 +123,9 @@ class ViewPagerFrag : Fragment() {
         if (!isActionView()) {
             binding.cvInfo.isVisible = true
             binding.cvDelete.isVisible = true
+            binding.cvEdit.isVisible = true
         }
 
-        binding.cvEdit.isVisible = true
         binding.tbViewPager.isVisible = true
         binding.cvShare.isVisible = true
         binding.ivGradTop.isVisible = true
@@ -213,6 +213,7 @@ class ViewPagerFrag : Fragment() {
         if (isActionView()) {
             binding.cvInfo.isVisible = false
             binding.cvDelete.isVisible = false
+            binding.cvEdit.isVisible = false
             return
         }
 
