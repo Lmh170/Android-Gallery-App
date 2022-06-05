@@ -64,7 +64,7 @@ dependencies {
 
     // Glide
     implementation("com.github.bumptech.glide:glide:4.13.1")
-    kapt("com.github.bumptech.glide:compiler:4.13.1")
+    kapt("com.github.bumptech.glide:compiler:4.13.2")
 
     // ExoPlayer
     implementation("com.google.android.exoplayer:exoplayer:2.17.1")
