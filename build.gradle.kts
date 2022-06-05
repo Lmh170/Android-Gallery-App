@@ -10,12 +10,24 @@ buildscript {
     }
 }
 
+plugins {
+  id("org.sonarqube") version "3.3"
+}
+
 allprojects {
     tasks.withType<JavaCompile> {
         val compilerArgs = options.compilerArgs
         compilerArgs.add("-Xlint:unchecked")
         compilerArgs.add("-Xlint:deprecation")
     }
+}
+
+sonarqube {
+  properties {
+    property("sonar.projectKey", "flawedworld_Android-Gallery-App")
+    property("sonar.organization", "flawedworld")
+    property("sonar.host.url", "https://sonarcloud.io")
+  }
 }
 
 tasks.register("clean", Delete::class) {
