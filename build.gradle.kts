@@ -24,8 +24,8 @@ allprojects {
 
 sonarqube {
   properties {
-    property("sonar.projectKey", "flawedworld_Android-Gallery-App")
-    property("sonar.organization", "flawedworld")
+    property("sonar.projectKey", "Lmh170_Android-Gallery-App")
+    property("sonar.organization", "lmh170")
     property("sonar.host.url", "https://sonarcloud.io")
   }
 }
