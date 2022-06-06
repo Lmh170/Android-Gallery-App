@@ -269,20 +269,29 @@ class ViewPagerFrag : Fragment() {
                 }
             }
 
-            infoBinding.btnEditDescription.setOnClickListener {
-                val editTextBinding = EditTextBinding.inflate(layoutInflater)
+            if (currentItem.type == MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE) {
+                infoBinding.btnEditDescription.setOnClickListener {
+                    val editTextBinding = EditTextBinding.inflate(layoutInflater)
 
-                MaterialAlertDialogBuilder(requireContext())
-                    .setTitle("Edit description")
-                    .setView(editTextBinding.root)
-                    .setPositiveButton("Edit") { _, _ ->
-                        viewModel.editImageDescription(
-                            currentItem,
-                            editTextBinding.tietDescription.text.toString()
-                        )
-                    }
-                    .setNegativeButton("Cancel", null)
-                    .show()
+                    MaterialAlertDialogBuilder(requireContext())
+                        .setTitle("Edit description")
+                        .setView(editTextBinding.root)
+                        .setPositiveButton("Edit") { _, _ ->
+                            viewModel.editImageDescription(
+                                currentItem,
+                                editTextBinding.tietDescription.text.toString()
+                            )
+                        }
+                        .setNegativeButton("Cancel", null)
+                        .show()
+                }
+            } else {
+                infoBinding.apply {
+                    tvDescription.isVisible = false
+                    tvDescriptionHolder.isVisible = false
+                    ivDescription.isVisible = false
+                    btnEditDescription.isVisible = false
+                }
             }
 
             MaterialAlertDialogBuilder(
@@ -293,7 +302,6 @@ class ViewPagerFrag : Fragment() {
                 .setIcon(R.drawable.ic_baseline_info_24)
                 .setPositiveButton(getString(R.string.close), null)
                 .show()
-
         }
     }
 

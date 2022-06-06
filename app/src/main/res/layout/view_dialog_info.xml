@@ -82,7 +82,7 @@
             app:layout_constraintTop_toBottomOf="@+id/tvDateAdded" />
 
         <ImageView
-            android:id="@+id/ivImg"
+            android:id="@+id/ivName"
             android:layout_width="23dp"
             android:layout_height="25dp"
             app:layout_constraintStart_toStartOf="parent"
@@ -99,7 +99,7 @@
             android:textColor="?attr/colorOnSurface"
             android:textSize="16sp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/ivImg"
+            app:layout_constraintStart_toEndOf="@+id/ivName"
             app:layout_constraintTop_toBottomOf="@+id/tvNameHolder" />
 
         <TextView
@@ -225,11 +225,11 @@
             android:textColor="?attr/colorOnSurface"
             android:textSize="16sp"
             app:layout_constraintEnd_toStartOf="@+id/btnEditDescription"
-            app:layout_constraintStart_toEndOf="@+id/imageView2"
+            app:layout_constraintStart_toEndOf="@+id/ivDescription"
             app:layout_constraintTop_toBottomOf="@+id/tvDescriptionHolder" />
 
         <ImageView
-            android:id="@+id/imageView2"
+            android:id="@+id/ivDescription"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
