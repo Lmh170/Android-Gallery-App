@@ -1,5 +1,6 @@
 package com.example.gallery.ui
 
+import android.net.Uri
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
@@ -7,10 +8,11 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.view.isVisible
 import androidx.transition.TransitionManager
+import com.example.gallery.R
 import com.example.gallery.databinding.ActivityVideoPlayerBinding
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
-import com.google.android.exoplayer2.util.Util
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.transition.MaterialFade
 
 class VideoPlayerActivity : AppCompatActivity() {
@@ -19,6 +21,7 @@ class VideoPlayerActivity : AppCompatActivity() {
     private var player: ExoPlayer? = null
     private var currentWindow = 0
     private var playbackPosition = 0L
+    private var source: Uri? = null
 
     companion object {
         const val KEY_PLAYER_POSITION: String = "current_position"
@@ -41,6 +44,23 @@ class VideoPlayerActivity : AppCompatActivity() {
         }
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
+
+        if (intent.scheme?.contains("http") == true) {
+            MaterialAlertDialogBuilder(
+                this, R.style.ThemeOverlay_Material3_MaterialAlertDialog_Centered
+            )
+                .setMessage(resources.getString(R.string.load_from_network, intent.data))
+                .setPositiveButton(resources.getString(R.string.load)) { _, _ ->
+                    source = intent.data!!
+                    initializePlayer()
+                }
+                .setNegativeButton(resources.getString(R.string.cancel)) { _, _ ->
+                    finish()
+                }
+                .show()
+        } else {
+            source = intent.data!!
+        }
 
         binding.exoPlayer.apply {
             setShowNextButton(false)
@@ -95,30 +115,12 @@ class VideoPlayerActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        if (Util.SDK_INT >= 24) {
-            initializePlayer()
-        }
-    }
-
-    override fun onResume() {
-        super.onResume()
-        if ((Util.SDK_INT < 24 || player == null)) {
-            initializePlayer()
-        }
-    }
-
-    override fun onPause() {
-        super.onPause()
-        if (Util.SDK_INT < 24) {
-            releasePlayer()
-        }
+        initializePlayer()
     }
 
     override fun onStop() {
         super.onStop()
-        if (Util.SDK_INT >= 24) {
-            releasePlayer()
-        }
+        releasePlayer()
     }
 
     private fun initializePlayer() {
@@ -126,7 +128,7 @@ class VideoPlayerActivity : AppCompatActivity() {
             .build()
             .also { exoPlayer ->
                 binding.exoPlayer.player = exoPlayer
-                val mediaItem = MediaItem.fromUri(intent.data!!)
+                val mediaItem = MediaItem.fromUri(source ?: return@also)
                 exoPlayer.setMediaItem(mediaItem)
             }
 

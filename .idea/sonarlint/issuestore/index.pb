@@ -1,5 +1,25 @@
 
 i
 9app/src/main/java/com/example/gallery/ui/BottomNavFrag.kt,c/3/c3be499d399604c24f7863a616372dea25868d22
-P
- app/src/main/AndroidManifest.xml,8/c/8c55c3ccc257e5907959013f99656e4c8ec3903e
+e
+5app/src/main/java/com/example/gallery/ui/AlbumFrag.kt,0/d/0d86ad3923d4e162c2e8f1d71745500f8d6eef9e
+a
+1app/src/main/java/com/example/gallery/ListItem.kt,7/0/70402d6251e2c80e4ce3259a3e5d67605049e1ec
+p
+@app/src/main/java/com/example/gallery/adapter/GridItemAdapter.kt,3/9/3970139d92160b0a6086499e33b5bda1bb849312
+q
+Aapp/src/main/java/com/example/gallery/adapter/ViewPagerAdapter.kt,1/b/1b46bf7ceb0b846f6ee42c760513e927777b0348
+@
+build.gradle.kts,d/b/dbcff70658daf80b53ce624f6adcaa529df5ed8d
+i
+9app/src/main/java/com/example/gallery/ui/MainViewModel.kt,5/9/59420892d616ff8aa2d9cfa7e8134217b559aed0
+i
+9app/src/main/java/com/example/gallery/ui/ViewPagerFrag.kt,5/b/5bbb962d39e6c8ee5e3dd7bb99e221127dceb3a8
+c
+3app/src/main/java/com/example/gallery/ui/BinFrag.kt,e/2/e24525bbce24e8d0ba1ab085732f510e05fa075e
+h
+8app/src/main/java/com/example/gallery/ui/MainActivity.kt,6/4/647d708eb97e0934cbf598849481f3208a9990cd
+m
+=app/src/main/java/com/example/gallery/ui/SearchResultsFrag.kt,7/0/705adc537bfc019e207df12b767b0d29e3cf35ed
+n
+>app/src/main/java/com/example/gallery/ui/SearchableActivity.kt,7/4/7439905d44e582cfadc95f29294568ec299c4120
