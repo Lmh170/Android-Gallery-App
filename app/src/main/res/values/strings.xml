@@ -29,4 +29,5 @@
     <string name="load_from_network">Do you want to load content from:\n%1$s</string>
     <string name="cancel">Cancel</string>
     <string name="load">Load</string>
+    <string name="restore">Restore</string>
 </resources>

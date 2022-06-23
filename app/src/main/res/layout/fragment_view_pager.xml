@@ -134,15 +134,15 @@
         android:layout_height="wrap_content"
         android:backgroundTint="@android:color/transparent"
         android:clickable="true"
+        android:fitsSystemWindows="true"
         android:focusable="true"
         android:foreground="?attr/selectableItemBackground"
         app:cardCornerRadius="30dp"
         app:cardElevation="0dp"
         app:cornerRadius="30dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/cvInfo"
-        android:fitsSystemWindows="true">
+        app:layout_constraintEnd_toStartOf="@+id/cvRestore"
+        app:layout_constraintStart_toEndOf="@+id/cvInfo">
 
         <TextView
             android:id="@+id/tvDelete"
@@ -157,5 +157,33 @@
 
     </androidx.cardview.widget.CardView>
 
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cvRestore"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:backgroundTint="@android:color/transparent"
+        android:clickable="true"
+        android:fitsSystemWindows="true"
+        android:focusable="true"
+        android:foreground="?attr/selectableItemBackground"
+        android:visibility="gone"
+        app:cardCornerRadius="30dp"
+        app:cardElevation="0dp"
+        app:cornerRadius="30dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/cvDelete">
+
+        <TextView
+            android:id="@+id/tvRestore"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_margin="15dp"
+            android:text="@string/restore"
+            android:textColor="@android:color/white"
+            app:drawableTint="@android:color/white"
+            app:drawableTopCompat="@drawable/ic_outline_restore_from_trash_24" />
+    </androidx.cardview.widget.CardView>
 </androidx.constraintlayout.widget.ConstraintLayout>
 

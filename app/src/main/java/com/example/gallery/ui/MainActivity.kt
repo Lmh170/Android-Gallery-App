@@ -10,6 +10,7 @@ import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
 import android.provider.Settings
+import android.util.Log
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -21,20 +22,20 @@ import androidx.core.view.WindowCompat
 import com.example.gallery.databinding.ActivityMainBinding
 import com.google.android.material.snackbar.Snackbar
 
-class MainActivity : AppCompatActivity() {
+open class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
-    private val viewModel: MainViewModel by viewModels()
+    protected val viewModel: MainViewModel by viewModels()
     lateinit var restoreRequest: ActivityResultLauncher<IntentSenderRequest>
 
-    val deleteRequest =
+    private val deleteRequest =
         registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
             if (result.resultCode == RESULT_OK) {
                 viewModel.deletePendingItem()
-                handleIntent()
+                handleIntent(intent)
             }
         }
 
-    val editDescriptionRequest =
+    private val editDescriptionRequest =
         registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
             if (result.resultCode == RESULT_OK) {
                 viewModel.editPendingItemDescription()
@@ -47,6 +48,10 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        setUpMainActivity()
+    }
+
+    protected fun setUpMainActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
@@ -74,7 +79,7 @@ class MainActivity : AppCompatActivity() {
             )
         }
 
-        handleIntent()
+        handleIntent(intent)
     }
 
     override fun onStart() {
@@ -85,9 +90,12 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun handleIntent() {
-        println("intent: action=${intent.action} category=${intent.categories} clipData=${intent.clipData} data=${intent.data} extras=${intent.extras} type=${intent.type}")
-        // Todo: Support Intent.ACTION_PICK, currently handled as Intent.ACTION_GET_CONTENT
+    protected open fun handleIntent(intent: Intent) {
+        Log.d(
+            this.attributionTag,
+            "intent: action=${intent.action} category=${intent.categories} clipData=${intent.clipData} data=${intent.data} extras=${intent.extras} type=${intent.type}"
+        )
+
         if (intent.action == Intent.ACTION_PICK || intent.action == Intent.ACTION_GET_CONTENT) {
             var source = MediaStore.Files.getContentUri(MediaStore.VOLUME_EXTERNAL)
             var projection = arrayOf(
@@ -170,7 +178,7 @@ class MainActivity : AppCompatActivity() {
         when (requestCode) {
             EXTERNAL_STORAGE_REQUEST -> {
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    handleIntent()
+                    handleIntent(intent)
                 } else {
                     val showRationale =
                         ActivityCompat.shouldShowRequestPermissionRationale(
@@ -197,7 +205,6 @@ class MainActivity : AppCompatActivity() {
     companion object {
         var currentListPosition: Int = 0
         var currentViewPagerPosition: Int = 0
-        lateinit var currentAlbumName: String
         const val EXTERNAL_STORAGE_REQUEST: Int = 0x1045
 
         fun haveStoragePermission(context: Context): Boolean =

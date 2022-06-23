@@ -34,8 +34,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val _albums = MutableLiveData<List<Album>>()
     val albums: LiveData<List<Album>> get() = _albums
 
-    private val _bin = MutableLiveData<List<ListItem.MediaItem>>()
-    val bin: LiveData<List<ListItem.MediaItem>> get() = _bin
+    private val _binItems = MutableLiveData<List<ListItem.MediaItem>>()
+    val binItems: LiveData<List<ListItem.MediaItem>> get() = _binItems
 
     private var pendingItem: ListItem.MediaItem? = null
     private var pendingItems: List<ListItem.MediaItem>? = null
@@ -76,13 +76,17 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         source: Uri,
         projection: Array<String>,
         selection: String?,
-        selectionArgs: Array<String>?
+        selectionArgs: Array<String>?,
+        addSearchWidget: String? = null
     ) {
         viewModelScope.launch {
-            val imageList = queryItems(source, projection, selection, selectionArgs)
+            val imageList =
+                queryItems(source, projection, selection, selectionArgs, addSearchWidget)
+            val viewPagerImageList = extractItems(imageList)
+
             _recyclerViewItems.postValue(imageList)
-            _viewPagerItems.postValue(imageList)
-            _albums.postValue(getAlbums(imageList))
+            _viewPagerItems.postValue(viewPagerImageList)
+            _albums.postValue(getAlbums(viewPagerImageList))
         }
     }
 
@@ -141,7 +145,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         items += ListItem.Search()
 
         var listPosition = 0
-        var viewPagerPosition = -1 //
+        var viewPagerPosition = -1
 
         withContext(Dispatchers.IO) {
             val projection = arrayOf(
@@ -228,9 +232,15 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         source: Uri,
         projection: Array<String>,
         selection: String?,
-        selectionArgs: Array<String>?
-    ): List<ListItem.MediaItem> {
-        val images = mutableListOf<ListItem.MediaItem>()
+        selectionArgs: Array<String>?,
+        addSearchWidget: String?
+    ): List<ListItem> {
+        val items = mutableListOf<ListItem>()
+
+        if (addSearchWidget != null) items.add(ListItem.Search(addSearchWidget))
+
+        var listPosition = 0
+        var viewPagerPosition = -1
 
         withContext(Dispatchers.IO) {
             val sortOrder = "${MediaStore.MediaColumns.DATE_ADDED} DESC"
@@ -292,7 +302,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                             throw Exception("Unknown type")
                         }
                     }
-
+                    // Todo: merge
                     val type = if (source == MediaStore.Images.Media.EXTERNAL_CONTENT_URI) {
                         MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE
                     } else if (source == MediaStore.Video.Media.EXTERNAL_CONTENT_URI) {
@@ -307,19 +317,22 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                         }
                     }
 
-                    images += ListItem.MediaItem(
+                    viewPagerPosition += 1
+                    listPosition += 1
+
+                    items += ListItem.MediaItem(
                         id,
                         uri,
                         album,
                         type,
                         dateModified,
-                        images.size,
-                        images.size
+                        viewPagerPosition,
+                        listPosition
                     )
                 }
             }
         }
-        return images
+        return items
     }
 
     private suspend fun getAlbums(mediaItems: List<ListItem.MediaItem>?): List<Album> {
@@ -465,13 +478,13 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    private suspend fun performDeleteItem(image: ListItem.MediaItem) {
+    private suspend fun performDeleteItem(image: ListItem.MediaItem, delete: Boolean) {
         withContext(Dispatchers.IO) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 val pendingIntent = MediaStore.createTrashRequest(
                     getApplication<Application>().contentResolver,
                     listOf(image.uri),
-                    true
+                    delete
                 )
 
                 pendingItem = null // Item will be deleted with request
@@ -499,7 +512,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    private suspend fun performDeleteItems(items: List<ListItem.MediaItem>) {
+    private suspend fun performDeleteItems(items: List<ListItem.MediaItem>, delete: Boolean) {
         withContext(Dispatchers.IO) {
             try {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
@@ -512,7 +525,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     val pendingIntent = MediaStore.createTrashRequest(
                         getApplication<Application>().contentResolver,
                         uris,
-                        true
+                        delete
                     )
 
                     _permissionNeededForDelete.postValue(pendingIntent.intentSender)
@@ -541,22 +554,22 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun deleteItem(image: ListItem.MediaItem) {
+    fun deleteItem(image: ListItem.MediaItem, delete: Boolean = true) {
         viewModelScope.launch {
-            performDeleteItem(image)
+            performDeleteItem(image, delete)
         }
     }
 
-    fun deleteItems(images: List<ListItem.MediaItem>) {
+    fun deleteItems(images: List<ListItem.MediaItem>, delete: Boolean = true) {
         viewModelScope.launch {
-            performDeleteItems(images)
+            performDeleteItems(images, delete)
         }
     }
 
     @RequiresApi(Build.VERSION_CODES.R)
     fun loadBin() {
         viewModelScope.launch {
-            _bin.postValue(queryBin())
+            _binItems.postValue(queryBin())
         }
     }
 

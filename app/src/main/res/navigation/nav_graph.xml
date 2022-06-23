@@ -26,13 +26,8 @@
         android:label="fragment_view_pager"
         tools:layout="@layout/fragment_view_pager">
         <argument
-            android:name="isAlbum"
-            android:defaultValue="false"
-            app:argType="boolean" />
-        <argument
-            android:name="item"
-            android:defaultValue="@null"
-            app:argType="android.net.Uri"
+            android:name="currentAlbumName"
+            app:argType="string"
             app:nullable="true" />
     </fragment>
     <fragment
@@ -43,10 +38,17 @@
         <action
             android:id="@+id/action_albumFrag_to_viewPagerFrag"
             app:destination="@id/viewPagerFrag" />
+        <argument
+            android:name="currentAlbumName"
+            app:argType="string" />
     </fragment>
     <fragment
         android:id="@+id/binFrag"
         android:name="com.example.gallery.ui.BinFrag"
         android:label="fragment_bin"
-        tools:layout="@layout/fragment_bin" />
+        tools:layout="@layout/fragment_album" >
+        <action
+            android:id="@+id/action_binFrag_to_viewPagerFrag"
+            app:destination="@id/viewPagerFrag" />
+    </fragment>
 </navigation>

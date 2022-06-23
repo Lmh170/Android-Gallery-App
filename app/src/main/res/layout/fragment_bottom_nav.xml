@@ -27,7 +27,7 @@
         android:id="@+id/rvItems"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".ui.GridItemFrag"
+        android:transitionGroup="true"
         app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
     <androidx.recyclerview.widget.RecyclerView
@@ -36,8 +36,7 @@
         android:layout_height="match_parent"
         android:transitionGroup="true"
         android:visibility="gone"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        tools:context=".ui.GridAlbumFrag" />
+        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bnvMain"

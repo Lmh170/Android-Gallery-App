@@ -1,6 +1,7 @@
 package com.example.gallery.adapter
 
 import android.content.Intent
+import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.navigation.fragment.findNavController
@@ -52,12 +53,13 @@ class GridAlbumAdapter(private val frag: BottomNavFrag) : ListAdapter<Album,
             ) {
                 MainActivity.currentListPosition = 0
 
-                MainActivity.currentAlbumName = getItem(holder.layoutPosition).name
-
                 frag.setSharedAxisTransition()
 
                 frag.findNavController().navigate(
-                    R.id.action_bottomNavFrag_to_albumDetailFrag
+                    R.id.action_bottomNavFrag_to_albumDetailFrag,
+                    Bundle().apply {
+                        putString("currentAlbumName", getItem(holder.layoutPosition).name)
+                    }
                 )
             }
         }

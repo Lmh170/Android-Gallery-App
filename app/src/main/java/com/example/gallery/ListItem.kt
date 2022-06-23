@@ -13,38 +13,34 @@ sealed class ListItem {
     ) : ListItem() {
 
         companion object {
-            val DiffCallback = object : DiffUtil.ItemCallback<MediaItem>() {
-                override fun areItemsTheSame(oldItem: MediaItem, newItem: MediaItem) =
-                    oldItem.id == newItem.id
+            val DiffCallback: DiffUtil.ItemCallback<MediaItem> =
+                object : DiffUtil.ItemCallback<MediaItem>() {
+                    override fun areItemsTheSame(oldItem: MediaItem, newItem: MediaItem) =
+                        oldItem.id == newItem.id
 
-                override fun areContentsTheSame(oldItem: MediaItem, newItem: MediaItem) =
-                    oldItem == newItem
-            }
+                    override fun areContentsTheSame(oldItem: MediaItem, newItem: MediaItem) =
+                        oldItem == newItem
+                }
         }
     }
 
     data class Header(override val id: Long, val description: String? = null) : ListItem()
 
-    data class Search(override val id: Long = searchID) : ListItem()
+    class Search(var query: String? = null) : ListItem() {
+        override val id: Long = 0x12332
+    }
 
-    // Todo(optimize)
     companion object {
-        val searchID: Long = 0x12332
-        val ListItemDiffCallback= object : DiffUtil.ItemCallback<ListItem>() {
-            override fun areItemsTheSame(oldItem: ListItem, newItem: ListItem): Boolean =
-                oldItem.id == newItem.id
+        val DiffCallback: DiffUtil.ItemCallback<ListItem> =
+            object : DiffUtil.ItemCallback<ListItem>() {
+                override fun areItemsTheSame(oldItem: ListItem, newItem: ListItem): Boolean =
+                    oldItem.id == newItem.id
 
-            override fun areContentsTheSame(oldItem: ListItem, newItem: ListItem): Boolean {
-                return if (oldItem is MediaItem && newItem is MediaItem) {
-                    oldItem.uri == newItem.uri
-                } else {
+                override fun areContentsTheSame(oldItem: ListItem, newItem: ListItem): Boolean =
                     oldItem == newItem
-                }
             }
-        }
     }
 }
-
 
 
 

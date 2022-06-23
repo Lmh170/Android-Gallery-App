@@ -23,10 +23,6 @@
             android:name=".ui.ViewPagerActivity"
             android:exported="true" >
             <!--
-         Todo: Add a ViewPager activity to support viewing multiple items:
-             <action android:name="com.android.camera.action.REVIEW"/>
-             <action android:name="android.provider.action.REVIEW"/>
-             <action android:name="android.provider.action.REVIEW_SECURE"/>
         according to
              https://developer.android.com/reference/android/content/Intent#ACTION_VIEW
              https://developer.android.com/reference/android/provider/MediaStore#ACTION_REVIEW
@@ -57,7 +53,7 @@
 
         <activity
             android:name=".ui.SearchableActivity"
-            android:exported="true"
+            android:exported="false"
             android:launchMode="singleTop"
             android:theme="@style/Theme.Gallery">
             <intent-filter>

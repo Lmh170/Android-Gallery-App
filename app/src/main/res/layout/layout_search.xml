@@ -1,63 +1,63 @@
-    <com.google.android.material.appbar.AppBarLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
-        android:id="@+id/appBarLayout"
+<com.google.android.material.appbar.AppBarLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/appBarLayout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    app:liftOnScroll="true">
+
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:liftOnScroll="true">
+        android:paddingStart="@dimen/layout_search_toolbar_padding"
+        android:paddingEnd="@dimen/layout_search_toolbar_padding"
+        app:contentInsetStart="0dp"
+        app:elevation="4dp"
+        app:layout_scrollFlags="scroll|enterAlways|snap">
 
-        <com.google.android.material.appbar.MaterialToolbar
-            android:id="@+id/toolbar"
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/searchBar"
+            style="?attr/materialCardViewFilledStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingStart="@dimen/layout_search_toolbar_padding"
-            android:paddingEnd="@dimen/layout_search_toolbar_padding"
-            app:contentInsetStart="0dp"
-            app:elevation="4dp"
-            app:layout_scrollFlags="scroll|enterAlways|snap">
+            app:cardCornerRadius="25dp">
 
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/searchBar"
-                style="?attr/materialCardViewFilledStyle"
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:cardCornerRadius="25dp">
+                android:layout_height="match_parent">
+                <SearchView
+                    android:id="@+id/searchInput"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:iconifiedByDefault="false"
+                    android:maxLines="1"
+                    android:padding="0dp"
+                    android:queryBackground="@null"
+                    android:searchIcon="@drawable/ic_outline_search"
+                    android:textColor="?attr/colorControlNormal"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/btnSearchDate"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
 
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent">
-                    <SearchView
-                        android:id="@+id/searchInput"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:iconifiedByDefault="false"
-                        android:maxLines="1"
-                        android:padding="0dp"
-                        android:queryBackground="@null"
-                        android:searchIcon="@drawable/ic_outline_search"
-                        android:textColor="?attr/colorControlNormal"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toStartOf="@+id/btnSearchDate"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
-
-                    <ImageButton
-                        android:id="@+id/btnSearchDate"
-                        android:layout_width="wrap_content"
-                        android:layout_height="0dp"
-                        android:layout_marginEnd="20dp"
-                        android:background="?attr/selectableItemBackgroundBorderless"
-                        android:contentDescription="@string/search_date_range"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toEndOf="@+id/searchInput"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:srcCompat="@drawable/ic_baseline_calendar_today_24"
-                        tools:ignore="TouchTargetSizeCheck" />
-                </androidx.constraintlayout.widget.ConstraintLayout>
-            </com.google.android.material.card.MaterialCardView>
-        </com.google.android.material.appbar.MaterialToolbar>
-    </com.google.android.material.appbar.AppBarLayout>
+                <ImageButton
+                    android:id="@+id/btnSearchDate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="0dp"
+                    android:layout_marginEnd="20dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/search_date_range"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/searchInput"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:srcCompat="@drawable/ic_baseline_calendar_today_24"
+                    tools:ignore="TouchTargetSizeCheck" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </com.google.android.material.card.MaterialCardView>
+    </com.google.android.material.appbar.MaterialToolbar>
+</com.google.android.material.appbar.AppBarLayout>
 
 

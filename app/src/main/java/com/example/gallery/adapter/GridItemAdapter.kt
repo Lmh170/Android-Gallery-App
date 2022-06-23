@@ -7,7 +7,6 @@ import android.content.Intent
 import android.graphics.drawable.Drawable
 import android.provider.MediaStore
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -30,9 +29,9 @@ import com.example.gallery.R
 import com.example.gallery.databinding.LayoutSearchBinding
 import com.example.gallery.databinding.ListGridHeaderBinding
 import com.example.gallery.databinding.ListGridMediaItemHolderBinding
-import com.example.gallery.ui.BinFrag
 import com.example.gallery.ui.MainActivity
 import com.google.android.material.datepicker.MaterialDatePicker
+import com.google.android.material.imageview.ShapeableImageView
 import com.google.android.material.shape.ShapeAppearanceModel
 import java.text.SimpleDateFormat
 import java.util.*
@@ -44,10 +43,9 @@ import java.util.concurrent.atomic.AtomicBoolean
  */
 class GridItemAdapter(
     private val frag: Fragment,
-    private val isAlbum: Boolean,
     val onClick: (extras: FragmentNavigator.Extras, position: Int) -> Unit
 ) :
-    ListAdapter<ListItem, ViewHolder>(ListItem.ListItemDiffCallback) {
+    ListAdapter<ListItem, ViewHolder>(ListItem.DiffCallback) {
 
     private val enterTransitionStarted: AtomicBoolean = AtomicBoolean()
     var tracker: SelectionTracker<Long>? = null
@@ -81,23 +79,26 @@ class GridItemAdapter(
         }
     }
 
+    private fun checkSelection(image: ShapeableImageView, position: Int) {
+        image.isActivated = tracker?.isSelected(getItemId(position)) == true
+
+        if (image.isActivated) {
+            image.apply {
+                shapeAppearanceModel = ShapeAppearanceModel().withCornerSize(70f)
+                animate().scaleX(0.75f).scaleY(0.75f).duration = 100
+            }
+
+        } else {
+            image.apply {
+                shapeAppearanceModel = ShapeAppearanceModel().withCornerSize(0f)
+                animate().scaleX(1f).scaleY(1f).duration = 100
+            }
+        }
+    }
+
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         if (holder is MediaItemHolder) {
-            holder.binding.image.isActivated = tracker?.isSelected(getItemId(position)) == true
-
-            if (holder.binding.image.isActivated) {
-                holder.binding.image.apply {
-                    shapeAppearanceModel = ShapeAppearanceModel().withCornerSize(70f)
-                    animate().scaleX(0.75f).scaleY(0.75f).duration = 100
-                }
-
-            } else if (!holder.binding.image.isActivated) {
-
-                holder.binding.image.apply {
-                    shapeAppearanceModel = ShapeAppearanceModel().withCornerSize(0f)
-                    animate().scaleX(1f).scaleY(1f).duration = 100
-                }
-            }
+            checkSelection(holder.binding.image, position)
 
             if ((getItem(position) as ListItem.MediaItem).type ==
                 MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO
@@ -110,7 +111,6 @@ class GridItemAdapter(
             GlideApp.with(holder.binding.image)
                 .load((getItem(position) as ListItem.MediaItem).uri)
                 .error(R.drawable.ic_baseline_image_not_supported_24)
-                .centerCrop()
                 .signature(
                     MediaStoreSignature(
                         null,
@@ -182,15 +182,6 @@ class GridItemAdapter(
                     }
                 }
 
-                if (frag !is BinFrag) {
-                    MainActivity.currentListPosition = holder.layoutPosition
-                    MainActivity.currentViewPagerPosition = if (isAlbum) {
-                        holder.layoutPosition
-                    } else {
-                        (getItem(holder.layoutPosition) as ListItem.MediaItem).viewPagerPosition
-                    }
-                }
-
                 onClick(
                     FragmentNavigatorExtras(
                         it to it.transitionName
@@ -215,6 +206,11 @@ class GridItemAdapter(
                 searchManager.getSearchableInfo(
                     frag.activity?.componentName
                 )
+            )
+
+            holder.binding.searchInput.setQuery(
+                (getItem(position) as ListItem.Search).query,
+                false
             )
 
             holder.binding.btnSearchDate.setOnClickListener {

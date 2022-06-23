@@ -25,7 +25,6 @@
         android:visibility="gone"
         app:srcCompat="@drawable/exo_styled_controls_play"
         android:focusable="true"
-        tools:targetApi="m"
         android:contentDescription="@string/play"/>
 </FrameLayout>
 

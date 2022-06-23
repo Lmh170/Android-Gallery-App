@@ -32,22 +32,29 @@ import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.set
 
-
 class ViewPagerFrag : Fragment() {
     private lateinit var _binding: FragmentViewPagerBinding
     val binding: FragmentViewPagerBinding get() = _binding
     private val viewModel: MainViewModel by activityViewModels()
     private var isSystemUiVisible = true
-    private var shortAnimationDuration = 0L
+    private var currentAlbumName: String? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        currentAlbumName = requireArguments().getString("currentAlbumName")
+
         when {
-            arguments?.getBoolean("isAlbum") == true -> {
+            currentAlbumName == MediaFrag.binFragID -> {
+                viewModel.binItems.observe(viewLifecycleOwner) { items ->
+                    (binding.viewPager.adapter as ViewPagerAdapter).submitList(items)
+                }
+            }
+            currentAlbumName != null -> {
                 viewModel.albums.observe(viewLifecycleOwner) { albums ->
-                    val items = albums.find { it.name == MainActivity.currentAlbumName }?.mediaItems
+                    val items =
+                        albums.find { it.name == currentAlbumName }?.mediaItems
                     (binding.viewPager.adapter as ViewPagerAdapter).submitList(items)
                 }
             }
@@ -60,12 +67,14 @@ class ViewPagerFrag : Fragment() {
 
         prepareSharedElementTransition()
 
+        sharedElementEnterTransition = MaterialContainerTransform().apply {
+            duration = 300
+        }
+
         if (::_binding.isInitialized) return binding.root
 
         _binding = FragmentViewPagerBinding.inflate(inflater, container, false)
 
-        shortAnimationDuration = resources.getInteger(android.R.integer.config_shortAnimTime)
-            .toLong()
         binding.tbViewPager.setNavigationOnClickListener {
             if (activity is MainActivity || activity is SearchableActivity) {
                 findNavController().navigateUp()
@@ -86,12 +95,18 @@ class ViewPagerFrag : Fragment() {
         binding.viewPager.apply {
             this.adapter = adapter
 
-            if (arguments?.getBoolean("isAlbum") == true) {
-                adapter.submitList(viewModel.albums.value?.find {
-                    it.name == MainActivity.currentAlbumName
-                }?.mediaItems)
-            } else {
-                adapter.submitList(viewModel.viewPagerItems.value)
+            when {
+                currentAlbumName == MediaFrag.binFragID -> {
+                    adapter.submitList(viewModel.binItems.value)
+                }
+                currentAlbumName != null -> {
+                    adapter.submitList(viewModel.albums.value?.find {
+                        it.name == currentAlbumName
+                    }?.mediaItems)
+                }
+                else -> {
+                    adapter.submitList(viewModel.viewPagerItems.value)
+                }
             }
 
             setCurrentItem(MainActivity.currentViewPagerPosition, false)
@@ -100,7 +115,7 @@ class ViewPagerFrag : Fragment() {
                 override fun onPageSelected(position: Int) {
                     MainActivity.currentViewPagerPosition = position
 
-                    if (arguments?.getBoolean("isAlbum") == true) {
+                    if (currentAlbumName != null) {
                         MainActivity.currentListPosition = position
                     } else {
                         MainActivity.currentListPosition =
@@ -126,13 +141,19 @@ class ViewPagerFrag : Fragment() {
             binding.cvEdit.isVisible = true
         }
 
+        if (currentAlbumName == MediaFrag.binFragID) {
+            binding.cvRestore.isVisible = true
+        }
+
         binding.tbViewPager.isVisible = true
         binding.cvShare.isVisible = true
         binding.ivGradTop.isVisible = true
         binding.ivGardBottom.isVisible = true
 
-        ViewCompat.getWindowInsetsController(requireActivity().window.decorView)
-            ?.show(WindowInsetsCompat.Type.systemBars())
+        WindowInsetsControllerCompat(
+            requireActivity().window,
+            requireActivity().window.decorView
+        ).show(WindowInsetsCompat.Type.systemBars())
     }
 
     fun hideSystemUI() {
@@ -142,16 +163,21 @@ class ViewPagerFrag : Fragment() {
             excludeTarget(binding.ivGardBottom, true)
         })
 
-        binding.tbViewPager.isVisible = false
-        binding.cvShare.isVisible = false
-        binding.cvEdit.isVisible = false
-        binding.cvInfo.isVisible = false
-        binding.cvDelete.isVisible = false
-        binding.ivGradTop.isVisible = false
-        binding.ivGardBottom.isVisible = false
+        binding.apply {
+            tbViewPager.isVisible = false
+            cvShare.isVisible = false
+            cvEdit.isVisible = false
+            cvInfo.isVisible = false
+            cvDelete.isVisible = false
+            cvRestore.isVisible = false
+            ivGradTop.isVisible = false
+            ivGardBottom.isVisible = false
+        }
 
-        ViewCompat.getWindowInsetsController(requireActivity().window.decorView)
-            ?.hide(WindowInsetsCompat.Type.systemBars())
+        WindowInsetsControllerCompat(
+            requireActivity().window,
+            requireActivity().window.decorView
+        ).hide(WindowInsetsCompat.Type.systemBars())
     }
 
     fun toggleSystemUI() {
@@ -159,17 +185,11 @@ class ViewPagerFrag : Fragment() {
         isSystemUiVisible = !isSystemUiVisible
     }
 
-    private fun setUpSystemBars() =
-        WindowInsetsControllerCompat(requireActivity().window, binding.root).let { controller ->
-            controller.isAppearanceLightStatusBars = false
-            controller.isAppearanceLightNavigationBars = false
-        }
-
-
     private fun setUpViews() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
             ViewCompat.setOnApplyWindowInsetsListener(requireActivity().window.decorView) { _, windowInsets ->
                 val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+
                 binding.tbViewPager.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                     topMargin = insets.top
                 }
@@ -185,6 +205,7 @@ class ViewPagerFrag : Fragment() {
                 binding.cvDelete.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                     bottomMargin = insets.bottom
                 }
+
                 return@setOnApplyWindowInsetsListener windowInsets
             }
         }
@@ -217,8 +238,14 @@ class ViewPagerFrag : Fragment() {
             return
         }
 
+        if (currentAlbumName == MediaFrag.binFragID) binding.cvRestore.isVisible = true
+
         binding.cvDelete.setOnClickListener {
             getCurrentItem()?.let { viewModel.deleteItem(it) }
+        }
+
+        binding.cvRestore.setOnClickListener {
+            getCurrentItem()?.let { viewModel.deleteItem(it, false) }
         }
 
         binding.cvInfo.setOnClickListener {
@@ -319,8 +346,10 @@ class ViewPagerFrag : Fragment() {
 
     override fun onDestroy() {
         super.onDestroy()
-        WindowInsetsControllerCompat(requireActivity().window, requireActivity().window.decorView)
-            .show(WindowInsetsCompat.Type.systemBars())
+        WindowInsetsControllerCompat(
+            requireActivity().window,
+            requireActivity().window.decorView
+        ).show(WindowInsetsCompat.Type.systemBars())
     }
 
     private fun getCurrentItem(): ListItem.MediaItem? {
@@ -334,15 +363,16 @@ class ViewPagerFrag : Fragment() {
 
     override fun startPostponedEnterTransition() {
         super.startPostponedEnterTransition()
-        setUpSystemBars()
+        setUpSystemBarsDark()
     }
 
-    private fun prepareSharedElementTransition() {
-        sharedElementEnterTransition = MaterialContainerTransform().apply {
-            scrimColor =
-                resources.getColor(android.R.color.black, requireActivity().theme)
+    private fun setUpSystemBarsDark() =
+        WindowInsetsControllerCompat(requireActivity().window, binding.root).let { controller ->
+            controller.isAppearanceLightStatusBars = false
+            controller.isAppearanceLightNavigationBars = false
         }
 
+    private fun prepareSharedElementTransition() {
         setEnterSharedElementCallback(
             object : SharedElementCallback() {
                 override fun onMapSharedElements(

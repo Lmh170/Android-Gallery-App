@@ -55,7 +55,9 @@ class ViewPagerAdapter(val frag: ViewPagerFrag) : ListAdapter<ListItem.MediaItem
             holderPager.binding.pagerImage.enableZooming()
         }
 
-        holderPager.binding.pagerImage.transitionName = getItem(holderPager.layoutPosition).id.toString()
+        holderPager.binding.pagerImage.transitionName =
+            getItem(holderPager.layoutPosition).id.toString()
+
         holderPager.binding.pagerImage.gFrag = frag
 
         GlideApp.with(holderPager.binding.pagerImage)

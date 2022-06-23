@@ -1,13 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph_search"
     app:startDestination="@id/searchResultsFrag">
 
     <fragment
         android:id="@+id/searchResultsFrag"
         android:name="com.example.gallery.ui.SearchResultsFrag"
-        android:label="SearchResultsFrag" >
+        android:label="SearchResultsFrag"
+        tools:layout="@layout/fragment_album">
         <action
             android:id="@+id/action_searchResultsFrag_to_viewPagerFrag2"
             app:destination="@id/viewPagerFrag2" />
@@ -15,15 +17,11 @@
     <fragment
         android:id="@+id/viewPagerFrag2"
         android:name="com.example.gallery.ui.ViewPagerFrag"
-        android:label="ViewPagerFrag" >
+        android:label="ViewPagerFrag"
+        tools:layout="@layout/fragment_view_pager">
         <argument
-            android:name="isAlbum"
-            android:defaultValue="false"
-            app:argType="boolean" />
-        <argument
-            android:name="item"
-            android:defaultValue="@null"
-            app:argType="android.net.Uri"
+            android:name="currentAlbumName"
+            app:argType="string"
             app:nullable="true" />
     </fragment>
 
