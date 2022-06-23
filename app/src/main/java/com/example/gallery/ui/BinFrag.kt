@@ -1,15 +1,18 @@
 package com.example.gallery.ui
 
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.RequiresApi
 import androidx.navigation.fragment.findNavController
 import com.example.gallery.R
 import com.example.gallery.adapter.GridItemAdapter
 
 class BinFrag : AlbumFrag() {
 
+    @RequiresApi(Build.VERSION_CODES.R)
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
