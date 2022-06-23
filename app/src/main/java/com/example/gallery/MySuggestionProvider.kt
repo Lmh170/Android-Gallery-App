@@ -8,7 +8,7 @@ class MySuggestionProvider : SearchRecentSuggestionsProvider() {
     }
 
     companion object {
-        const val AUTHORITY = "com.example.gallery.MySuggestionProvider"
+        const val AUTHORITY: String = "com.example.gallery.MySuggestionProvider"
         const val MODE: Int = DATABASE_MODE_QUERIES
     }
 }

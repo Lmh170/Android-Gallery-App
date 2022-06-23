@@ -25,7 +25,7 @@ import com.google.android.material.snackbar.Snackbar
 open class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     protected val viewModel: MainViewModel by viewModels()
-    lateinit var restoreRequest: ActivityResultLauncher<IntentSenderRequest>
+    private lateinit var restoreRequest: ActivityResultLauncher<IntentSenderRequest>
 
     private val deleteRequest =
         registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
@@ -92,7 +92,7 @@ open class MainActivity : AppCompatActivity() {
 
     protected open fun handleIntent(intent: Intent) {
         Log.d(
-            this.attributionTag,
+            this.toString(),
             "intent: action=${intent.action} category=${intent.categories} clipData=${intent.clipData} data=${intent.data} extras=${intent.extras} type=${intent.type}"
         )
 

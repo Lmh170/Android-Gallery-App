@@ -247,7 +247,7 @@ class ZoomableImageView @JvmOverloads constructor(
         if (saveScale == 1f) {
             // Fit to screen.
             val scale: Float
-            if (drawable?.intrinsicWidth ?: 0 == 0 || drawable?.intrinsicHeight ?: 0 == 0) return
+            if ((drawable?.intrinsicWidth ?: 0) == 0 || (drawable?.intrinsicHeight ?: 0) == 0) return
             val bmWidth = drawable.intrinsicWidth
             val bmHeight = drawable.intrinsicHeight
             Log.d("bmSize", "bmWidth: $bmWidth bmHeight : $bmHeight")
@@ -270,9 +270,9 @@ class ZoomableImageView @JvmOverloads constructor(
     }
 
     companion object {
-        const val NONE = 0
-        const val DRAG = 1
-        const val ZOOM = 2
-        const val CLICK = 3
+        const val NONE: Int = 0
+        const val DRAG: Int = 1
+        const val ZOOM: Int = 2
+        const val CLICK: Int = 3
     }
 }
