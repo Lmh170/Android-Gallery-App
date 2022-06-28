@@ -70,6 +70,12 @@ class BottomNavFrag : MediaFrag() {
                             )
                             return@setOnMenuItemClickListener true
                         }
+                        R.id.miSettings -> {
+                            findNavController().navigate(
+                                R.id.action_bottomNavFrag_to_settingsActivity
+                            )
+                            return@setOnMenuItemClickListener true
+                        }
                         else -> return@setOnMenuItemClickListener false
                     }
                 }

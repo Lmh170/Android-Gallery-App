@@ -554,15 +554,36 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun deleteItem(image: ListItem.MediaItem, delete: Boolean = true) {
-        viewModelScope.launch {
-            performDeleteItem(image, delete)
+    @RequiresApi(Build.VERSION_CODES.R)
+    private suspend fun performPermanentlyDeleteItem(item: ListItem.MediaItem) {
+        withContext(Dispatchers.IO) {
+            val pendingIntent = MediaStore.createDeleteRequest(
+                getApplication<Application>().contentResolver,
+                listOf(item.uri)
+            )
+
+            pendingItem = null // Item will be deleted with request
+            _permissionNeededForDelete.postValue(pendingIntent.intentSender)
+            return@withContext
         }
     }
 
-    fun deleteItems(images: List<ListItem.MediaItem>, delete: Boolean = true) {
+    fun deleteItem(item: ListItem.MediaItem, delete: Boolean = true) {
         viewModelScope.launch {
-            performDeleteItems(images, delete)
+            performDeleteItem(item, delete)
+        }
+    }
+
+    fun deleteItems(items: List<ListItem.MediaItem>, delete: Boolean = true) {
+        viewModelScope.launch {
+            performDeleteItems(items, delete)
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.R)
+    fun permanentlyDeleteItem(item: ListItem.MediaItem) {
+        viewModelScope.launch {
+            performPermanentlyDeleteItem(item)
         }
     }
 
@@ -580,7 +601,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         withContext(Dispatchers.IO) {
             val projection = arrayOf(
                 MediaStore.MediaColumns._ID,
-                MediaStore.Files.FileColumns.MEDIA_TYPE
+                MediaStore.Files.FileColumns.MEDIA_TYPE,
+                MediaStore.MediaColumns.DATE_MODIFIED,
+                MediaStore.MediaColumns.DATE_EXPIRES
             )
 
             val contentUri = MediaStore.Files.getContentUri(MediaStore.VOLUME_EXTERNAL)
@@ -603,6 +626,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
                     val id = cursor.getLong(0)
                     val type = cursor.getInt(1)
+                    val dateModified = cursor.getLong(2)
+                    val dateExpires = cursor.getInt(3)
 
                     val uri = if (type == MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE) {
                         ContentUris.withAppendedId(
@@ -617,10 +642,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     images += ListItem.MediaItem(
                         id,
                         uri,
-                        "", type,
-                        0L,
+                        "",
+                        type,
+                        dateModified,
                         0,
-                        0
+                        0,
+                        dateExpires
                     )
                 }
             }

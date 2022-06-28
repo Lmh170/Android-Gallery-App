@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -9,9 +9,11 @@
         android:id="@+id/pagerImage"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="@android:color/black"
         android:scaleType="centerInside"
-        tools:srcCompat="@tools:sample/avatars"
-        android:background="@android:color/black" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:srcCompat="@tools:sample/avatars" />
 
     <ImageView
         android:id="@+id/ivPlayButton"
@@ -19,12 +21,26 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:clickable="true"
+        android:contentDescription="@string/play"
+        android:focusable="true"
         android:foreground="?attr/selectableItemBackgroundBorderless"
         android:minWidth="46dp"
         android:minHeight="46dp"
         android:visibility="gone"
-        app:srcCompat="@drawable/exo_styled_controls_play"
-        android:focusable="true"
-        android:contentDescription="@string/play"/>
-</FrameLayout>
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/exo_styled_controls_play" />
+
+    <TextView
+        android:id="@+id/tvTimeTillDelete"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="100dp"
+        android:text="days until permanently deleted"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+</androidx.constraintlayout.widget.ConstraintLayout>
 

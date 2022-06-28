@@ -116,6 +116,14 @@ class ViewPagerAdapter(val frag: ViewPagerFrag) : ListAdapter<ListItem.MediaItem
             pagerImage.setOnClickListener { frag.toggleSystemUI() }
             root.setOnClickListener { frag.toggleSystemUI() }
         }
+
+        if (getItem(position).dateExpires != null) {
+            holderPager.binding.tvTimeTillDelete.isVisible = true
+            holderPager.binding.tvTimeTillDelete.text = frag.resources.getString(
+                R.string.days_until_deleted,
+                getItem(position).dateExpires.toString()
+            )
+        }
     }
 }
 

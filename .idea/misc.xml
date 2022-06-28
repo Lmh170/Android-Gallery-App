@@ -10,6 +10,17 @@
         <entry key="../../Android/Sdk/platforms/android-32/data/res/drawable/btn_search_dialog.xml" value="0.3705" />
         <entry key="../../Android/Sdk/platforms/android-32/data/res/drawable/ic_go_search_api_material.xml" value="0.3705" />
         <entry key="../../Android/Sdk/platforms/android-32/data/res/drawable/time_picker_editable_background.xml" value="0.3705" />
+        <entry key="..\:/Users/PD-MPM_Intern1/StudioProjects/Android-Gallery-App/app/src/main/res/layout/activity_video_player.xml" value="0.19293478260869565" />
+        <entry key="..\:/Users/PD-MPM_Intern1/StudioProjects/Android-Gallery-App/app/src/main/res/layout/activity_view_pager.xml" value="0.24547101449275363" />
+        <entry key="..\:/Users/PD-MPM_Intern1/StudioProjects/Android-Gallery-App/app/src/main/res/layout/fragment_view_pager.xml" value="0.25" />
+        <entry key="..\:/Users/PD-MPM_Intern1/StudioProjects/Android-Gallery-App/app/src/main/res/layout/settings_activity.xml" value="0.24547101449275363" />
+        <entry key="..\:/Users/PD-MPM_Intern1/StudioProjects/Android-Gallery-App/app/src/main/res/layout/view_dialog_info.xml" value="0.24547101449275363" />
+        <entry key="..\:/Users/PD-MPM_Intern1/StudioProjects/Android-Gallery-App/app/src/main/res/layout/view_pager_item_holder.xml" value="0.24547101449275363" />
+        <entry key="..\:/Users/PD-MPM_Intern1/StudioProjects/Android-Gallery-App/app/src/main/res/menu/action_bar_home.xml" value="0.25416666666666665" />
+        <entry key="..\:/Users/PD-MPM_Intern1/StudioProjects/Android-Gallery-App/app/src/main/res/menu/action_bar_view_pager.xml" value="0.253125" />
+        <entry key="..\:/Users/PD-MPM_Intern1/StudioProjects/Android-Gallery-App/app/src/main/res/menu/bnv_menu.xml" value="0.25416666666666665" />
+        <entry key="..\:/Users/PD-MPM_Intern1/StudioProjects/Android-Gallery-App/app/src/main/res/menu/contextual_action_bar.xml" value="0.25416666666666665" />
+        <entry key="..\:/Users/PD-MPM_Intern1/StudioProjects/Android-Gallery-App/app/src/main/res/xml/root_preferences.xml" value="0.24547101449275363" />
         <entry key="app/src/main/res/drawable/ic_baseline_arrow_back_24.xml" value="0.212" />
         <entry key="app/src/main/res/drawable/ic_baseline_close_24.xml" value="0.19947916666666668" />
         <entry key="app/src/main/res/drawable/ic_baseline_edit_24.xml" value="0.3705" />

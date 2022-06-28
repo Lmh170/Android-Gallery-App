@@ -75,14 +75,6 @@ class ViewPagerFrag : Fragment() {
 
         _binding = FragmentViewPagerBinding.inflate(inflater, container, false)
 
-        binding.tbViewPager.setNavigationOnClickListener {
-            if (activity is MainActivity || activity is SearchableActivity) {
-                findNavController().navigateUp()
-            } else {
-                requireActivity().finish()
-            }
-        }
-
         setUpViewpager()
         setUpViews()
 
@@ -142,7 +134,7 @@ class ViewPagerFrag : Fragment() {
         }
 
         if (currentAlbumName == MediaFrag.binFragID) {
-            binding.cvRestore.isVisible = true
+            binding.btnRestore.isVisible = true
         }
 
         binding.tbViewPager.isVisible = true
@@ -169,7 +161,7 @@ class ViewPagerFrag : Fragment() {
             cvEdit.isVisible = false
             cvInfo.isVisible = false
             cvDelete.isVisible = false
-            cvRestore.isVisible = false
+            btnRestore.isVisible = false
             ivGradTop.isVisible = false
             ivGardBottom.isVisible = false
         }
@@ -208,6 +200,31 @@ class ViewPagerFrag : Fragment() {
 
                 return@setOnApplyWindowInsetsListener windowInsets
             }
+
+            binding.tbViewPager.setNavigationOnClickListener {
+                if (activity is MainActivity || activity is SearchableActivity) {
+                    findNavController().navigateUp()
+                } else {
+                    requireActivity().finish()
+                }
+            }
+
+            binding.tbViewPager.inflateMenu(R.menu.action_bar_view_pager)
+            binding.tbViewPager.setOnMenuItemClickListener {
+                when (it.itemId) {
+                    R.id.miDeleteFromDevice -> {
+                        getCurrentItem()?.let { item ->
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                                viewModel.permanentlyDeleteItem(item)
+                            } else {
+                                viewModel.deleteItem(item)
+                            }
+                        }
+                        return@setOnMenuItemClickListener true
+                    }
+                    else -> return@setOnMenuItemClickListener false
+                }
+            }
         }
 
         binding.cvShare.setOnClickListener {
@@ -238,13 +255,19 @@ class ViewPagerFrag : Fragment() {
             return
         }
 
-        if (currentAlbumName == MediaFrag.binFragID) binding.cvRestore.isVisible = true
+        if (currentAlbumName == MediaFrag.binFragID) binding.btnRestore.isVisible = true
 
         binding.cvDelete.setOnClickListener {
-            getCurrentItem()?.let { viewModel.deleteItem(it) }
+            if (currentAlbumName == MediaFrag.binFragID && Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                getCurrentItem()?.let {
+                    viewModel.permanentlyDeleteItem(it)
+                }
+            } else {
+                getCurrentItem()?.let { viewModel.deleteItem(it) }
+            }
         }
 
-        binding.cvRestore.setOnClickListener {
+        binding.btnRestore.setOnClickListener {
             getCurrentItem()?.let { viewModel.deleteItem(it, false) }
         }
 
@@ -290,7 +313,7 @@ class ViewPagerFrag : Fragment() {
                 infoBinding.ivLocation.isVisible = false
                 infoBinding.btnLeaveApp.isVisible = false
             } else {
-                infoBinding.tvLocation.text = "${info[5]}, ${info[6]}"
+                infoBinding.tvLocation.text = resources.getString(R.string.tvLocation_placeholder, info[5], info[6])
                 infoBinding.btnLeaveApp.setOnClickListener {
                     launchMapIntent(info)
                 }

@@ -1,8 +1,14 @@
 package com.example.gallery.ui
 
+import android.graphics.drawable.ColorDrawable
 import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.os.PersistableBundle
+import android.widget.MediaController
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
@@ -18,137 +24,60 @@ import com.google.android.material.transition.MaterialFade
 class VideoPlayerActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityVideoPlayerBinding
-    private var player: ExoPlayer? = null
-    private var currentWindow = 0
-    private var playbackPosition = 0L
     private var source: Uri? = null
 
-    companion object {
-        const val KEY_PLAYER_POSITION: String = "current_position"
-        const val KEY_PLAYER_WINDOW: String = "current_window"
-    }
+    private var handler: Handler = Handler(Looper.myLooper()!!)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityVideoPlayerBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        window.statusBarColor = resources.getColor(android.R.color.black, theme)
-
-        binding.tbVideo.setNavigationOnClickListener {
-            finish()
+        supportActionBar?.let {
+            it.setBackgroundDrawable(ColorDrawable(ContextCompat.getColor(this, android.R.color.black)))
+            it.setDisplayShowTitleEnabled(false)
+            it.setDisplayHomeAsUpEnabled(true)
         }
 
         if (intent.data == null) {
             throw Exception("Video Player requires videoUri")
         }
 
-        WindowCompat.setDecorFitsSystemWindows(window, false)
+        source = intent.data
 
-        if (intent.scheme?.contains("http") == true) {
-            MaterialAlertDialogBuilder(
-                this, R.style.ThemeOverlay_Material3_MaterialAlertDialog_Centered
-            )
-                .setMessage(resources.getString(R.string.load_from_network, intent.data))
-                .setPositiveButton(resources.getString(R.string.load)) { _, _ ->
-                    source = intent.data!!
-                    initializePlayer()
-                }
-                .setNegativeButton(resources.getString(R.string.cancel)) { _, _ ->
-                    finish()
-                }
-                .show()
-        } else {
-            source = intent.data!!
-        }
+        val videoView = binding.videoPlayer
 
-        binding.exoPlayer.apply {
-            setShowNextButton(false)
-            setShowPreviousButton(false)
-
-            if (savedInstanceState != null) {
-                playbackPosition = savedInstanceState.getLong(KEY_PLAYER_POSITION)
-                currentWindow = savedInstanceState.getInt(KEY_PLAYER_WINDOW)
+        val mediaController = object : MediaController(this) {
+            override fun show() {
+                super.show()
+                supportActionBar?.show()
             }
 
-            setControllerVisibilityListener {
-                if (binding.exoPlayer.isControllerFullyVisible) {
-                    showSystemUi()
-                } else {
-                    hideSystemUi()
-                }
+            override fun hide() {
+                super.hide()
+                supportActionBar?.hide()
             }
         }
-    }
+        mediaController.setAnchorView(videoView)
 
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        outState.putLong(KEY_PLAYER_POSITION, playbackPosition)
-        outState.putInt(KEY_PLAYER_WINDOW, currentWindow)
-    }
+        videoView.setMediaController(mediaController)
+        videoView.setVideoURI(source)
+        videoView.requestFocus()
+        videoView.start()
 
-    private fun hideSystemUi() {
-        TransitionManager.beginDelayedTransition(binding.root, MaterialFade().apply {
-            duration = 180L
-        })
-
-        binding.tbVideo.isVisible = false
-
-        WindowInsetsControllerCompat(
-            window,
-            window.decorView
-        ).hide(WindowInsetsCompat.Type.systemBars())
-    }
-
-    private fun showSystemUi() {
-        TransitionManager.beginDelayedTransition(binding.root, MaterialFade().apply {
-            duration = 250L
-        })
-
-        binding.tbVideo.isVisible = true
-
-        WindowInsetsControllerCompat(
-            window,
-            window.decorView
-        ).show(WindowInsetsCompat.Type.systemBars())
-    }
-
-    override fun onStart() {
-        super.onStart()
-        initializePlayer()
-    }
-
-    override fun onStop() {
-        super.onStop()
-        releasePlayer()
-    }
-
-    private fun initializePlayer() {
-        player = ExoPlayer.Builder(this)
-            .build()
-            .also { exoPlayer ->
-                binding.exoPlayer.player = exoPlayer
-                val mediaItem = MediaItem.fromUri(source ?: return@also)
-                exoPlayer.setMediaItem(mediaItem)
-            }
-
-        player!!.playWhenReady = true
-        player!!.seekTo(currentWindow, playbackPosition)
-        player!!.prepare()
-    }
-
-    private fun releasePlayer() {
-        player?.run {
-            playbackPosition = this.currentPosition
-            currentWindow = this.currentMediaItemIndex
-            release()
-        }
-
-        player = null
+        handler.postDelayed(
+            { mediaController.show(0) },
+            100
+        )
     }
 
     override fun onSupportNavigateUp(): Boolean {
         finish()
         return true
+    }
+
+    override fun onResume() {
+        super.onResume()
+        supportActionBar?.show()
     }
 }
