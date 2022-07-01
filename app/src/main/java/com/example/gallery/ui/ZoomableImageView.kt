@@ -164,7 +164,7 @@ class ZoomableImageView @JvmOverloads constructor(
             return true
         }
 
-        override fun onScaleEnd(detector: ScaleGestureDetector?) {
+        override fun onScaleEnd(detector: ScaleGestureDetector) {
             super.onScaleEnd(detector)
             if (saveScale == 1f) {
                 gFrag?.binding?.viewPager?.isUserInputEnabled = true

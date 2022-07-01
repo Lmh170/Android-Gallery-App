@@ -2,6 +2,7 @@ package com.example.gallery.ui
 
 import android.os.Bundle
 import android.provider.SearchRecentSuggestions
+import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
@@ -21,6 +22,13 @@ class SettingsActivity : AppCompatActivity() {
                 .commit()
         }
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return if (item.itemId == android.R.id.home) {
+            finish()
+            true;
+        } else false;
     }
 
     class SettingsFragment : PreferenceFragmentCompat() {
