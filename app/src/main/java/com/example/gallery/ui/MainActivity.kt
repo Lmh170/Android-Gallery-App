@@ -11,7 +11,6 @@ import android.os.Bundle
 import android.provider.MediaStore
 import android.provider.Settings
 import android.util.Log
-import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
@@ -25,13 +24,15 @@ import com.google.android.material.snackbar.Snackbar
 open class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     protected val viewModel: MainViewModel by viewModels()
-    private lateinit var restoreRequest: ActivityResultLauncher<IntentSenderRequest>
 
     private val deleteRequest =
         registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
             if (result.resultCode == RESULT_OK) {
                 viewModel.deletePendingItem()
                 handleIntent(intent)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    viewModel.loadBin()
+                }
             }
         }
 
@@ -53,15 +54,6 @@ open class MainActivity : AppCompatActivity() {
 
     protected fun setUpMainActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            restoreRequest =
-                registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
-                    if (result.resultCode == RESULT_OK) {
-                        viewModel.loadBin()
-                    }
-                }
-        }
 
         viewModel.permissionNeededForDelete.observe(this) { intentSender ->
             deleteRequest.launch(

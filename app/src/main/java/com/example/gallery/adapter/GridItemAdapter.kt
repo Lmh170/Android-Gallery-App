@@ -114,7 +114,8 @@ class GridItemAdapter(
                 .signature(
                     MediaStoreSignature(
                         null,
-                        (getItem(position) as ListItem.MediaItem).dateModified, 0
+                        (getItem(position) as ListItem.MediaItem).dateModified,
+                        0
                     )
                 )
                 .listener(object : RequestListener<Drawable?> {
@@ -189,15 +190,13 @@ class GridItemAdapter(
                     holder.layoutPosition
                 )
             }
+
         } else if (holder is HeaderViewHolder) {
-            if ((getItem(position) as ListItem.Header).description.isNullOrEmpty()) {
-                holder.binding.tvDate.text =
-                    SimpleDateFormat.getDateInstance(SimpleDateFormat.FULL).format(
-                        Date(getItemId(position))
-                    )
-            } else {
-                holder.binding.tvDate.text = (getItem(position) as ListItem.Header).description
-            }
+            holder.binding.tvDate.text =
+                SimpleDateFormat.getDateInstance(SimpleDateFormat.FULL).format(
+                    Date(getItemId(position))
+                )
+
         } else if (holder is SearchViewHolder) {
             val searchManager =
                 frag.activity?.getSystemService(Context.SEARCH_SERVICE) as SearchManager

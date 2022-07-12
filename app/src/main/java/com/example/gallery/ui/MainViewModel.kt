@@ -602,8 +602,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             val projection = arrayOf(
                 MediaStore.MediaColumns._ID,
                 MediaStore.Files.FileColumns.MEDIA_TYPE,
-                MediaStore.MediaColumns.DATE_MODIFIED,
-                MediaStore.MediaColumns.DATE_EXPIRES
+                MediaStore.MediaColumns.DATE_MODIFIED
             )
 
             val contentUri = MediaStore.Files.getContentUri(MediaStore.VOLUME_EXTERNAL)
@@ -627,7 +626,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     val id = cursor.getLong(0)
                     val type = cursor.getInt(1)
                     val dateModified = cursor.getLong(2)
-                    val dateExpires = cursor.getInt(3)
 
                     val uri = if (type == MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE) {
                         ContentUris.withAppendedId(
@@ -646,8 +644,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                         type,
                         dateModified,
                         0,
-                        0,
-                        dateExpires
+                        0
                     )
                 }
             }

@@ -17,10 +17,12 @@
     <ImageView
         android:id="@+id/ivGardBottom"
         android:layout_width="0dp"
-        android:layout_height="130dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="-32dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/btnRestore"
         app:srcCompat="@drawable/gradient_background"
         tools:ignore="ContentDescription" />
 
@@ -38,12 +40,13 @@
         android:id="@+id/tbViewPager"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:fitsSystemWindows="true"
         android:minHeight="?attr/actionBarSize"
-        app:navigationIcon="@drawable/ic_baseline_arrow_back_24"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:navigationIconTint="@android:color/white"
-        android:fitsSystemWindows="true"/>
+        app:menu="@menu/action_bar_view_pager"
+        app:navigationIcon="@drawable/ic_baseline_arrow_back_24"
+        app:navigationIconTint="@android:color/white" />
 
     <androidx.cardview.widget.CardView
         android:id="@+id/cvShare"
@@ -162,12 +165,18 @@
         style="?attr/materialButtonOutlinedStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
         android:text="@string/restore"
+        android:textColor="@android:color/white"
+        android:visibility="gone"
         app:icon="@drawable/ic_outline_restore_from_trash_24"
         app:iconGravity="textStart"
+        app:iconTint="@android:color/white"
         app:layout_constraintBottom_toTopOf="@+id/cvEdit"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:strokeColor="@android:color/white"
+        tools:visibility="visible" />
 </androidx.constraintlayout.widget.ConstraintLayout>
 

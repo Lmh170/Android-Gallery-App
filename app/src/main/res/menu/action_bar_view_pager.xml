@@ -6,4 +6,9 @@
         android:title="Delete from device"
         app:showAsAction="never" />
 
+    <item
+        android:id="@+id/miUseAs"
+        android:title="Use as"
+        app:showAsAction="never" />
+
 </menu>

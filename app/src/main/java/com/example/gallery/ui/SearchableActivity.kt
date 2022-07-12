@@ -42,14 +42,6 @@ class SearchableActivity : MainActivity() {
                 var extendedQuery = query
                 extendedQuery = extendedQuery.removeRange("DATE:".indices)
 
-                intent.putExtra(
-                    SearchManager.QUERY,
-                    SimpleDateFormat.getDateInstance(SimpleDateFormat.SHORT).format(
-                        Date(extendedQuery.take(10).toLong().times(1000))
-                    ) +
-                            " - "
-                )
-
                 source = MediaStore.Files.getContentUri(MediaStore.VOLUME_EXTERNAL)
 
                 projection = arrayOf(
@@ -76,14 +68,6 @@ class SearchableActivity : MainActivity() {
 
                 selectionArgs = arrayOf(extendedQuery.take(10))
                 extendedQuery = extendedQuery.removeRange(0..10)
-
-                intent.putExtra(
-                    SearchManager.QUERY,
-                    intent.getStringExtra(SearchManager.QUERY) +
-                            SimpleDateFormat.getDateInstance(SimpleDateFormat.SHORT).format(
-                                Date(extendedQuery.toLong().times(1000))
-                            )
-                )
 
                 selectionArgs += extendedQuery
             } else {
@@ -131,7 +115,6 @@ class SearchableActivity : MainActivity() {
                 )
             }
         }
-
     }
 
     override fun onNewIntent(intent: Intent) {

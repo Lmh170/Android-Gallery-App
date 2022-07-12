@@ -8,4 +8,8 @@
         <item name="actionModeCloseDrawable">@drawable/ic_baseline_close_24</item>
         <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
     </style>
+
+    <style name="Theme.Gallery.ActionBar" parent="Theme.Material3.DayNight">
+        <item name="android:statusBarColor">@android:color/black</item>
+    </style>
 </resources>

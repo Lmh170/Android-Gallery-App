@@ -31,6 +31,6 @@
         <item name="cornerSize">50%</item>
     </style>
 
+    <style name="Theme.Gallery.ActionBar" parent="Theme.Material3.DayNight"/>
 
-    <style name="Theme.Apps.PopUpOverlay" parent="ThemeOverlay.Material3.Light" />
 </resources>

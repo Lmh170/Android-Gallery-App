@@ -25,7 +25,7 @@ sealed class ListItem {
         }
     }
 
-    data class Header(override val id: Long, val description: String? = null) : ListItem()
+    data class Header(override val id: Long) : ListItem()
 
     class Search(var query: String? = null) : ListItem() {
         override val id: Long = 0x12332

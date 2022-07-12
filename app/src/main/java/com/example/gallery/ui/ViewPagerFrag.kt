@@ -6,6 +6,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -49,6 +50,7 @@ class ViewPagerFrag : Fragment() {
             currentAlbumName == MediaFrag.binFragID -> {
                 viewModel.binItems.observe(viewLifecycleOwner) { items ->
                     (binding.viewPager.adapter as ViewPagerAdapter).submitList(items)
+                    Log.d("tag", "here")
                 }
             }
             currentAlbumName != null -> {
@@ -177,6 +179,48 @@ class ViewPagerFrag : Fragment() {
         isSystemUiVisible = !isSystemUiVisible
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        binding.tbViewPager.setNavigationOnClickListener {
+            if (activity is MainActivity || activity is SearchableActivity) {
+                findNavController().navigateUp()
+            } else {
+                requireActivity().finish()
+            }
+        }
+
+        binding.tbViewPager.setOnMenuItemClickListener {
+            when (it.itemId) {
+
+                R.id.miDeleteFromDevice -> {
+                    getCurrentItem()?.let { item ->
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                            viewModel.permanentlyDeleteItem(item)
+                        } else {
+                            viewModel.deleteItem(item)
+                        }
+                    }
+                    true
+                }
+
+                R.id.miUseAs -> {
+                    getCurrentItem()?.let { item ->
+                        Intent().apply {
+                            action = Intent.ACTION_ATTACH_DATA
+                            data = item.uri
+                        }.also { intent ->
+                            startActivity(Intent.createChooser(intent, "Use as"))
+                        }
+                    }
+                    true
+                }
+
+                else -> false
+            }
+        }
+    }
+
     private fun setUpViews() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
             ViewCompat.setOnApplyWindowInsetsListener(requireActivity().window.decorView) { _, windowInsets ->
@@ -197,33 +241,11 @@ class ViewPagerFrag : Fragment() {
                 binding.cvDelete.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                     bottomMargin = insets.bottom
                 }
+                binding.btnRestore.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                    bottomMargin = insets.bottom
+                }
 
                 return@setOnApplyWindowInsetsListener windowInsets
-            }
-
-            binding.tbViewPager.setNavigationOnClickListener {
-                if (activity is MainActivity || activity is SearchableActivity) {
-                    findNavController().navigateUp()
-                } else {
-                    requireActivity().finish()
-                }
-            }
-
-            binding.tbViewPager.inflateMenu(R.menu.action_bar_view_pager)
-            binding.tbViewPager.setOnMenuItemClickListener {
-                when (it.itemId) {
-                    R.id.miDeleteFromDevice -> {
-                        getCurrentItem()?.let { item ->
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                                viewModel.permanentlyDeleteItem(item)
-                            } else {
-                                viewModel.deleteItem(item)
-                            }
-                        }
-                        return@setOnMenuItemClickListener true
-                    }
-                    else -> return@setOnMenuItemClickListener false
-                }
             }
         }
 
@@ -313,7 +335,8 @@ class ViewPagerFrag : Fragment() {
                 infoBinding.ivLocation.isVisible = false
                 infoBinding.btnLeaveApp.isVisible = false
             } else {
-                infoBinding.tvLocation.text = resources.getString(R.string.tvLocation_placeholder, info[5], info[6])
+                infoBinding.tvLocation.text =
+                    resources.getString(R.string.tvLocation_placeholder, info[5], info[6])
                 infoBinding.btnLeaveApp.setOnClickListener {
                     launchMapIntent(info)
                 }
