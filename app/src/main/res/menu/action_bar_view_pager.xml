@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
+    
     <item
         android:id="@+id/miDeleteFromDevice"
-        android:title="Delete from device"
+        android:title="@string/delete_from_device"
         app:showAsAction="never" />
 
     <item
         android:id="@+id/miUseAs"
-        android:title="Use as"
+        android:title="@string/use_as"
         app:showAsAction="never" />
 
 </menu>

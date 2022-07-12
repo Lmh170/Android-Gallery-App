@@ -557,9 +557,28 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     @RequiresApi(Build.VERSION_CODES.R)
     private suspend fun performPermanentlyDeleteItem(item: ListItem.MediaItem) {
         withContext(Dispatchers.IO) {
+
             val pendingIntent = MediaStore.createDeleteRequest(
                 getApplication<Application>().contentResolver,
                 listOf(item.uri)
+            )
+
+            pendingItem = null // Item will be deleted with request
+            _permissionNeededForDelete.postValue(pendingIntent.intentSender)
+            return@withContext
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.R)
+    private suspend fun performPermanentlyDeleteItems(items: List<ListItem.MediaItem>) {
+        withContext(Dispatchers.IO) {
+            val uris = mutableListOf<Uri>()
+            items.forEach { item ->
+                uris.add(item.uri)
+            }
+            val pendingIntent = MediaStore.createDeleteRequest(
+                getApplication<Application>().contentResolver,
+                uris
             )
 
             pendingItem = null // Item will be deleted with request
@@ -584,6 +603,13 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun permanentlyDeleteItem(item: ListItem.MediaItem) {
         viewModelScope.launch {
             performPermanentlyDeleteItem(item)
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.R)
+    fun permanentlyDeleteItems(items: List<ListItem.MediaItem>) {
+        viewModelScope.launch {
+            performPermanentlyDeleteItems(items)
         }
     }
 

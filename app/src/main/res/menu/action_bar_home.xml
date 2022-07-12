@@ -11,4 +11,5 @@
         android:id="@+id/miSettings"
         android:title="@string/settings"
         app:showAsAction="never" />
+
 </menu>

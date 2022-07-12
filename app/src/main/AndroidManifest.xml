@@ -126,7 +126,8 @@
         </activity>
         <activity
             android:name=".ui.VideoPlayerActivity"
-            android:exported="true">
+            android:exported="true"
+            android:theme="@style/Theme.Material3.DayNight.NoActionBar">
 
             <!--
             Displays a video to the user specified in intent.data

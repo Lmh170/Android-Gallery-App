@@ -28,7 +28,8 @@ class BinFrag : AlbumFrag() {
         setUpAlbumFrag(
             inflater,
             container,
-            R.id.action_binFrag_to_viewPagerFrag
+            R.id.action_binFrag_to_viewPagerFrag,
+            R.menu.contextual_action_bar_bin
         )
 
         binding.tbAlbum.title = resources.getString(R.string.bin)

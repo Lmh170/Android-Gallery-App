@@ -5,8 +5,10 @@
         android:id="@+id/miPhotos"
         android:icon="@drawable/ic_outline_photo_24"
         android:title="@string/photos" />
+
     <item
         android:id="@+id/miAlbums"
         android:icon="@drawable/ic_outline_auto_stories_24"
         android:title="@string/albums" />
+
 </menu>

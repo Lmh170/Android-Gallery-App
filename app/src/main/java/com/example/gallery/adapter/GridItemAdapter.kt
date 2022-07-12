@@ -165,7 +165,7 @@ class GridItemAdapter(
                     if (frag.requireActivity().intent.getBooleanExtra(
                             Intent.EXTRA_ALLOW_MULTIPLE,
                             false
-                        ) && frag.requireActivity().intent.action == Intent.ACTION_GET_CONTENT
+                        )
                     ) {
                         tracker?.select(getItemId(holder.layoutPosition))
 

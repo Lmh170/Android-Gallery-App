@@ -21,9 +21,3 @@ a
 1app/src/main/java/com/example/gallery/ListItem.kt,7/0/70402d6251e2c80e4ce3259a3e5d67605049e1ec
 m
 =app/src/main/java/com/example/gallery/ui/ViewPagerActivity.kt,2/f/2f3185a9a041a4e1f9dab889c0970d91f011ba5a
-i
-9app/src/main/java/com/example/gallery/ui/MainViewModel.kt,5/9/59420892d616ff8aa2d9cfa7e8134217b559aed0
-p
-@app/src/main/java/com/example/gallery/adapter/GridItemAdapter.kt,3/9/3970139d92160b0a6086499e33b5bda1bb849312
-h
-8app/src/main/java/com/example/gallery/ui/MainActivity.kt,6/4/647d708eb97e0934cbf598849481f3208a9990cd

@@ -101,18 +101,46 @@ open class MainActivity : AppCompatActivity() {
 
             when {
                 intent.data != null -> {
-                    source = viewModel.convertMediaUriToContentUri(intent.data!!)
-                    projection += MediaStore.Files.FileColumns.MEDIA_TYPE
-                    selection += "(" +
-                            MediaStore.Files.FileColumns.MEDIA_TYPE +
-                            "=" +
-                            MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE +
-                            " OR " +
-                            MediaStore.Files.FileColumns.MEDIA_TYPE +
-                            "=" +
-                            MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO +
-                            ")"
-
+                    when (intent.data) {
+                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI -> {
+                            source = MediaStore.Files.getContentUri(MediaStore.VOLUME_EXTERNAL)
+                            projection += MediaStore.Files.FileColumns.MEDIA_TYPE
+                            selection += "(" + MediaStore.Files.FileColumns.MEDIA_TYPE + "=" +
+                                    MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE + ")"
+                        }
+                        MediaStore.Video.Media.EXTERNAL_CONTENT_URI -> {
+                            source = MediaStore.Files.getContentUri(MediaStore.VOLUME_EXTERNAL)
+                            projection += MediaStore.Files.FileColumns.MEDIA_TYPE
+                            selection += "(" + MediaStore.Files.FileColumns.MEDIA_TYPE + "=" +
+                                    MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO + ")"
+                        }
+                        MediaStore.Files.getContentUri(MediaStore.VOLUME_EXTERNAL) -> {
+                            source = intent.data
+                            projection += MediaStore.Files.FileColumns.MEDIA_TYPE
+                            selection += "(" +
+                                    MediaStore.Files.FileColumns.MEDIA_TYPE +
+                                    "=" +
+                                    MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE +
+                                    " OR " +
+                                    MediaStore.Files.FileColumns.MEDIA_TYPE +
+                                    "=" +
+                                    MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO +
+                                    ")"
+                        }
+                        else -> {
+                            source = viewModel.convertMediaUriToContentUri(intent.data!!)
+                            projection += MediaStore.Files.FileColumns.MEDIA_TYPE
+                            selection += "(" +
+                                    MediaStore.Files.FileColumns.MEDIA_TYPE +
+                                    "=" +
+                                    MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE +
+                                    " OR " +
+                                    MediaStore.Files.FileColumns.MEDIA_TYPE +
+                                    "=" +
+                                    MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO +
+                                    ")"
+                        }
+                    }
                 }
                 intent.type != null -> {
                     if (intent.type!!.contains("image")) {

@@ -63,6 +63,7 @@
         <entry key="app/src/main/res/menu/action_bar_view_pager.xml" value="0.3697916666666667" />
         <entry key="app/src/main/res/menu/bnv_menu.xml" value="0.34479166666666666" />
         <entry key="app/src/main/res/menu/contextual_action_bar.xml" value="0.16666666666666666" />
+        <entry key="app/src/main/res/menu/contextual_action_bar_bin.xml" value="0.36875" />
         <entry key="app/src/main/res/menu/tb_main_context.xml" value="0.34479166666666666" />
         <entry key="app/src/main/res/xml/trest.xml" value="0.3697916666666667" />
       </map>
