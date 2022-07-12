@@ -93,6 +93,11 @@ class BottomNavFrag : MediaFrag() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        if (savedInstanceState != null) {
+            binding.rvItems.isVisible = savedInstanceState.getBoolean(RV_ITEMS_VISIBILITY)
+            binding.rvAlbums.isVisible = !savedInstanceState.getBoolean(RV_ITEMS_VISIBILITY)
+        }
+
         if (binding.rvItems.isVisible && MainActivity.currentListPosition != Int.MIN_VALUE) {
             onViewCreated(view, savedInstanceState, binding.rvItems)
         }
@@ -103,15 +108,6 @@ class BottomNavFrag : MediaFrag() {
             outState.putBoolean(RV_ITEMS_VISIBILITY, binding.rvItems.isVisible)
         }
         super.onSaveInstanceState(outState)
-    }
-
-    override fun onViewStateRestored(savedInstanceState: Bundle?) {
-        super.onViewStateRestored(savedInstanceState)
-
-        if (savedInstanceState != null) {
-            binding.rvItems.isVisible = savedInstanceState.getBoolean(RV_ITEMS_VISIBILITY)
-            binding.rvAlbums.isVisible = !savedInstanceState.getBoolean(RV_ITEMS_VISIBILITY)
-        }
     }
 
     private fun setUpViews() {
