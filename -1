@@ -1,0 +1,486 @@
+[33mcommit f1fd21f8faf8c68e2cbc807c7e6e75f89e77ab42[m[33m ([m[1;36mHEAD -> [m[1;32mtesting[m[33m)[m
+Author: Lmh170 <97251582+Lmh170@users.noreply.github.com>
+Date:   Tue Jun 28 15:40:19 2022 +0200
+
+    Migrate to Android 13 + other improvements
+    
+    - Replace video Player
+    - Add warning when loading unencrypted files
+    - Add option to permanently delete item
+    - Add SettingsActivity to clear search history
+    
+    Please note that I have not been able to test the changes
+
+[33mcommit 43d163616998ae52799b9dfdcd637bad86bf80c9[m[33m ([m[1;31morigin/testing[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmain[m[33m)[m
+Merge: f56ee9e 6d8a88b
+Author: Lmh170 <97251582+Lmh170@users.noreply.github.com>
+Date:   Thu Jun 23 20:30:49 2022 +0200
+
+    Merge pull request #25 from Lmh170/dependabot/gradle/main/org.sonarqube-3.4.0.2513
+    
+    Bump org.sonarqube from 3.3 to 3.4.0.2513
+
+[33mcommit f56ee9e1072bb545fb35ac447a27924ef2bcf6f6[m
+Merge: 60034ab acdd39b
+Author: Lmh170 <97251582+Lmh170@users.noreply.github.com>
+Date:   Thu Jun 23 19:41:48 2022 +0200
+
+    Merge pull request #26 from Lmh170/dependabot/gradle/main/org.jetbrains.kotlin-kotlin-gradle-plugin-1.7.0
+    
+    Bump kotlin-gradle-plugin from 1.6.21 to 1.7.0
+
+[33mcommit 60034ab9adf5449b46a9fcf38bac822e6ca50926[m
+Author: Lmh170 <97251582+Lmh170@users.noreply.github.com>
+Date:   Thu Jun 23 18:51:58 2022 +0200
+
+    Fix build failed
+
+[33mcommit a9cac3ee22da3eddec4610b501b112e4660924e1[m
+Author: Lmh170 <97251582+Lmh170@users.noreply.github.com>
+Date:   Thu Jun 23 18:32:43 2022 +0200
+
+    Add annotation
+
+[33mcommit eacc679c8dd685d69abdd07e089af8363ac1c883[m
+Author: Lmh170 <97251582+Lmh170@users.noreply.github.com>
+Date:   Thu Jun 23 18:21:34 2022 +0200
+
+    Code cleanup
+
+[33mcommit acdd39bae5e6da62c601388eae60874fc8afef6b[m
+Author: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+Date:   Thu Jun 9 01:42:47 2022 +0000
+
+    Bump kotlin-gradle-plugin from 1.6.21 to 1.7.0
+    
+    Bumps [kotlin-gradle-plugin](https://github.com/JetBrains/kotlin) from 1.6.21 to 1.7.0.
+    - [Release notes](https://github.com/JetBrains/kotlin/releases)
+    - [Changelog](https://github.com/JetBrains/kotlin/blob/master/ChangeLog.md)
+    - [Commits](https://github.com/JetBrains/kotlin/commits)
+    
+    ---
+    updated-dependencies:
+    - dependency-name: org.jetbrains.kotlin:kotlin-gradle-plugin
+      dependency-type: direct:production
+      update-type: version-update:semver-minor
+    ...
+    
+    Signed-off-by: dependabot[bot] <support@github.com>
+
+[33mcommit 6d8a88b4337bc2f82e982a8b44faa333c47196d2[m
+Author: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+Date:   Thu Jun 9 01:42:03 2022 +0000
+
+    Bump org.sonarqube from 3.3 to 3.4.0.2513
+    
+    Bumps org.sonarqube from 3.3 to 3.4.0.2513.
+    
+    ---
+    updated-dependencies:
+    - dependency-name: org.sonarqube
+      dependency-type: direct:production
+      update-type: version-update:semver-minor
+    ...
+    
+    Signed-off-by: dependabot[bot] <support@github.com>
+
+[33mcommit cdffff58f5ef5a1c6b663e774e89a5abf22472d7[m
+Author: Lmh170 <97251582+Lmh170@users.noreply.github.com>
+Date:   Wed Jun 8 18:48:11 2022 +0200
+
+    Upgrade dependencies
+
+[33mcommit 692e051e56e3b869a1cd286243ec560627d752bb[m
+Author: Lmh170 <97251582+Lmh170@users.noreply.github.com>
+Date:   Wed Jun 8 18:27:13 2022 +0200
+
+    Add Dialog to prompt for user confirmation before loading network content #17
+
+[33mcommit 96c26ad9b9692de15d46b50ee9b2f124383c43c2[m
+Author: Lmh170 <97251582+Lmh170@users.noreply.github.com>
+Date:   Mon Jun 6 21:13:29 2022 +0200
+
+    Prevent editing video description as it can destroy videos
+
+[33mcommit 51e7a38ae199d6f9e8afd8b3ae1c893cec058e96[m
+Merge: eec6901 637e841
+Author: Lmh170 <97251582+Lmh170@users.noreply.github.com>
+Date:   Mon Jun 6 20:31:29 2022 +0200
+
+    Merge pull request #22 from Lmh170/dependabot/github_actions/main/actions/cache-3
+    
+    Bump actions/cache from 1 to 3
+
+[33mcommit 637e8412b558f86679ee8e34d983fb797f4e61b4[m
+Author: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+Date:   Mon Jun 6 01:51:30 2022 +0000
+
+    Bump actions/cache from 1 to 3
+    
+    Bumps [actions/cache](https://github.com/actions/cache) from 1 to 3.
+    - [Release notes](https://github.com/actions/cache/releases)
+    - [Changelog](https://github.com/actions/cache/blob/main/RELEASES.md)
+    - [Commits](https://github.com/actions/cache/compare/v1...v3)
+    
+    ---
+    updated-dependencies:
+    - dependency-name: actions/cache
+      dependency-type: direct:production
+      update-type: version-update:semver-major
+    ...
+    
+    Signed-off-by: dependabot[bot] <support@github.com>
+
+[33mcommit eec690106aaae357a925b7b18e096ff196650782[m
+Merge: d05c8bf 8307107
+Author: Lmh170 <97251582+Lmh170@users.noreply.github.com>
+Date:   Sun Jun 5 21:08:32 2022 +0200
+
+    Merge pull request #20 from Lmh170/sonarCloud
+    
+    Update build.gradle.kts
+
+[33mcommit 8307107ba58246cbaa3b47aeafe9ddc4d5136eeb[m
+Author: Lmh170 <97251582+Lmh170@users.noreply.github.com>
+Date:   Sun Jun 5 20:53:16 2022 +0200
+
+    Change sonar organization and projekt key
+
+[33mcommit 368e6ecd0fcbf25c803fccd93210fd0116880a57[m
+Merge: d05c8bf af18eb6
+Author: Lmh170 <97251582+Lmh170@users.noreply.github.com>
+Date:   Sun Jun 5 20:45:56 2022 +0200
+
+    Merge pull request #19 from flawedworld/main
+    
+    Integrate SonarCloud
+
+[33mcommit d05c8bfb7cf07e14ce01f93162a847eda59fedf7[m
+Author: Lmh170 <97251582+Lmh170@users.noreply.github.com>
+Date:   Sun Jun 5 20:40:17 2022 +0200
+
+    Add SonarCloud info
+
+[33mcommit af18eb6d953b59b9824b00ac386d5dd042d9ef86[m
+Author: flawedworld <flawedworld@flawed.world>
+Date:   Sun Jun 5 19:18:11 2022 +0100
+
+    SonarCloud
+
+[33mcommit c8405f69ebe81210180d33dc2959cc4eb3441e55[m
+Merge: 6f16571 f5dada1
+Author: Lmh170 <97251582+Lmh170@users.noreply.github.com>
+Date:   Sun Jun 5 20:10:26 2022 +0200
+
+    Merge pull request #18 from flawedworld/main
+    
+    misc
+
+[33mcommit 6f16571b934652bb871d50d04b4d910cb5652535[m
+Merge: 30d8555 21961f5
+Author: Lmh170 <97251582+Lmh170@users.noreply.github.com>
+Date:   Sun Jun 5 19:53:11 2022 +0200
+
+    Merge pull request #15 from Lmh170/dependabot/gradle/main/com.github.bumptech.glide-glide-4.13.2
+    
+    Bump glide from 4.13.1 to 4.13.2
+
+[33mcommit f5dada11e9ecfbf6cf0180fd8da39b9712603fa2[m
+Author: flawedworld <flawedworld@flawed.world>
+Date:   Sun Jun 5 18:51:37 2022 +0100
+
+    Remove unused unit tests
+
+[33mcommit eebb3a870aba26a06bcb87d309c5adebc73085f2[m
+Author: flawedworld <flawedworld@flawed.world>
+Date:   Sat Jun 4 23:00:24 2022 +0100
+
+    Update gradle to 7.4.2
+
+[33mcommit 30d85556b3ae625f867d8f2005411907b746c5a6[m
+Merge: 90e7d3b 282d1bc
+Author: Lmh170 <97251582+Lmh170@users.noreply.github.com>
+Date:   Sun Jun 5 19:46:36 2022 +0200
+
+    Merge pull request #16 from Lmh170/dependabot/gradle/main/com.android.tools.build-gradle-7.2.1
+    
+    Bump gradle from 7.2.0 to 7.2.1
+
+[33mcommit 21961f5ecba930ef133146052cb405b1cf323523[m
+Author: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+Date:   Sun Jun 5 17:43:54 2022 +0000
+
+    Bump glide from 4.13.1 to 4.13.2
+    
+    Bumps [glide](https://github.com/bumptech/glide) from 4.13.1 to 4.13.2.
+    - [Release notes](https://github.com/bumptech/glide/releases)
+    - [Commits](https://github.com/bumptech/glide/compare/v4.13.1...v4.13.2)
+    
+    ---
+    updated-dependencies:
+    - dependency-name: com.github.bumptech.glide:glide
+      dependency-type: direct:production
+      update-type: version-update:semver-patch
+    ...
+    
+    Signed-off-by: dependabot[bot] <support@github.com>
+
+[33mcommit 90e7d3b1de9c5e502009265c24d6dd144d4c7d03[m
+Merge: b3f40a5 bb7e7f9
+Author: Lmh170 <97251582+Lmh170@users.noreply.github.com>
+Date:   Sun Jun 5 19:43:26 2022 +0200
+
+    Merge pull request #14 from Lmh170/dependabot/gradle/main/com.github.bumptech.glide-compiler-4.13.2
+    
+    Bump compiler from 4.13.1 to 4.13.2
+
+[33mcommit 282d1bc2b3e676aeb65b164815c41bdb383ce5bf[m
+Author: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+Date:   Sun Jun 5 17:26:48 2022 +0000
+
+    Bump gradle from 7.2.0 to 7.2.1
+    
+    Bumps gradle from 7.2.0 to 7.2.1.
+    
+    ---
+    updated-dependencies:
+    - dependency-name: com.android.tools.build:gradle
+      dependency-type: direct:production
+      update-type: version-update:semver-patch
+    ...
+    
+    Signed-off-by: dependabot[bot] <support@github.com>
+
+[33mcommit bb7e7f919a44b06589a2f1e3ed494d682b162e12[m
+Author: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+Date:   Sun Jun 5 17:26:40 2022 +0000
+
+    Bump compiler from 4.13.1 to 4.13.2
+    
+    Bumps [compiler](https://github.com/bumptech/glide) from 4.13.1 to 4.13.2.
+    - [Release notes](https://github.com/bumptech/glide/releases)
+    - [Commits](https://github.com/bumptech/glide/compare/v4.13.1...v4.13.2)
+    
+    ---
+    updated-dependencies:
+    - dependency-name: com.github.bumptech.glide:compiler
+      dependency-type: direct:production
+      update-type: version-update:semver-patch
+    ...
+    
+    Signed-off-by: dependabot[bot] <support@github.com>
+
+[33mcommit b3f40a5d4c2628701fdff01840578a80889cc7fb[m
+Merge: d20cde4 4cfed58
+Author: Lmh170 <97251582+Lmh170@users.noreply.github.com>
+Date:   Sun Jun 5 19:26:06 2022 +0200
+
+    Merge pull request #9 from flawedworld/ci
+    
+    Add CI
+
+[33mcommit d20cde45500ddd3c2edb89b8831f657d04d3767d[m
+Author: Lmh170 <97251582+Lmh170@users.noreply.github.com>
+Date:   Sun Jun 5 19:19:21 2022 +0200
+
+    Remove edit button on Intent.ACTION_VIEW
+
+[33mcommit 4cfed58f2c11df2eac0c76b76239f106f42f4e5c[m
+Author: flawedworld <flawedworld@flawed.world>
+Date:   Sat Jun 4 21:39:38 2022 +0100
+
+    Add CI
+
+[33mcommit 8afcd630bad99e357044d71564ba3849b0445607[m
+Author: Lmh170 <97251582+Lmh170@users.noreply.github.com>
+Date:   Fri Jun 3 22:18:51 2022 +0200
+
+    Prevent app from crashing if image is too large bumptech/glide#3775
+
+[33mcommit 098683666778e48e38e6486a0166bf8f36559fa5[m
+Author: Lmh170 <97251582+Lmh170@users.noreply.github.com>
+Date:   Sun May 29 20:19:42 2022 +0200
+
+    Improve item share
+
+[33mcommit 82ec3946443ca6a2d9fb126bb1444b1d824ea9fa[m
+Author: Lmh170 <97251582+Lmh170@users.noreply.github.com>
+Date:   Fri May 27 12:07:04 2022 +0200
+
+    Initial support for GET_CONTENT, PICK, VIEW, REVIEW and REVIEW_SECURE #3
+
+[33mcommit 47c5bdffe709f45ec26432273bf71e8a4f1c00f6[m
+Merge: 574d21c 48b6527
+Author: Lmh170 <97251582+Lmh170@users.noreply.github.com>
+Date:   Sun May 22 18:21:18 2022 +0200
+
+    Merge pull request #6 from Lmh170/feature-search
+    
+    Add search functionality
+
+[33mcommit 48b6527f2ba6e8dab27b505faa026805cab9d83e[m
+Author: Lmh170 <97251582+Lmh170@users.noreply.github.com>
+Date:   Sun May 22 18:20:44 2022 +0200
+
+    Fix intent issue, improve search results
+
+[33mcommit 2b111738cdbae49af4898e5ecad37a37d1c9b3d5[m
+Author: Lmh170 <97251582+Lmh170@users.noreply.github.com>
+Date:   Sun May 22 11:23:35 2022 +0200
+
+    Add shared element transition #5, support date range search for videos
+
+[33mcommit df98b5a5e42272ea5ca270b84aae6afb7e3dfb84[m
+Author: Lmh170 <97251582+Lmh170@users.noreply.github.com>
+Date:   Sun May 22 10:04:16 2022 +0200
+
+    Improve visual appearance of date range search
+
+[33mcommit cfbc8e0c69e219679603a62dac77310eea4d3dce[m
+Author: Lmh170 <97251582+Lmh170@users.noreply.github.com>
+Date:   Sun May 22 09:48:55 2022 +0200
+
+    Improve date range search
+
+[33mcommit 843789f6d7131ce9041665e3f10b62b609eacdfc[m
+Author: Lmh170 <97251582+Lmh170@users.noreply.github.com>
+Date:   Sun May 22 09:32:31 2022 +0200
+
+    Add search photos for date range
+
+[33mcommit 932cf947a6707d4866f6cd5ed9ef84bdfc94deb0[m
+Author: Lmh170 <97251582+Lmh170@users.noreply.github.com>
+Date:   Sat May 21 14:13:10 2022 +0200
+
+    Include search tab as list item in photos tab
+
+[33mcommit ed9d6a5ec9a6ed04bc1d6da95528c8d204b63b00[m
+Author: Lmh170 <97251582+Lmh170@users.noreply.github.com>
+Date:   Sat May 21 13:15:39 2022 +0200
+
+    Add 'This week last year' section
+
+[33mcommit d9b8b0f99c77c0ac8e347eff75fe1c8fc073d35e[m
+Author: Lmh170 <97251582+Lmh170@users.noreply.github.com>
+Date:   Sat May 21 12:29:30 2022 +0200
+
+    Add error image
+
+[33mcommit 91f85ed6f26cf8c72f43fcbdcb2276b6f75417da[m
+Author: Lmh170 <97251582+Lmh170@users.noreply.github.com>
+Date:   Fri May 20 21:55:24 2022 +0200
+
+    Fix issue with MEDIA_TYPE_IMAGE in viewModel.loadItems()
+
+[33mcommit 2149b35fb8768170635721c42f369ea468f2e7ce[m
+Author: Marian <marian@LAPTOP-VQ3NGB39IrisHoischen.fritz.box>
+Date:   Fri May 20 21:50:14 2022 +0200
+
+    Fix issue with MEDIA_TYPE_IMAGE in viewModel.loadItems()
+
+[33mcommit 3edb6661c8f90dfa0e0ea791325e5c830484635b[m
+Author: Marian <marian@LAPTOP-VQ3NGB39IrisHoischen.fritz.box>
+Date:   Fri May 20 21:35:29 2022 +0200
+
+    Re-use layout_search.xml
+
+[33mcommit ecd97e5055a8c850cf7a7b01943f727a30cb64ee[m
+Author: Marian <marian@LAPTOP-VQ3NGB39IrisHoischen.fritz.box>
+Date:   Fri May 20 18:29:24 2022 +0200
+
+    Add basic search functionality #5, support for viewing and removing description metadata
+
+[33mcommit 574d21c2b58fda0475d4c2efb1d4d393d94d7123[m
+Author: Lmh170 <97251582+Lmh170@users.noreply.github.com>
+Date:   Mon Apr 25 20:24:15 2022 +0200
+
+    Update theme
+
+[33mcommit 1420ef76c77bf796209df38d8a2756f581de69e0[m[33m ([m[1;33mtag: v1.0.0-alpha01[m[33m)[m
+Author: Lmh170 <97251582+Lmh170@users.noreply.github.com>
+Date:   Wed Apr 20 15:23:54 2022 +0200
+
+    Use layoutPosition instead of position in onClickListener
+
+[33mcommit 2c890ba8d24953ebad7a9a1e92655dacf30215ee[m
+Author: Lmh170 <97251582+Lmh170@users.noreply.github.com>
+Date:   Wed Apr 20 13:26:57 2022 +0200
+
+    Code cleanup
+
+[33mcommit 67a81ff53e6d4d45b977776d307d4da6012c59ee[m
+Author: Lmh170 <97251582+Lmh170@users.noreply.github.com>
+Date:   Wed Apr 20 11:02:43 2022 +0200
+
+    Code cleanup, resolve issue #1
+
+[33mcommit e280084aefa816856c316d7bf4ea03de7fdf079f[m
+Author: Lmh170 <97251582+Lmh170@users.noreply.github.com>
+Date:   Tue Apr 19 22:08:17 2022 +0200
+
+    add Todo
+
+[33mcommit 7b425e1d89680590d5a301b4525ae54ed16fbe18[m
+Author: Lmh170 <97251582+Lmh170@users.noreply.github.com>
+Date:   Tue Apr 19 22:03:15 2022 +0200
+
+    Move bind logic to onBindViewHolder, add checkIntent method, code cleanup, changed icons
+
+[33mcommit 383264750facc3273fad648dccbc282cf8d33241[m
+Author: Lmh170 <97251582+Lmh170@users.noreply.github.com>
+Date:   Tue Apr 19 21:13:05 2022 +0200
+
+    Declare that Intent.ACTION_PICK is not supported
+
+[33mcommit aae7a0a77f6c5717bafd3835e3d466789b92d512[m
+Author: Lmh170 <97251582+Lmh170@users.noreply.github.com>
+Date:   Tue Apr 19 18:46:28 2022 +0200
+
+    Add ContentObserver in MainViewModel, remove obsolete loadItems() statements
+
+[33mcommit c3863eeafb90c7414097dcbef6fd0d24d8bee52c[m
+Author: Lmh170 <97251582+Lmh170@users.noreply.github.com>
+Date:   Tue Apr 19 14:57:20 2022 +0200
+
+    Remove obsolete SDK version check
+
+[33mcommit cd66e1f7b014acf5ded0c36a66e00527d0174715[m
+Author: Lmh170 <97251582+Lmh170@users.noreply.github.com>
+Date:   Tue Apr 19 14:43:48 2022 +0200
+
+    Remove misleading Intent actions, code cleanup
+
+[33mcommit 0805cc2d5417a500297aa4c0e439552450979210[m
+Author: Lmh170 <97251582+Lmh170@users.noreply.github.com>
+Date:   Tue Apr 19 11:37:43 2022 +0200
+
+    Add references to documentation
+
+[33mcommit 0023709b5a853d8b5a23765ed948d81a93653991[m
+Author: Lmh170 <97251582+Lmh170@users.noreply.github.com>
+Date:   Tue Apr 19 09:36:23 2022 +0200
+
+    Format files to the Official Kotlin codestyle, remove unused imports and themes
+
+[33mcommit 80762900cedd5973f1082565e3950404ad526b13[m
+Author: Lmh170 <97251582+Lmh170@users.noreply.github.com>
+Date:   Mon Apr 18 22:02:48 2022 +0200
+
+    Increment minSdk to 29
+
+[33mcommit 3495604159f495bd88332d207885d1d8f6f18a1f[m
+Merge: 4c9fe3c fc9db2b
+Author: Lmh170 <97251582+Lmh170@users.noreply.github.com>
+Date:   Mon Apr 18 18:27:43 2022 +0200
+
+    Merge pull request #2 from Lmh170/feature-legacy-support
+    
+    Support older version of Android
+
+[33mcommit 4c9fe3ca5f381f996e706e3e70aa5964e1d6ff3d[m
+Author: Lmh170 <97251582+Lmh170@users.noreply.github.com>
+Date:   Mon Apr 18 18:25:36 2022 +0200
+
+    Revert "Revert "fix regarding bottomNavigationView overlapping fragmentContainerView""
+    
+    This reverts commit f817b7295855e6d7e9bae8d6d8ad433441cad858.

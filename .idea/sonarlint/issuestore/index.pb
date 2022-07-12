@@ -19,8 +19,6 @@ q
 Aapp/src/main/java/com/example/gallery/adapter/ViewPagerAdapter.kt,1/b/1b46bf7ceb0b846f6ee42c760513e927777b0348
 a
 1app/src/main/java/com/example/gallery/ListItem.kt,7/0/70402d6251e2c80e4ce3259a3e5d67605049e1ec
-P
- app/src/main/AndroidManifest.xml,8/c/8c55c3ccc257e5907959013f99656e4c8ec3903e
 m
 =app/src/main/java/com/example/gallery/ui/ViewPagerActivity.kt,2/f/2f3185a9a041a4e1f9dab889c0970d91f011ba5a
 i
