@@ -27,7 +27,6 @@
     <string name="search_photos">Search photos</string>
     <string name="no_description">No description</string>
     <string name="load_from_network">Do you want to load content from:\n%1$s</string>
-    <string name="load_from_network_unencrypted">Do you want to load content from:\n%1$s. \n Please note that the connection is not encrypted.</string>
     <string name="cancel">Cancel</string>
     <string name="load">Load</string>
     <string name="restore">Restore</string>

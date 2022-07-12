@@ -50,7 +50,6 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <category android:name="android.intent.category.APP_GALLERY" />
 
-                <data android:scheme="http" />
                 <data android:scheme="https" />
                 <data android:scheme="content" />
                 <data android:scheme="file" />
@@ -140,7 +139,6 @@
                 <category android:name="android.intent.category.APP_GALLERY" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
-                <data android:scheme="http" />
                 <data android:scheme="https" />
                 <data android:scheme="content" />
                 <data android:scheme="file" />

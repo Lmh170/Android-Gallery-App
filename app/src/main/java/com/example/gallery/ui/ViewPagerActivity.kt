@@ -84,31 +84,6 @@ class ViewPagerActivity : AppCompatActivity() {
         when (intent.action) {
             Intent.ACTION_VIEW -> {
                 when (intent.scheme) {
-                    "http" -> {
-                        MaterialAlertDialogBuilder(
-                            this, R.style.ThemeOverlay_Material3_MaterialAlertDialog_Centered
-                        )
-                            .setMessage(resources.getString(R.string.load_from_network_unencrypted, intent.data))
-                            .setPositiveButton(resources.getString(R.string.load)) { _, _ ->
-                                viewModel.setRecyclerViewItems(
-                                    listOf(
-                                        ListItem.MediaItem(
-                                            Long.MIN_VALUE,
-                                            intent.data!!,
-                                            "",
-                                            MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE,
-                                            0L,
-                                            0,
-                                            0
-                                        )
-                                    )
-                                )
-                            }
-                            .setNegativeButton(resources.getString(R.string.cancel)) { _, _ ->
-                                finish()
-                            }
-                            .show()
-                    }
                     "https" -> {
                         MaterialAlertDialogBuilder(
                             this, R.style.ThemeOverlay_Material3_MaterialAlertDialog_Centered

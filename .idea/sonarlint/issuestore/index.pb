@@ -7,10 +7,6 @@ j
 :app/src/main/java/com/example/gallery/MyItemKeyProvider.kt,e/7/e70ae8f07ee5637d2c9cb89f56d2c7bf584b3148
 ^
 .app/src/main/java/com/example/gallery/Album.kt,7/d/7da1b63146169854966df149c586b61a2873236f
-@
-build.gradle.kts,d/b/dbcff70658daf80b53ce624f6adcaa529df5ed8d
-D
-app/build.gradle.kts,d/2/d2a4383452aad84a18429a5844d31330a012a9e6
 m
 =app/src/main/java/com/example/gallery/ui/ZoomableImageView.kt,a/5/a52c81a767fa0c25d9012a6c56b72b1126ee6b1e
 q
@@ -19,5 +15,3 @@ q
 Aapp/src/main/java/com/example/gallery/adapter/ViewPagerAdapter.kt,1/b/1b46bf7ceb0b846f6ee42c760513e927777b0348
 a
 1app/src/main/java/com/example/gallery/ListItem.kt,7/0/70402d6251e2c80e4ce3259a3e5d67605049e1ec
-m
-=app/src/main/java/com/example/gallery/ui/ViewPagerActivity.kt,2/f/2f3185a9a041a4e1f9dab889c0970d91f011ba5a
