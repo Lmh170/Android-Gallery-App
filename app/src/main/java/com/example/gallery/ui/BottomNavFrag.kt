@@ -100,6 +100,8 @@ class BottomNavFrag : MediaFrag() {
 
         if (binding.rvItems.isVisible && MainActivity.currentListPosition != Int.MIN_VALUE) {
             onViewCreated(view, savedInstanceState, binding.rvItems)
+        } else {
+            setSharedAxisTransition()
         }
     }
 
