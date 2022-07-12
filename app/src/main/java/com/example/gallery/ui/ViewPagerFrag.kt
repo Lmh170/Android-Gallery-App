@@ -44,7 +44,7 @@ class ViewPagerFrag : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        currentAlbumName = requireArguments().getString("currentAlbumName")
+        currentAlbumName = arguments?.getString("currentAlbumName")
 
         when {
             currentAlbumName == MediaFrag.binFragID -> {

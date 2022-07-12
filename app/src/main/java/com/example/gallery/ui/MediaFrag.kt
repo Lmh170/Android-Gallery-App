@@ -1,12 +1,14 @@
 package com.example.gallery.ui
 
 import android.content.res.Configuration
+import android.os.Build
 import android.os.Bundle
 import android.view.ActionMode
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import androidx.annotation.MenuRes
+import androidx.annotation.RequiresApi
 import androidx.core.app.SharedElementCallback
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.fragment.app.Fragment
@@ -183,7 +185,7 @@ open class MediaFrag : Fragment() {
                         }
                         actionMode?.finish()
 
-                        viewModel.permanentlyDeleteItems(items)
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) viewModel.permanentlyDeleteItems(items)
                         true
                     }
 
