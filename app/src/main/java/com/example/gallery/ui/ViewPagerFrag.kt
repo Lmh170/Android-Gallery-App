@@ -6,7 +6,6 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -50,7 +49,6 @@ class ViewPagerFrag : Fragment() {
             currentAlbumName == MediaFrag.binFragID -> {
                 viewModel.binItems.observe(viewLifecycleOwner) { items ->
                     (binding.viewPager.adapter as ViewPagerAdapter).submitList(items)
-                    Log.d("tag", "here")
                 }
             }
             currentAlbumName != null -> {
@@ -131,7 +129,7 @@ class ViewPagerFrag : Fragment() {
 
         if (!isActionView()) {
             binding.cvInfo.isVisible = true
-            binding.cvDelete.isVisible = true
+            binding.cvBin.isVisible = true
             binding.cvEdit.isVisible = true
         }
 
@@ -162,7 +160,7 @@ class ViewPagerFrag : Fragment() {
             cvShare.isVisible = false
             cvEdit.isVisible = false
             cvInfo.isVisible = false
-            cvDelete.isVisible = false
+            cvBin.isVisible = false
             btnRestore.isVisible = false
             ivGradTop.isVisible = false
             ivGardBottom.isVisible = false
@@ -238,7 +236,7 @@ class ViewPagerFrag : Fragment() {
                 binding.cvInfo.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                     bottomMargin = insets.bottom
                 }
-                binding.cvDelete.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                binding.cvBin.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                     bottomMargin = insets.bottom
                 }
                 binding.btnRestore.updateLayoutParams<ViewGroup.MarginLayoutParams> {
@@ -272,14 +270,19 @@ class ViewPagerFrag : Fragment() {
 
         if (isActionView()) {
             binding.cvInfo.isVisible = false
-            binding.cvDelete.isVisible = false
+            binding.cvBin.isVisible = false
             binding.cvEdit.isVisible = false
             return
         }
 
-        if (currentAlbumName == MediaFrag.binFragID) binding.btnRestore.isVisible = true
+        if (currentAlbumName == MediaFrag.binFragID && Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            binding.btnRestore.isVisible = true
+            binding.tvBin.text = resources.getString(R.string.delete)
+        } else {
+            binding.tvBin.text = resources.getString(R.string.bin)
+        }
 
-        binding.cvDelete.setOnClickListener {
+        binding.cvBin.setOnClickListener {
             if (currentAlbumName == MediaFrag.binFragID && Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 getCurrentItem()?.let {
                     viewModel.permanentlyDeleteItem(it)

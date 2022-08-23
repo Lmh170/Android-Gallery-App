@@ -70,6 +70,7 @@
             android:layout_gravity="center"
             android:layout_margin="15dp"
             android:text="@string/share"
+            android:textAlignment="center"
             android:textColor="@android:color/white"
             app:drawableTint="@android:color/white"
             app:drawableTopCompat="@drawable/ic_outline_share_24" />
@@ -98,6 +99,7 @@
             android:layout_gravity="center"
             android:layout_margin="15dp"
             android:text="@string/edit"
+            android:textAlignment="center"
             android:textColor="@android:color/white"
             app:drawableTint="@android:color/white"
             app:drawableTopCompat="@drawable/ic_outline_edit_24" />
@@ -115,7 +117,7 @@
         app:cardCornerRadius="30dp"
         app:cardElevation="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/cvDelete"
+        app:layout_constraintEnd_toStartOf="@+id/cvBin"
         app:layout_constraintStart_toEndOf="@+id/cvEdit"
         android:fitsSystemWindows="true">
 
@@ -126,13 +128,14 @@
             android:layout_gravity="center"
             android:layout_margin="15dp"
             android:text="@string/info"
+            android:textAlignment="center"
             android:textColor="@android:color/white"
             app:drawableTint="@android:color/white"
             app:drawableTopCompat="@drawable/ic_outline_info_24" />
     </androidx.cardview.widget.CardView>
 
     <androidx.cardview.widget.CardView
-        android:id="@+id/cvDelete"
+        android:id="@+id/cvBin"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:backgroundTint="@android:color/transparent"
@@ -148,12 +151,11 @@
         app:layout_constraintStart_toEndOf="@+id/cvInfo">
 
         <TextView
-            android:id="@+id/tvDelete"
+            android:id="@+id/tvBin"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_margin="15dp"
-            android:text="@string/delete"
             android:textColor="@android:color/white"
             app:drawableTint="@android:color/white"
             app:drawableTopCompat="@drawable/ic_outline_delete_24" />
