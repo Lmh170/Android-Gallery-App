@@ -199,7 +199,7 @@ class BottomNavFrag : MediaFrag() {
                     true
                 }
 
-                R.id.miAlbums -> {
+                R.id.miFolders -> {
                     TransitionManager.beginDelayedTransition(
                         binding.root,
                         MaterialFadeThrough().apply {
@@ -225,7 +225,7 @@ class BottomNavFrag : MediaFrag() {
                     binding.rvItems.scrollToPosition(0)
                 }
 
-                R.id.miAlbums -> {
+                R.id.miFolders -> {
                     binding.rvAlbums.scrollToPosition(0)
                 }
             }

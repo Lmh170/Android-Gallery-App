@@ -10,7 +10,14 @@
         <entry key="../../Android/Sdk/platforms/android-32/data/res/drawable/btn_search_dialog.xml" value="0.3705" />
         <entry key="../../Android/Sdk/platforms/android-32/data/res/drawable/ic_go_search_api_material.xml" value="0.3705" />
         <entry key="../../Android/Sdk/platforms/android-32/data/res/drawable/time_picker_editable_background.xml" value="0.3705" />
-        <entry key="..\:/Users/Familie/StudioProjects/Android-Gallery-App/app/src/main/res/layout/fragment_view_pager.xml" value="0.4" />
+        <entry key="..\:/Users/Familie/StudioProjects/Android-Gallery-App/app/src/main/res/drawable/ic_baseline_folder_24.xml" value="0.236" />
+        <entry key="..\:/Users/Familie/StudioProjects/Android-Gallery-App/app/src/main/res/drawable/ic_outline_folder_24.xml" value="0.236" />
+        <entry key="..\:/Users/Familie/StudioProjects/Android-Gallery-App/app/src/main/res/drawable/ic_outline_info_24.xml" value="0.236" />
+        <entry key="..\:/Users/Familie/StudioProjects/Android-Gallery-App/app/src/main/res/layout/fragment_bottom_nav.xml" value="0.24547101449275363" />
+        <entry key="..\:/Users/Familie/StudioProjects/Android-Gallery-App/app/src/main/res/layout/fragment_view_pager.xml" value="0.176" />
+        <entry key="..\:/Users/Familie/StudioProjects/Android-Gallery-App/app/src/main/res/layout/view_dialog_info.xml" value="0.12360688956433637" />
+        <entry key="..\:/Users/Familie/StudioProjects/Android-Gallery-App/app/src/main/res/menu/action_bar_home.xml" value="0.25416666666666665" />
+        <entry key="..\:/Users/Familie/StudioProjects/Android-Gallery-App/app/src/main/res/menu/bnv_menu.xml" value="0.25416666666666665" />
         <entry key="..\:/Users/PD-MPM_Intern1/StudioProjects/Android-Gallery-App/app/src/main/res/layout/activity_video_player.xml" value="0.19293478260869565" />
         <entry key="..\:/Users/PD-MPM_Intern1/StudioProjects/Android-Gallery-App/app/src/main/res/layout/activity_view_pager.xml" value="0.24547101449275363" />
         <entry key="..\:/Users/PD-MPM_Intern1/StudioProjects/Android-Gallery-App/app/src/main/res/layout/fragment_view_pager.xml" value="0.25" />

@@ -46,7 +46,7 @@ class GridAlbumAdapter(private val frag: BottomNavFrag) : ListAdapter<Album,
         holder.binding.tvAlbumName.text = getItem(position).name
 
         holder.binding.ivThumbnailAlbum.setOnClickListener {
-            if ((frag.binding.bnvMain as NavigationBarView).selectedItemId == R.id.miAlbums
+            if ((frag.binding.bnvMain as NavigationBarView).selectedItemId == R.id.miFolders
                 || frag.requireActivity().intent.action == Intent.ACTION_PICK || frag.requireActivity()
                     .intent.action ==
                 Intent.ACTION_GET_CONTENT

@@ -7,8 +7,8 @@
         android:title="@string/photos" />
 
     <item
-        android:id="@+id/miAlbums"
-        android:icon="@drawable/ic_outline_auto_stories_24"
-        android:title="@string/albums" />
+        android:id="@+id/miFolders"
+        android:icon="@drawable/ic_baseline_folder_24"
+        android:title="@string/folders" />
 
 </menu>
