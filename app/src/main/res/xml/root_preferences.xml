@@ -1,0 +1,12 @@
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory android:title="Search">
+
+        <Preference
+            android:key="clear_search_history"
+            android:title="Clear search history" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

@@ -10,6 +10,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.IdRes
+import androidx.annotation.MenuRes
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import com.example.gallery.ListItem
@@ -74,6 +75,7 @@ open class AlbumFrag : MediaFrag() {
 
                 if (items.size == 1) {
                     intent.putExtra(Intent.EXTRA_STREAM, items[0] as Parcelable)
+                    intent.data = items[0]
                 } else {
                     intent.putParcelableArrayListExtra(
                         Intent.EXTRA_STREAM,
@@ -98,7 +100,8 @@ open class AlbumFrag : MediaFrag() {
     protected fun setUpAlbumFrag(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        @IdRes resId: Int
+        @IdRes resId: Int,
+        @MenuRes menuRes: Int = R.menu.contextual_action_bar
     ) {
         enterTransition = MaterialSharedAxis(MaterialSharedAxis.Z, true)
         returnTransition = MaterialSharedAxis(MaterialSharedAxis.Z, false)
@@ -135,7 +138,8 @@ open class AlbumFrag : MediaFrag() {
 
         setUpRecyclerViewSelection(
             binding.rvAlbumDetail,
-            "AlbumFragSelection"
+            "AlbumFragSelection",
+            menuRes
         )
     }
 

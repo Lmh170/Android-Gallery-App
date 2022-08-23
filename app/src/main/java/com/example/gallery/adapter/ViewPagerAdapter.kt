@@ -21,6 +21,7 @@ import com.example.gallery.databinding.ViewPagerItemHolderBinding
 import com.example.gallery.ui.MainActivity
 import com.example.gallery.ui.VideoPlayerActivity
 import com.example.gallery.ui.ViewPagerFrag
+import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
 
 class ViewPagerAdapter(val frag: ViewPagerFrag) : ListAdapter<ListItem.MediaItem,

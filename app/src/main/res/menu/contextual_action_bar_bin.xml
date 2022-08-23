@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/miRestore"
+        android:icon="@drawable/ic_outline_restore_from_trash_24"
+        android:title="@string/restore" />
+
+    <item
+        android:id="@+id/miDeleteFromDevice"
+        android:icon="@drawable/ic_outline_delete_24"
+        android:title="@string/delete_from_device" />
+
+</menu>

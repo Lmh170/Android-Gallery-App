@@ -9,7 +9,8 @@ sealed class ListItem {
 
     data class MediaItem(
         override val id: Long, val uri: Uri, val album: String, val type: Int,
-        val dateModified: Long, val viewPagerPosition: Int, val listPosition: Int
+        val dateModified: Long, val viewPagerPosition: Int, val listPosition: Int,
+        val dateExpires: Int? = null
     ) : ListItem() {
 
         companion object {
@@ -24,7 +25,7 @@ sealed class ListItem {
         }
     }
 
-    data class Header(override val id: Long, val description: String? = null) : ListItem()
+    data class Header(override val id: Long) : ListItem()
 
     class Search(var query: String? = null) : ListItem() {
         override val id: Long = 0x12332

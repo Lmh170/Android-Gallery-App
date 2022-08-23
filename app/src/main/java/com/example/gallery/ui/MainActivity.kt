@@ -11,7 +11,6 @@ import android.os.Bundle
 import android.provider.MediaStore
 import android.provider.Settings
 import android.util.Log
-import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
@@ -25,13 +24,15 @@ import com.google.android.material.snackbar.Snackbar
 open class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     protected val viewModel: MainViewModel by viewModels()
-    private lateinit var restoreRequest: ActivityResultLauncher<IntentSenderRequest>
 
     private val deleteRequest =
         registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
             if (result.resultCode == RESULT_OK) {
                 viewModel.deletePendingItem()
                 handleIntent(intent)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    viewModel.loadBin()
+                }
             }
         }
 
@@ -53,15 +54,6 @@ open class MainActivity : AppCompatActivity() {
 
     protected fun setUpMainActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            restoreRequest =
-                registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
-                    if (result.resultCode == RESULT_OK) {
-                        viewModel.loadBin()
-                    }
-                }
-        }
 
         viewModel.permissionNeededForDelete.observe(this) { intentSender ->
             deleteRequest.launch(
@@ -109,18 +101,46 @@ open class MainActivity : AppCompatActivity() {
 
             when {
                 intent.data != null -> {
-                    source = viewModel.convertMediaUriToContentUri(intent.data!!)
-                    projection += MediaStore.Files.FileColumns.MEDIA_TYPE
-                    selection += "(" +
-                            MediaStore.Files.FileColumns.MEDIA_TYPE +
-                            "=" +
-                            MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE +
-                            " OR " +
-                            MediaStore.Files.FileColumns.MEDIA_TYPE +
-                            "=" +
-                            MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO +
-                            ")"
-
+                    when (intent.data) {
+                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI -> {
+                            source = MediaStore.Files.getContentUri(MediaStore.VOLUME_EXTERNAL)
+                            projection += MediaStore.Files.FileColumns.MEDIA_TYPE
+                            selection += "(" + MediaStore.Files.FileColumns.MEDIA_TYPE + "=" +
+                                    MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE + ")"
+                        }
+                        MediaStore.Video.Media.EXTERNAL_CONTENT_URI -> {
+                            source = MediaStore.Files.getContentUri(MediaStore.VOLUME_EXTERNAL)
+                            projection += MediaStore.Files.FileColumns.MEDIA_TYPE
+                            selection += "(" + MediaStore.Files.FileColumns.MEDIA_TYPE + "=" +
+                                    MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO + ")"
+                        }
+                        MediaStore.Files.getContentUri(MediaStore.VOLUME_EXTERNAL) -> {
+                            source = intent.data
+                            projection += MediaStore.Files.FileColumns.MEDIA_TYPE
+                            selection += "(" +
+                                    MediaStore.Files.FileColumns.MEDIA_TYPE +
+                                    "=" +
+                                    MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE +
+                                    " OR " +
+                                    MediaStore.Files.FileColumns.MEDIA_TYPE +
+                                    "=" +
+                                    MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO +
+                                    ")"
+                        }
+                        else -> {
+                            source = viewModel.convertMediaUriToContentUri(intent.data!!)
+                            projection += MediaStore.Files.FileColumns.MEDIA_TYPE
+                            selection += "(" +
+                                    MediaStore.Files.FileColumns.MEDIA_TYPE +
+                                    "=" +
+                                    MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE +
+                                    " OR " +
+                                    MediaStore.Files.FileColumns.MEDIA_TYPE +
+                                    "=" +
+                                    MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO +
+                                    ")"
+                        }
+                    }
                 }
                 intent.type != null -> {
                     if (intent.type!!.contains("image")) {
@@ -208,22 +228,45 @@ open class MainActivity : AppCompatActivity() {
         const val EXTERNAL_STORAGE_REQUEST: Int = 0x1045
 
         fun haveStoragePermission(context: Context): Boolean =
-            ContextCompat.checkSelfPermission(
-                context,
-                Manifest.permission.READ_EXTERNAL_STORAGE
-            ) == PackageManager.PERMISSION_GRANTED &&
-                    ContextCompat.checkSelfPermission(
-                        context,
-                        Manifest.permission.ACCESS_MEDIA_LOCATION
-                    ) == PackageManager.PERMISSION_GRANTED
+            if (Build.VERSION.SDK_INT >= 33) {
+                ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.READ_MEDIA_IMAGES
+                ) == PackageManager.PERMISSION_GRANTED &&
+                        ContextCompat.checkSelfPermission(
+                            context,
+                            Manifest.permission.READ_MEDIA_VIDEO
+                        ) ==
+                        PackageManager.PERMISSION_GRANTED &&
+                        ContextCompat.checkSelfPermission(
+                            context,
+                            Manifest.permission.ACCESS_MEDIA_LOCATION
+                        ) == PackageManager.PERMISSION_GRANTED
+            } else {
+                ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.READ_EXTERNAL_STORAGE
+                ) == PackageManager.PERMISSION_GRANTED &&
+                        ContextCompat.checkSelfPermission(
+                            context,
+                            Manifest.permission.ACCESS_MEDIA_LOCATION
+                        ) == PackageManager.PERMISSION_GRANTED
+            }
 
         fun requestStoragePermission(activity: Activity) {
             if (!haveStoragePermission(activity)) {
                 val permissions =
-                    arrayOf(
-                        Manifest.permission.READ_EXTERNAL_STORAGE,
-                        Manifest.permission.ACCESS_MEDIA_LOCATION
-                    )
+                    if (Build.VERSION.SDK_INT >= 33) {
+                        arrayOf(
+                            Manifest.permission.READ_MEDIA_IMAGES,
+                            Manifest.permission.READ_MEDIA_VIDEO
+                        )
+                    } else {
+                        arrayOf(
+                            Manifest.permission.READ_EXTERNAL_STORAGE,
+                            Manifest.permission.ACCESS_MEDIA_LOCATION
+                        )
+                    }
                 ActivityCompat.requestPermissions(activity, permissions, EXTERNAL_STORAGE_REQUEST)
             }
         }

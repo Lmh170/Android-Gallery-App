@@ -17,10 +17,12 @@
     <ImageView
         android:id="@+id/ivGardBottom"
         android:layout_width="0dp"
-        android:layout_height="130dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="-32dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/btnRestore"
         app:srcCompat="@drawable/gradient_background"
         tools:ignore="ContentDescription" />
 
@@ -38,12 +40,13 @@
         android:id="@+id/tbViewPager"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:fitsSystemWindows="true"
         android:minHeight="?attr/actionBarSize"
-        app:navigationIcon="@drawable/ic_baseline_arrow_back_24"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:navigationIconTint="@android:color/white"
-        android:fitsSystemWindows="true"/>
+        app:menu="@menu/action_bar_view_pager"
+        app:navigationIcon="@drawable/ic_baseline_arrow_back_24"
+        app:navigationIconTint="@android:color/white" />
 
     <androidx.cardview.widget.CardView
         android:id="@+id/cvShare"
@@ -141,7 +144,7 @@
         app:cardElevation="0dp"
         app:cornerRadius="30dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/cvRestore"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/cvInfo">
 
         <TextView
@@ -157,33 +160,23 @@
 
     </androidx.cardview.widget.CardView>
 
-    <androidx.cardview.widget.CardView
-        android:id="@+id/cvRestore"
-        android:layout_width="0dp"
+    <Button
+        android:id="@+id/btnRestore"
+        style="?attr/materialButtonOutlinedStyle"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:backgroundTint="@android:color/transparent"
-        android:clickable="true"
-        android:fitsSystemWindows="true"
-        android:focusable="true"
-        android:foreground="?attr/selectableItemBackground"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:text="@string/restore"
+        android:textColor="@android:color/white"
         android:visibility="gone"
-        app:cardCornerRadius="30dp"
-        app:cardElevation="0dp"
-        app:cornerRadius="30dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:icon="@drawable/ic_outline_restore_from_trash_24"
+        app:iconGravity="textStart"
+        app:iconTint="@android:color/white"
+        app:layout_constraintBottom_toTopOf="@+id/cvEdit"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/cvDelete">
-
-        <TextView
-            android:id="@+id/tvRestore"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_margin="15dp"
-            android:text="@string/restore"
-            android:textColor="@android:color/white"
-            app:drawableTint="@android:color/white"
-            app:drawableTopCompat="@drawable/ic_outline_restore_from_trash_24" />
-    </androidx.cardview.widget.CardView>
+        app:layout_constraintStart_toStartOf="parent"
+        app:strokeColor="@android:color/white"
+        tools:visibility="visible" />
 </androidx.constraintlayout.widget.ConstraintLayout>
 

@@ -1,11 +1,14 @@
 package com.example.gallery.ui
 
 import android.content.res.Configuration
+import android.os.Build
 import android.os.Bundle
 import android.view.ActionMode
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import androidx.annotation.MenuRes
+import androidx.annotation.RequiresApi
 import androidx.core.app.SharedElementCallback
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.fragment.app.Fragment
@@ -105,7 +108,8 @@ open class MediaFrag : Fragment() {
 
     protected fun setUpRecyclerViewSelection(
         recyclerView: RecyclerView,
-        selectionId: String
+        selectionId: String,
+        @MenuRes menuRes: Int = R.menu.contextual_action_bar
     ) {
         val tracker = SelectionTracker.Builder(
             selectionId,
@@ -130,13 +134,7 @@ open class MediaFrag : Fragment() {
 
         val callback = object : ActionMode.Callback {
             override fun onCreateActionMode(mode: ActionMode?, menu: Menu?): Boolean {
-
-                activity?.menuInflater?.inflate(R.menu.contextual_action_bar, menu)
-                /*
-                frag.activity?.window?.statusBarColor = SurfaceColors.getColorForElevation(
-                    frag.requireContext(), binding.appBarLayout.elevation
-                )
-                 */
+                activity?.menuInflater?.inflate(menuRes, menu)
                 return true
             }
 
@@ -175,20 +173,43 @@ open class MediaFrag : Fragment() {
                         true
                     }
 
+                    R.id.miDeleteFromDevice -> {
+                        val items = mutableListOf<ListItem.MediaItem>()
+
+                        for (id in tracker.selection) {
+                            val selectedItem = (recyclerView.adapter as GridItemAdapter)
+                                .currentList.find {
+                                    it.id == id
+                                } as ListItem.MediaItem? ?: return false
+                            items.add(selectedItem)
+                        }
+                        actionMode?.finish()
+
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) viewModel.permanentlyDeleteItems(items)
+                        true
+                    }
+
+                    R.id.miRestore -> {
+                        val items = mutableListOf<ListItem.MediaItem>()
+
+                        for (id in tracker.selection) {
+                            val selectedItem = (recyclerView.adapter as GridItemAdapter)
+                                .currentList.find {
+                                    it.id == id
+                                } as ListItem.MediaItem? ?: return false
+                            items.add(selectedItem)
+                        }
+                        actionMode?.finish()
+                        viewModel.deleteItems(items, false)
+                        true
+                    }
+
                     else -> false
                 }
             }
 
             override fun onDestroyActionMode(mode: ActionMode?) {
                 tracker.clearSelection()
-/*
-                Handler(Looper.getMainLooper()).postDelayed({
-                    frag.requireActivity().window?.statusBarColor = resources.getColor(
-                        android.R.color.transparent, requireActivity().theme
-                    )
-                }, 400)
-
- */
                 actionMode = null
             }
         }

@@ -6,6 +6,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -43,12 +44,13 @@ class ViewPagerFrag : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        currentAlbumName = requireArguments().getString("currentAlbumName")
+        currentAlbumName = arguments?.getString("currentAlbumName")
 
         when {
             currentAlbumName == MediaFrag.binFragID -> {
                 viewModel.binItems.observe(viewLifecycleOwner) { items ->
                     (binding.viewPager.adapter as ViewPagerAdapter).submitList(items)
+                    Log.d("tag", "here")
                 }
             }
             currentAlbumName != null -> {
@@ -74,14 +76,6 @@ class ViewPagerFrag : Fragment() {
         if (::_binding.isInitialized) return binding.root
 
         _binding = FragmentViewPagerBinding.inflate(inflater, container, false)
-
-        binding.tbViewPager.setNavigationOnClickListener {
-            if (activity is MainActivity || activity is SearchableActivity) {
-                findNavController().navigateUp()
-            } else {
-                requireActivity().finish()
-            }
-        }
 
         setUpViewpager()
         setUpViews()
@@ -142,7 +136,7 @@ class ViewPagerFrag : Fragment() {
         }
 
         if (currentAlbumName == MediaFrag.binFragID) {
-            binding.cvRestore.isVisible = true
+            binding.btnRestore.isVisible = true
         }
 
         binding.tbViewPager.isVisible = true
@@ -169,7 +163,7 @@ class ViewPagerFrag : Fragment() {
             cvEdit.isVisible = false
             cvInfo.isVisible = false
             cvDelete.isVisible = false
-            cvRestore.isVisible = false
+            btnRestore.isVisible = false
             ivGradTop.isVisible = false
             ivGardBottom.isVisible = false
         }
@@ -183,6 +177,48 @@ class ViewPagerFrag : Fragment() {
     fun toggleSystemUI() {
         if (isSystemUiVisible) hideSystemUI() else showSystemUI()
         isSystemUiVisible = !isSystemUiVisible
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        binding.tbViewPager.setNavigationOnClickListener {
+            if (activity is MainActivity || activity is SearchableActivity) {
+                findNavController().navigateUp()
+            } else {
+                requireActivity().finish()
+            }
+        }
+
+        binding.tbViewPager.setOnMenuItemClickListener {
+            when (it.itemId) {
+
+                R.id.miDeleteFromDevice -> {
+                    getCurrentItem()?.let { item ->
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                            viewModel.permanentlyDeleteItem(item)
+                        } else {
+                            viewModel.deleteItem(item)
+                        }
+                    }
+                    true
+                }
+
+                R.id.miUseAs -> {
+                    getCurrentItem()?.let { item ->
+                        Intent().apply {
+                            action = Intent.ACTION_ATTACH_DATA
+                            data = item.uri
+                        }.also { intent ->
+                            startActivity(Intent.createChooser(intent, "Use as"))
+                        }
+                    }
+                    true
+                }
+
+                else -> false
+            }
+        }
     }
 
     private fun setUpViews() {
@@ -203,6 +239,9 @@ class ViewPagerFrag : Fragment() {
                     bottomMargin = insets.bottom
                 }
                 binding.cvDelete.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                    bottomMargin = insets.bottom
+                }
+                binding.btnRestore.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                     bottomMargin = insets.bottom
                 }
 
@@ -238,13 +277,19 @@ class ViewPagerFrag : Fragment() {
             return
         }
 
-        if (currentAlbumName == MediaFrag.binFragID) binding.cvRestore.isVisible = true
+        if (currentAlbumName == MediaFrag.binFragID) binding.btnRestore.isVisible = true
 
         binding.cvDelete.setOnClickListener {
-            getCurrentItem()?.let { viewModel.deleteItem(it) }
+            if (currentAlbumName == MediaFrag.binFragID && Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                getCurrentItem()?.let {
+                    viewModel.permanentlyDeleteItem(it)
+                }
+            } else {
+                getCurrentItem()?.let { viewModel.deleteItem(it) }
+            }
         }
 
-        binding.cvRestore.setOnClickListener {
+        binding.btnRestore.setOnClickListener {
             getCurrentItem()?.let { viewModel.deleteItem(it, false) }
         }
 
@@ -290,7 +335,8 @@ class ViewPagerFrag : Fragment() {
                 infoBinding.ivLocation.isVisible = false
                 infoBinding.btnLeaveApp.isVisible = false
             } else {
-                infoBinding.tvLocation.text = "${info[5]}, ${info[6]}"
+                infoBinding.tvLocation.text =
+                    resources.getString(R.string.tvLocation_placeholder, info[5], info[6])
                 infoBinding.btnLeaveApp.setOnClickListener {
                     launchMapIntent(info)
                 }

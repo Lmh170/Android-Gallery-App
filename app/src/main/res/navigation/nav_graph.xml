@@ -19,6 +19,9 @@
         <action
             android:id="@+id/action_bottomNavFrag_to_binFrag"
             app:destination="@id/binFrag" />
+        <action
+            android:id="@+id/action_bottomNavFrag_to_settingsActivity"
+            app:destination="@id/settingsActivity" />
     </fragment>
     <fragment
         android:id="@+id/viewPagerFrag"
@@ -51,4 +54,8 @@
             android:id="@+id/action_binFrag_to_viewPagerFrag"
             app:destination="@id/viewPagerFrag" />
     </fragment>
+    <activity
+        android:id="@+id/settingsActivity"
+        android:name="com.example.gallery.ui.SettingsActivity"
+        android:label="SettingsActivity" />
 </navigation>

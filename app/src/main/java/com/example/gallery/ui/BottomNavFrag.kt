@@ -70,6 +70,12 @@ class BottomNavFrag : MediaFrag() {
                             )
                             return@setOnMenuItemClickListener true
                         }
+                        R.id.miSettings -> {
+                            findNavController().navigate(
+                                R.id.action_bottomNavFrag_to_settingsActivity
+                            )
+                            return@setOnMenuItemClickListener true
+                        }
                         else -> return@setOnMenuItemClickListener false
                     }
                 }
@@ -87,8 +93,15 @@ class BottomNavFrag : MediaFrag() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        if (savedInstanceState != null) {
+            binding.rvItems.isVisible = savedInstanceState.getBoolean(RV_ITEMS_VISIBILITY)
+            binding.rvAlbums.isVisible = !savedInstanceState.getBoolean(RV_ITEMS_VISIBILITY)
+        }
+
         if (binding.rvItems.isVisible && MainActivity.currentListPosition != Int.MIN_VALUE) {
             onViewCreated(view, savedInstanceState, binding.rvItems)
+        } else {
+            setSharedAxisTransition()
         }
     }
 
@@ -97,15 +110,6 @@ class BottomNavFrag : MediaFrag() {
             outState.putBoolean(RV_ITEMS_VISIBILITY, binding.rvItems.isVisible)
         }
         super.onSaveInstanceState(outState)
-    }
-
-    override fun onViewStateRestored(savedInstanceState: Bundle?) {
-        super.onViewStateRestored(savedInstanceState)
-
-        if (savedInstanceState != null) {
-            binding.rvItems.isVisible = savedInstanceState.getBoolean(RV_ITEMS_VISIBILITY)
-            binding.rvAlbums.isVisible = !savedInstanceState.getBoolean(RV_ITEMS_VISIBILITY)
-        }
     }
 
     private fun setUpViews() {
