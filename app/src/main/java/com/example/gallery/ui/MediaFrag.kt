@@ -120,13 +120,13 @@ open class MediaFrag : Fragment() {
         ).withSelectionPredicate(object : SelectionTracker.SelectionPredicate<Long>() {
 
             override fun canSetStateForKey(key: Long, nextState: Boolean): Boolean =
-                recyclerView.findViewHolderForItemId(key) != null
+                recyclerView.findViewHolderForItemId(key) is GridItemAdapter.MediaItemHolder
 
             override fun canSelectMultiple(): Boolean =
                 true
 
             override fun canSetStateAtPosition(position: Int, nextState: Boolean): Boolean =
-                recyclerView.findViewHolderForLayoutPosition(position) != null
+                recyclerView.findViewHolderForLayoutPosition(position) is GridItemAdapter.MediaItemHolder
 
         }).build()
 
