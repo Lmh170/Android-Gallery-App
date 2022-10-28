@@ -11,7 +11,7 @@ buildscript {
 }
 
 plugins {
-  id("org.sonarqube") version "3.4.0.2513"
+  id("org.sonarqube") version "3.5.0.2730"
     id("org.jetbrains.kotlin.android") version "1.7.20" apply false
 }
 
